@@ -1,11 +1,12 @@
 // SleepyEngine.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
-
+#include "Application.h"
 int main()
 {
-    std::cout << "Hello World!\n";
+	Application app;
+	app.Run();
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
