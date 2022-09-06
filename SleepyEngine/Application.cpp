@@ -24,7 +24,6 @@ glm::vec3 up = glm::vec3(0.0f,1.0f,0.0f);
 void TestFunc2()
 {
 	std::cout << "TESTFUNC2" << std::endl;
-
 }
 
 int Application::Run()
@@ -94,7 +93,8 @@ int Application::Run()
 	Renderer::SetShaderUniformMat4(shaderId, "projection", projection);
 
 	Input i(window);
-	i.AddKeyBinding(GLFW_KEY_A, std::bind(&Application::TestFunc, this));
+	i.AddKeyBinding(GLFW_KEY_A, std::bind(&Application::MoveLeft, this));
+	i.AddKeyBinding(GLFW_KEY_D, std::bind(&Application::MoveRight, this));
 	i.AddMousePosBinding(std::bind(&Application::TestFunc3, this, std::placeholders::_1,std::placeholders::_2));
 	i.AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, std::bind(&Application::MouseButtonPressed, this));
 
@@ -122,13 +122,20 @@ int Application::Run()
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		
+		InputManager::GetInstance().RunEvents();
 	}
 }
 
-void Application::TestFunc()
+void Application::MoveLeft()
 {
-	std::cout << "TESTFUNC" << std::endl;
+	position -= right * cameraSpeed;
+}
+
+void Application::MoveRight()
+{
+	
+
+	position += right * cameraSpeed;
 }
 
 void Application::TestFunc3(double xPos, double yPos)
@@ -140,38 +147,38 @@ void Application::TestFunc3(double xPos, double yPos)
 		firstMouse = false;
 	}
 
-	float xoffset = xPos - lastX;
-	float yoffset = lastY - yPos;
+	xoffset = xPos - lastX;
+	yoffset = lastY - yPos;
 	lastX = xPos;
 	lastY = yPos;
-	if (mousePressed)
-	{
-		const float sensitivity = 0.1f;
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
-		std::cout << "x offset " << xoffset << "y offset " << yoffset << std::endl;
-		yaw += xoffset;
-		pitch += yoffset;
-	
-		if (pitch > 89.0f)
-			pitch = 89.0f;
-		if (pitch < -89.0f)
-			pitch = -89.0f;
-	
-		glm::vec3 direction;
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		front = glm::normalize(direction);
-	
-		right = glm::normalize(glm::cross(front, up));
-	
-	}
+
 	//std::cout << "xPos: " << xPos << "yPos: " << yPos << std::endl;
 }
 
 void Application::MouseButtonPressed()
 {
-	std::cout << "Mouse Pressed!" << std::endl;
 	mousePressed = true;
+	if (mousePressed)
+	{
+		const float sensitivity = 0.1f;
+		xoffset *= sensitivity;
+		yoffset *= sensitivity;
+		//std::cout << "x offset " << xoffset << "y offset " << yoffset << std::endl;
+		yaw += xoffset;
+		pitch += yoffset;
+
+		if (pitch > 89.0f)
+			pitch = 89.0f;
+		if (pitch < -89.0f)
+			pitch = -89.0f;
+
+		glm::vec3 direction;
+		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		direction.y = sin(glm::radians(pitch));
+		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		front = glm::normalize(direction);
+
+		right = glm::normalize(glm::cross(front, up));
+
+	}
 }

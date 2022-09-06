@@ -1,5 +1,7 @@
 #include "Input.h"
+#include <iostream>
 #include "InputManager.h"
+
 Input::Input(GLFWwindow* window) : m_Window(window)
 {
 	InputManager::GetInstance().AddInputComponent(this);
@@ -21,13 +23,41 @@ void Input::AddMouseButtonBinding(int button, std::function<void()> func )
 	m_MouseButtonCallbacks[button].push_back(func);
 }
 
-
-void Input::HandleKeyEvents(int key)
+void Input::RunEvents()
 {
-	for (auto it = m_KeyCallbacks[key].begin(); it != m_KeyCallbacks[key].end(); ++it)
+	for (int key : activeKeys)
 	{
-		(*it)();
+		for (auto it = m_KeyCallbacks[key].begin(); it != m_KeyCallbacks[key].end(); ++it)
+		{
+			(*it)();
+		}
 	}
+
+	for (int button : activeMouseButtons)
+	{
+		for (auto it = m_MouseButtonCallbacks[button].begin(); it != m_MouseButtonCallbacks[button].end(); ++it)
+		{
+			(*it)();
+		}
+	}
+}
+
+
+void Input::HandleKeyEvents(int key, int action)
+{
+	if (action == GLFW_PRESS)
+	{
+		activeKeys.push_back(key);
+	}
+	else if (action == GLFW_RELEASE)
+	{
+		remove(activeKeys.begin(), activeKeys.end(), key);
+
+		auto it = std::find(activeKeys.begin(), activeKeys.end(), key);
+		if (it != activeKeys.end())
+			activeKeys.erase(it);
+	}
+
 }
 
 void Input::HandleMousePosEvents(double xPos, double yPos)
@@ -38,12 +68,17 @@ void Input::HandleMousePosEvents(double xPos, double yPos)
 	}
 }
 
-void Input::HandleMouseButtonEvents(int button)
+void Input::HandleMouseButtonEvents(int button, int action)
 {
-	for (auto it = m_MouseButtonCallbacks[button].begin(); it != m_MouseButtonCallbacks[button].end(); ++it)
+	if (action == GLFW_PRESS)
 	{
-		(*it)();
+		activeMouseButtons.push_back(button);
 	}
-	
+	if (action == GLFW_RELEASE)
+	{
+		auto it = std::find(activeMouseButtons.begin(), activeMouseButtons.end(), button);
+		if (it != activeMouseButtons.end())
+			activeMouseButtons.erase(it);
+	}
 }
 

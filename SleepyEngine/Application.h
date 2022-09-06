@@ -4,8 +4,10 @@ class Application
 public:
 	Application() {};
 	int Run();
-	void TestFunc();
 
+private:
+	void MoveLeft();
+	void MoveRight();
 	void TestFunc3(double xPos, double yPos);
 	void MouseButtonPressed();
 
@@ -15,5 +17,9 @@ public:
 	double lastX, lastY;
 	float yaw = -90;
 	float pitch = 0;
+	float xoffset;
+	float yoffset;
+
+	float cameraSpeed = 0.03;
 };
 

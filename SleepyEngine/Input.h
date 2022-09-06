@@ -12,11 +12,17 @@ public:
 	void AddMousePosBinding(std::function<void(double, double)> func);
 	void AddMouseButtonBinding(int button, std::function<void()> func);
 private:
-	void HandleKeyEvents(int key);
+	void RunEvents();
+
+	void HandleKeyEvents(int key, int action);
 	void HandleMousePosEvents(double xPos, double yPos);
-	void HandleMouseButtonEvents(int button);
+	void HandleMouseButtonEvents(int button, int action);
 
 	GLFWwindow* m_Window;
+	std::vector<int> activeKeys;
+	std::vector<int> activeMouseButtons;
+
+
 	std::map<int, std::vector<std::function<void()>>> m_KeyCallbacks;
 	std::vector<std::function<void(double, double)>> m_MousePosCallbacks;
 	std::map<int, std::vector<std::function<void()>>> m_MouseButtonCallbacks;

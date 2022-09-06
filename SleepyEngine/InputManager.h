@@ -16,6 +16,8 @@ public:
 		return *s_InputManager;
 	}
 	bool Init(GLFWwindow* window);
+
+	void RunEvents();
 private:
 	InputManager() {};
 

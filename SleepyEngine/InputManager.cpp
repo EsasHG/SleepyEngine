@@ -15,6 +15,14 @@ bool InputManager::Init(GLFWwindow* window)
 	return bInitialized;
 }
 
+void InputManager::RunEvents()
+{
+	for (Input* i : inputs)
+	{
+		i->RunEvents();
+	}
+}
+
 void InputManager::AddInputComponent(Input* i)
 {
 	inputs.push_back(i);
@@ -45,12 +53,11 @@ void InputManager::CursorPosCallbackImpl(GLFWwindow* window, double xPos, double
 	}
 }
 
-
 void InputManager::KeyCallbackImpl(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	for (Input* i : inputs)
 	{
-		i->HandleKeyEvents(key);
+		i->HandleKeyEvents(key, action);
 	}
 }
 
@@ -58,7 +65,7 @@ void InputManager::MouseButtonCallbackImpl(GLFWwindow* window, int button, int a
 {
 	for (Input* i : inputs)
 	{
-		i->HandleMouseButtonEvents(button);
+		i->HandleMouseButtonEvents(button, action);
 	}
 }
 
