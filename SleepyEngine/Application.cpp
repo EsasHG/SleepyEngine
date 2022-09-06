@@ -9,14 +9,10 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <SFML/System.hpp>
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
 
 #include "Renderer.h"
 #include "Input.h"
 #include "InputManager.h"
-
 
 //TEMP
 glm::vec3 position = glm::vec3(0.0f,0.0f,4.0f);
