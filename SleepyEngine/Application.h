@@ -5,11 +5,17 @@ public:
 	Application() {};
 	int Run();
 
+	void MoveForward();
+
+	void MoveBackward();
+
 private:
 	void MoveLeft();
 	void MoveRight();
 	void TestFunc3(double xPos, double yPos);
 	void MouseButtonPressed();
+
+	void MouseButtonReleased();
 
 	//TEMP
 	bool firstMouse = true;

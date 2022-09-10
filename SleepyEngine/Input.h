@@ -4,13 +4,22 @@
 #include <functional>
 #include <map>
 #include <vector>
+
+enum SLE_INPUT_MODE
+{
+	SLE_PRESSED,
+	SLE_RELEASED,
+	SLE_HELD
+};
+
+
 class Input
 {
 public:
 	Input(GLFWwindow* window);
-	void AddKeyBinding(int key, std::function<void()> func);
+	void AddKeyBinding(int key, SLE_INPUT_MODE mode, std::function<void()> func);
 	void AddMousePosBinding(std::function<void(double, double)> func);
-	void AddMouseButtonBinding(int button, std::function<void()> func);
+	void AddMouseButtonBinding(int button, SLE_INPUT_MODE mode, std::function<void()> func);
 private:
 	void RunEvents();
 
@@ -19,14 +28,19 @@ private:
 	void HandleMouseButtonEvents(int button, int action);
 
 	GLFWwindow* m_Window;
-	std::vector<int> activeKeys;
-	std::vector<int> activeMouseButtons;
+	std::vector<int> m_ActiveKeys;
+	std::vector<int> m_ActiveMouseButtons;
 
 
-	std::map<int, std::vector<std::function<void()>>> m_KeyCallbacks;
+	std::map<int, std::vector<std::function<void()>>> m_HeldKeyCallbacks;
+	std::map<int, std::vector<std::function<void()>>> m_PressedKeyCallbacks;
+	std::map<int, std::vector<std::function<void()>>> m_ReleasedKeyCallbacks;
+
+	std::map<int, std::vector<std::function<void()>>> m_HeldMouseButtonCallbacks;
+	std::map<int, std::vector<std::function<void()>>> m_PressedMouseButtonCallbacks;
+	std::map<int, std::vector<std::function<void()>>> m_ReleasedMouseButtonCallbacks;
+
 	std::vector<std::function<void(double, double)>> m_MousePosCallbacks;
-	std::map<int, std::vector<std::function<void()>>> m_MouseButtonCallbacks;
-
 	friend class InputManager;
 };
 

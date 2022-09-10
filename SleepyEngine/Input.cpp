@@ -8,9 +8,23 @@ Input::Input(GLFWwindow* window) : m_Window(window)
 
 }
 
-void Input::AddKeyBinding(int key, std::function<void()> func)
+void Input::AddKeyBinding(int key, SLE_INPUT_MODE inputMode, std::function<void()> func)
 {
-	m_KeyCallbacks[key].push_back(func);
+	switch (inputMode)
+	{
+	case(SLE_HELD):
+		m_HeldKeyCallbacks[key].push_back(func);
+		break;
+	case(SLE_PRESSED):
+		m_PressedKeyCallbacks[key].push_back(func);
+		break;
+
+	case(SLE_RELEASED):
+		m_ReleasedKeyCallbacks[key].push_back(func);
+		break;
+	default:
+		std::cout << "Invalid input mode";
+	};
 }
 
 void Input::AddMousePosBinding(std::function<void(double, double)> func)
@@ -18,24 +32,38 @@ void Input::AddMousePosBinding(std::function<void(double, double)> func)
 	m_MousePosCallbacks.push_back(func);
 }
 
-void Input::AddMouseButtonBinding(int button, std::function<void()> func )
+void Input::AddMouseButtonBinding(int button, SLE_INPUT_MODE inputMode, std::function<void()> func )
 {
-	m_MouseButtonCallbacks[button].push_back(func);
+	switch (inputMode)
+	{
+	case(SLE_HELD):
+		m_HeldMouseButtonCallbacks[button].push_back(func);
+		break;
+	case(SLE_PRESSED):
+		m_PressedMouseButtonCallbacks[button].push_back(func);
+		break;
+
+	case(SLE_RELEASED):
+		m_ReleasedMouseButtonCallbacks[button].push_back(func);
+		break;
+	default:
+		std::cout << "Invalid input mode";
+	};
 }
 
 void Input::RunEvents()
 {
-	for (int key : activeKeys)
+	for (int key : m_ActiveKeys)
 	{
-		for (auto it = m_KeyCallbacks[key].begin(); it != m_KeyCallbacks[key].end(); ++it)
+		for (auto it = m_HeldKeyCallbacks[key].begin(); it != m_HeldKeyCallbacks[key].end(); ++it)
 		{
 			(*it)();
 		}
 	}
 
-	for (int button : activeMouseButtons)
+	for (int button : m_ActiveMouseButtons)
 	{
-		for (auto it = m_MouseButtonCallbacks[button].begin(); it != m_MouseButtonCallbacks[button].end(); ++it)
+		for (auto it = m_HeldMouseButtonCallbacks[button].begin(); it != m_HeldMouseButtonCallbacks[button].end(); ++it)
 		{
 			(*it)();
 		}
@@ -47,15 +75,24 @@ void Input::HandleKeyEvents(int key, int action)
 {
 	if (action == GLFW_PRESS)
 	{
-		activeKeys.push_back(key);
+		m_ActiveKeys.push_back(key);
+		for (auto it = m_PressedKeyCallbacks[key].begin(); it != m_PressedKeyCallbacks[key].end(); ++it)
+		{
+			(*it)();
+		}
 	}
 	else if (action == GLFW_RELEASE)
 	{
-		remove(activeKeys.begin(), activeKeys.end(), key);
+		//remove(m_ActiveKeys.begin(), m_ActiveKeys.end(), key);
+		m_ActiveKeys.erase(std::remove(m_ActiveKeys.begin(), m_ActiveKeys.end(), key), m_ActiveKeys.end());
+		//auto it = std::find(m_ActiveKeys.begin(), m_ActiveKeys.end(), key);
+		//if (it != m_ActiveKeys.end())
+		//	m_ActiveKeys.erase(it);
 
-		auto it = std::find(activeKeys.begin(), activeKeys.end(), key);
-		if (it != activeKeys.end())
-			activeKeys.erase(it);
+		for (auto it = m_ReleasedKeyCallbacks[key].begin(); it != m_ReleasedKeyCallbacks[key].end(); ++it)
+		{
+			(*it)();
+		}
 	}
 
 }
@@ -72,13 +109,23 @@ void Input::HandleMouseButtonEvents(int button, int action)
 {
 	if (action == GLFW_PRESS)
 	{
-		activeMouseButtons.push_back(button);
+		for (auto it = m_PressedMouseButtonCallbacks[button].begin(); it != m_PressedMouseButtonCallbacks[button].end(); ++it)
+		{
+			(*it)();
+		}
+		m_ActiveMouseButtons.push_back(button);
 	}
 	if (action == GLFW_RELEASE)
 	{
-		auto it = std::find(activeMouseButtons.begin(), activeMouseButtons.end(), button);
-		if (it != activeMouseButtons.end())
-			activeMouseButtons.erase(it);
+		for (auto it = m_ReleasedMouseButtonCallbacks[button].begin(); it != m_ReleasedMouseButtonCallbacks[button].end(); ++it)
+		{
+			(*it)();
+		}
+		m_ActiveMouseButtons.erase(std::remove(m_ActiveMouseButtons.begin(), m_ActiveMouseButtons.end(), button), m_ActiveMouseButtons.end());
+
+		//auto it = std::find(m_ActiveMouseButtons.begin(), m_ActiveMouseButtons.end(), button);
+		//if (it != m_ActiveMouseButtons.end())
+		//	m_ActiveMouseButtons.erase(it);
 	}
 }
 

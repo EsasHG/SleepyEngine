@@ -20,12 +20,6 @@ glm::vec3 front = glm::vec3(0.0f,0.0f,-1.0f);
 glm::vec3 right;
 glm::vec3 up = glm::vec3(0.0f,1.0f,0.0f);
 
-
-void TestFunc2()
-{
-	std::cout << "TESTFUNC2" << std::endl;
-}
-
 int Application::Run()
 {
 
@@ -93,10 +87,13 @@ int Application::Run()
 	Renderer::SetShaderUniformMat4(shaderId, "projection", projection);
 
 	Input i(window);
-	i.AddKeyBinding(GLFW_KEY_A, std::bind(&Application::MoveLeft, this));
-	i.AddKeyBinding(GLFW_KEY_D, std::bind(&Application::MoveRight, this));
+	i.AddKeyBinding(GLFW_KEY_A,SLE_HELD, std::bind(&Application::MoveLeft, this));
+	i.AddKeyBinding(GLFW_KEY_D, SLE_HELD, std::bind(&Application::MoveRight, this));
+	i.AddKeyBinding(GLFW_KEY_W, SLE_HELD, std::bind(&Application::MoveForward, this));
+	i.AddKeyBinding(GLFW_KEY_S, SLE_HELD, std::bind(&Application::MoveBackward, this));
 	i.AddMousePosBinding(std::bind(&Application::TestFunc3, this, std::placeholders::_1,std::placeholders::_2));
-	i.AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, std::bind(&Application::MouseButtonPressed, this));
+	i.AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_PRESSED, std::bind(&Application::MouseButtonPressed, this));
+	i.AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_RELEASED, std::bind(&Application::MouseButtonReleased, this));
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -126,6 +123,16 @@ int Application::Run()
 	}
 }
 
+void Application::MoveForward()
+{
+	position += front * cameraSpeed;
+}
+
+void Application::MoveBackward()
+{
+	position -= front * cameraSpeed;
+}
+
 void Application::MoveLeft()
 {
 	position -= right * cameraSpeed;
@@ -133,8 +140,6 @@ void Application::MoveLeft()
 
 void Application::MoveRight()
 {
-	
-
 	position += right * cameraSpeed;
 }
 
@@ -152,12 +157,7 @@ void Application::TestFunc3(double xPos, double yPos)
 	lastX = xPos;
 	lastY = yPos;
 
-	//std::cout << "xPos: " << xPos << "yPos: " << yPos << std::endl;
-}
 
-void Application::MouseButtonPressed()
-{
-	mousePressed = true;
 	if (mousePressed)
 	{
 		const float sensitivity = 0.1f;
@@ -181,4 +181,15 @@ void Application::MouseButtonPressed()
 		right = glm::normalize(glm::cross(front, up));
 
 	}
+
+	//std::cout << "xPos: " << xPos << "yPos: " << yPos << std::endl;
+}
+
+void Application::MouseButtonPressed()
+{
+	mousePressed = true;
+}
+void Application::MouseButtonReleased()
+{
+	mousePressed = false;
 }
