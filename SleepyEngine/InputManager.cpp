@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 #include "Input.h"
 
-bool InputManager::Init(GLFWwindow* window)
+void InputManager::Init(GLFWwindow* window)
 {
 	if (!bInitialized)
 	{
@@ -12,12 +12,11 @@ bool InputManager::Init(GLFWwindow* window)
 		glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 		bInitialized = true;
 	}
-
-	return bInitialized;
 }
 
 void InputManager::RunEvents()
 {
+	glfwPollEvents();
 	for (Input* i : m_Inputs)
 	{
 		i->RunEvents();
@@ -31,7 +30,7 @@ void InputManager::AddInputComponent(Input* i)
 	m_Inputs.push_back(i);
 }
 
-void InputManager::AddeWindowResizeCallback(std::function<void(int, int)> func)
+void InputManager::AddWindowResizeCallback(std::function<void(int, int)> func)
 {
 	m_FramebufferSizeCallbacks.push_back(func);
 }

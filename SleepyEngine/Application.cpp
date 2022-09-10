@@ -14,34 +14,16 @@
 #include "Input.h"
 #include "InputManager.h"
 #include "Camera.h"
+#include "Window.h"
 
 //TEMP
 
-
 int Application::Run()
 {
-	if (!glfwInit())
-		return -1;
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	Window window(800, 600, "Sleepy Engine");
 
-	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Sleepy Engine", NULL, NULL);
-	if (!window)
-	{
-		glfwTerminate();
-		return -1;
-	}
-	
-	glfwMakeContextCurrent(window);
-	
-	const char* description;
-	int code = glfwGetError(&description);
-	if (code != GLFW_NO_ERROR)
-	{
-		std::cout << description << std::endl;
-		glfwTerminate();
-	}
+
 
 	if (!gladLoadGL())
 	{
@@ -59,8 +41,6 @@ int Application::Run()
 		 1.0f,  1.0f,  1.0f, 1.0f
 	};
 
-	InputManager::GetInstance().Init(window);
-
 	unsigned int VAO, VBO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -75,17 +55,10 @@ int Application::Run()
 	shaderId = Renderer::CreateShader("Shaders/SingleColor.vert", "Shaders/SingleColor.frag");
 
 	glUseProgram(shaderId);
-
-
-
-	glm::mat4 projection = glm::perspective(0.5f, (float)windowWidth / windowHeight, 0.1f, 100.0f);
-	Renderer::SetShaderUniformMat4(shaderId, "projection", projection);
+	
 	Camera camera;
-	Input i;
-	
-	InputManager::GetInstance().AddeWindowResizeCallback(std::bind(&Application::WindowResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
-	
-	while (!glfwWindowShouldClose(window))
+
+	while (!window.ShouldClose())
 	{
 		double time = glfwGetTime();
 		double deltaTime = time - prevFrameTime;
@@ -93,10 +66,14 @@ int Application::Run()
 		camera.Run(deltaTime);
 
 		glClearColor(0.7f, 0.3f, 0.6f,1.0f);
-		glViewport(0, 0, windowWidth, windowHeight);
+		glViewport(0, 0, window.GetWidth(), window.GetHeight());
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
 		glUseProgram(shaderId);
+
+		glm::mat4 projection = glm::perspective(0.5f, (float)window.GetWidth() / window.GetHeight(), 0.1f, 100.0f);
+		Renderer::SetShaderUniformMat4(shaderId, "projection", projection);
+
 		glm::mat4 view = camera.GetViewMatrix();
 		Renderer::SetShaderUniformMat4(shaderId, "view", view);
 
@@ -110,18 +87,8 @@ int Application::Run()
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		window.SwapBuffers();
 		InputManager::GetInstance().RunEvents();
 	}
-}
-
-void Application::WindowResizeCallback(int width, int height)
-{
-	windowWidth = width;
-	windowHeight = height;
-	glViewport(0, 0, width, height);
-
-	glm::mat4 projection = glm::perspective(0.5f, (float)windowWidth / windowHeight, 0.1f, 100.0f);
-	Renderer::SetShaderUniformMat4(shaderId, "projection", projection);
+	return 0;
 }

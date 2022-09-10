@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "Input.h"
-class GLFWwindow;
+struct GLFWwindow;
 
 static InputManager* s_InputManager;
 
@@ -15,11 +15,11 @@ public:
 		s_InputManager = new InputManager();
 		return *s_InputManager;
 	}
-	bool Init(GLFWwindow* window);
 
 	void RunEvents();
 
-	void AddeWindowResizeCallback(std::function<void(int, int)> func);
+	void Init(GLFWwindow* window);
+	void AddWindowResizeCallback(std::function<void(int, int)> func);
 
 private:
 	InputManager() {};
@@ -35,9 +35,6 @@ private:
 
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	void MouseButtonCallbackImpl(GLFWwindow* window, int button, int action, int mods);
-
-
-	GLFWwindow* m_Window;
 
 	std::vector<Input*> m_Inputs;
 	std::vector< std::function<void(int, int)>> m_FramebufferSizeCallbacks;
