@@ -13,18 +13,13 @@
 #include "Renderer.h"
 #include "Input.h"
 #include "InputManager.h"
+#include "Camera.h"
 
 //TEMP
-glm::vec3 position = glm::vec3(0.0f,0.0f,4.0f);
-glm::vec3 front = glm::vec3(0.0f,0.0f,-1.0f);
-glm::vec3 right;
-glm::vec3 up = glm::vec3(0.0f,1.0f,0.0f);
+
 
 int Application::Run()
 {
-
-	int windowWidth = 800, windowHeight = 600;
-
 	if (!glfwInit())
 		return -1;
 
@@ -77,34 +72,32 @@ int Application::Run()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(4 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	unsigned int shaderId = Renderer::CreateShader("Shaders/SingleColor.vert", "Shaders/SingleColor.frag");
+	shaderId = Renderer::CreateShader("Shaders/SingleColor.vert", "Shaders/SingleColor.frag");
 
 	glUseProgram(shaderId);
 
 
 
-	glm::mat4 projection = glm::perspective(0.5f, (float)windowWidth / windowHeight, 0.1f, 10.0f);
+	glm::mat4 projection = glm::perspective(0.5f, (float)windowWidth / windowHeight, 0.1f, 100.0f);
 	Renderer::SetShaderUniformMat4(shaderId, "projection", projection);
-
-	Input i(window);
-	i.AddKeyBinding(GLFW_KEY_A,SLE_HELD, std::bind(&Application::MoveLeft, this));
-	i.AddKeyBinding(GLFW_KEY_D, SLE_HELD, std::bind(&Application::MoveRight, this));
-	i.AddKeyBinding(GLFW_KEY_W, SLE_HELD, std::bind(&Application::MoveForward, this));
-	i.AddKeyBinding(GLFW_KEY_S, SLE_HELD, std::bind(&Application::MoveBackward, this));
-	i.AddMousePosBinding(std::bind(&Application::TestFunc3, this, std::placeholders::_1,std::placeholders::_2));
-	i.AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_PRESSED, std::bind(&Application::MouseButtonPressed, this));
-	i.AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_RELEASED, std::bind(&Application::MouseButtonReleased, this));
-
+	Camera camera;
+	Input i;
+	
+	InputManager::GetInstance().AddeWindowResizeCallback(std::bind(&Application::WindowResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
+	
 	while (!glfwWindowShouldClose(window))
 	{
-		
+		double time = glfwGetTime();
+		double deltaTime = time - prevFrameTime;
+		prevFrameTime = time;
+		camera.Run(deltaTime);
+
 		glClearColor(0.7f, 0.3f, 0.6f,1.0f);
 		glViewport(0, 0, windowWidth, windowHeight);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
 		glUseProgram(shaderId);
-		
-		glm::mat4 view = glm::lookAt(position, position + front, up);
+		glm::mat4 view = camera.GetViewMatrix();
 		Renderer::SetShaderUniformMat4(shaderId, "view", view);
 
 
@@ -123,73 +116,12 @@ int Application::Run()
 	}
 }
 
-void Application::MoveForward()
+void Application::WindowResizeCallback(int width, int height)
 {
-	position += front * cameraSpeed;
-}
+	windowWidth = width;
+	windowHeight = height;
+	glViewport(0, 0, width, height);
 
-void Application::MoveBackward()
-{
-	position -= front * cameraSpeed;
-}
-
-void Application::MoveLeft()
-{
-	position -= right * cameraSpeed;
-}
-
-void Application::MoveRight()
-{
-	position += right * cameraSpeed;
-}
-
-void Application::TestFunc3(double xPos, double yPos)
-{
-	if (firstMouse)
-	{
-		lastX = xPos;
-		lastY = yPos;
-		firstMouse = false;
-	}
-
-	xoffset = xPos - lastX;
-	yoffset = lastY - yPos;
-	lastX = xPos;
-	lastY = yPos;
-
-
-	if (mousePressed)
-	{
-		const float sensitivity = 0.1f;
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
-		//std::cout << "x offset " << xoffset << "y offset " << yoffset << std::endl;
-		yaw += xoffset;
-		pitch += yoffset;
-
-		if (pitch > 89.0f)
-			pitch = 89.0f;
-		if (pitch < -89.0f)
-			pitch = -89.0f;
-
-		glm::vec3 direction;
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		front = glm::normalize(direction);
-
-		right = glm::normalize(glm::cross(front, up));
-
-	}
-
-	//std::cout << "xPos: " << xPos << "yPos: " << yPos << std::endl;
-}
-
-void Application::MouseButtonPressed()
-{
-	mousePressed = true;
-}
-void Application::MouseButtonReleased()
-{
-	mousePressed = false;
+	glm::mat4 projection = glm::perspective(0.5f, (float)windowWidth / windowHeight, 0.1f, 100.0f);
+	Renderer::SetShaderUniformMat4(shaderId, "projection", projection);
 }

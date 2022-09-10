@@ -5,27 +5,12 @@ public:
 	Application() {};
 	int Run();
 
-	void MoveForward();
-
-	void MoveBackward();
-
 private:
-	void MoveLeft();
-	void MoveRight();
-	void TestFunc3(double xPos, double yPos);
-	void MouseButtonPressed();
 
-	void MouseButtonReleased();
+	void WindowResizeCallback(int width, int height);
 
-	//TEMP
-	bool firstMouse = true;
-	bool mousePressed = false;
-	double lastX, lastY;
-	float yaw = -90;
-	float pitch = 0;
-	float xoffset;
-	float yoffset;
-
-	float cameraSpeed = 0.03;
+	int windowWidth = 800, windowHeight = 600;
+	unsigned int shaderId;
+	double prevFrameTime;
 };
 

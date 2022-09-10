@@ -2,7 +2,7 @@
 #include <iostream>
 #include "InputManager.h"
 
-Input::Input(GLFWwindow* window) : m_Window(window)
+Input::Input()
 {
 	InputManager::GetInstance().AddInputComponent(this);
 
@@ -83,18 +83,14 @@ void Input::HandleKeyEvents(int key, int action)
 	}
 	else if (action == GLFW_RELEASE)
 	{
-		//remove(m_ActiveKeys.begin(), m_ActiveKeys.end(), key);
 		m_ActiveKeys.erase(std::remove(m_ActiveKeys.begin(), m_ActiveKeys.end(), key), m_ActiveKeys.end());
-		//auto it = std::find(m_ActiveKeys.begin(), m_ActiveKeys.end(), key);
-		//if (it != m_ActiveKeys.end())
-		//	m_ActiveKeys.erase(it);
+
 
 		for (auto it = m_ReleasedKeyCallbacks[key].begin(); it != m_ReleasedKeyCallbacks[key].end(); ++it)
 		{
 			(*it)();
 		}
 	}
-
 }
 
 void Input::HandleMousePosEvents(double xPos, double yPos)
@@ -122,10 +118,6 @@ void Input::HandleMouseButtonEvents(int button, int action)
 			(*it)();
 		}
 		m_ActiveMouseButtons.erase(std::remove(m_ActiveMouseButtons.begin(), m_ActiveMouseButtons.end(), button), m_ActiveMouseButtons.end());
-
-		//auto it = std::find(m_ActiveMouseButtons.begin(), m_ActiveMouseButtons.end(), button);
-		//if (it != m_ActiveMouseButtons.end())
-		//	m_ActiveMouseButtons.erase(it);
 	}
 }
 

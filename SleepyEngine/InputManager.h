@@ -18,8 +18,14 @@ public:
 	bool Init(GLFWwindow* window);
 
 	void RunEvents();
+
+	void AddeWindowResizeCallback(std::function<void(int, int)> func);
+
 private:
 	InputManager() {};
+	static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+	void FramebufferSizeCallbackImpl(GLFWwindow* window, int width, int height);
+
 
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	void KeyCallbackImpl(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -33,7 +39,8 @@ private:
 
 	GLFWwindow* m_Window;
 
-	std::vector<Input*> inputs;
+	std::vector<Input*> m_Inputs;
+	std::vector< std::function<void(int, int)>> m_FramebufferSizeCallbacks;
 	bool bInitialized = false;
 
 	void AddInputComponent(Input* i);

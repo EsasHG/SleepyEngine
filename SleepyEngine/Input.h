@@ -16,7 +16,7 @@ enum SLE_INPUT_MODE
 class Input
 {
 public:
-	Input(GLFWwindow* window);
+	Input();
 	void AddKeyBinding(int key, SLE_INPUT_MODE mode, std::function<void()> func);
 	void AddMousePosBinding(std::function<void(double, double)> func);
 	void AddMouseButtonBinding(int button, SLE_INPUT_MODE mode, std::function<void()> func);
@@ -27,10 +27,8 @@ private:
 	void HandleMousePosEvents(double xPos, double yPos);
 	void HandleMouseButtonEvents(int button, int action);
 
-	GLFWwindow* m_Window;
 	std::vector<int> m_ActiveKeys;
 	std::vector<int> m_ActiveMouseButtons;
-
 
 	std::map<int, std::vector<std::function<void()>>> m_HeldKeyCallbacks;
 	std::map<int, std::vector<std::function<void()>>> m_PressedKeyCallbacks;
