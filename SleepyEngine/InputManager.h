@@ -11,8 +11,7 @@ class InputManager
 public:
 	static InputManager& GetInstance() {
 		if(!s_InputManager)
-
-		s_InputManager = new InputManager();
+			s_InputManager = new InputManager();
 		return *s_InputManager;
 	}
 

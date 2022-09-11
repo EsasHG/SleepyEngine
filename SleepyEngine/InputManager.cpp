@@ -16,7 +16,7 @@ void InputManager::Init(GLFWwindow* window)
 
 void InputManager::RunEvents()
 {
-	glfwPollEvents();
+
 	for (Input* i : m_Inputs)
 	{
 		i->RunEvents();

@@ -2,7 +2,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "InputManager.h"
-
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_glfw.h"
+#include "ImGui/imgui_impl_opengl3.h"
 
 Window::Window(int width, int height, const char* title) : m_Width(width), m_Height(height)
 {
@@ -30,17 +32,21 @@ Window::Window(int width, int height, const char* title) : m_Width(width), m_Hei
 		glfwTerminate();
 		return;
 	}
-
 	InputManager::GetInstance().Init(m_Window);
 	InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Window::WindowResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
+}
 
+void Window::EnableImGui()
+{
+	const char* glsl_version = "#version 130";
+	ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+	ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
 void Window::WindowResizeCallback(int width, int height)
 {
 	m_Width = width;
 	m_Height = height;
-	glViewport(0, 0, width, height);
 }
 
 

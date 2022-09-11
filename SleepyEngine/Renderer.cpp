@@ -6,6 +6,75 @@
 #include <sstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <functional>
+
+#include "InputManager.h"
+#include "UiLayer.h"
+Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
+{
+
+	if (!gladLoadGL())
+	{
+		std::cout << "Glad did not load successfully!" << std::endl;
+	}
+
+	InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Renderer::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
+	ui = new UiLayer();
+
+	m_ShaderId = Renderer::CreateShader("Shaders/SingleColor.vert", "Shaders/SingleColor.frag");
+
+	float quadVertices[] = {
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(4 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+}
+
+void Renderer::Draw()
+{
+	ui->Run();
+
+	glClearColor(ui->clearColor.x, ui->clearColor.y, ui->clearColor.z, 1.0f);
+
+	glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glDisable(GL_CULL_FACE);
+	glUseProgram(m_ShaderId);
+
+
+	glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 100.0f);
+	Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
+
+	Renderer::SetShaderUniformVec3(m_ShaderId, "color", ui->quadColor);
+
+	glm::mat4 model = glm::mat4(1.0f);
+	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
+
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void Renderer::FramebufferResizeCallback(int x, int y)
+{
+	glViewport(0, 0, x, y);
+
+}
 
 unsigned int Renderer::CreateShader(const char* vertShaderPath, const char* fragShaderPath)
 {
@@ -212,33 +281,38 @@ unsigned int Renderer::CreateShader(const char* vertShaderPath, const char* geom
 	return Id;
 }
 
-void Renderer::SetShaderUniformFloat(unsigned int shaderId, const char* name, float f)
+void Renderer::SetShaderUniformFloat(unsigned int m_SshaderId, const char* name, float f)
 {
-	unsigned int loc = glGetUniformLocation(shaderId, name);
+	unsigned int loc = glGetUniformLocation(m_SshaderId, name);
 	glUniform1f(loc, f);
 }
 
-void Renderer::SetShaderUniformInt(unsigned int shaderId, const char* name, int i)
+void Renderer::SetShaderUniformInt(unsigned int m_SshaderId, const char* name, int i)
 {
-	unsigned int loc = glGetUniformLocation(shaderId, name);
+	unsigned int loc = glGetUniformLocation(m_SshaderId, name);
 	glUniform1i(loc, i);
 }
 
-void Renderer::SetShaderUniformVec2(unsigned int shaderId, const char* name, glm::vec2 vector)
+void Renderer::SetShaderUniformVec2(unsigned int m_SshaderId, const char* name, glm::vec2 vector)
 {
-	unsigned int loc = glGetUniformLocation(shaderId, name);
+	unsigned int loc = glGetUniformLocation(m_SshaderId, name);
 	glUniform2f(loc, vector.x, vector.y);
 }
 
-void Renderer::SetShaderUniformVec3(unsigned int shaderId, const char* name, glm::vec3 vector)
+void Renderer::SetShaderUniformVec3(unsigned int m_SshaderId, const char* name, glm::vec3 vector)
 {
-	unsigned int loc = glGetUniformLocation(shaderId, name);
+	unsigned int loc = glGetUniformLocation(m_SshaderId, name);
 	glUniform3f(loc, vector.x, vector.y, vector.z);
 }
 
-void Renderer::SetShaderUniformMat4(unsigned int shaderId, const char* name, glm::mat4 matrix)
+void Renderer::SetShaderUniformMat4(unsigned int m_SshaderId, const char* name, glm::mat4 matrix)
 {
-	unsigned int loc = glGetUniformLocation(shaderId, name);
+	unsigned int loc = glGetUniformLocation(m_SshaderId, name);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
+}
 
+void Renderer::SetShaderUniformMat4(const char* name, glm::mat4 matrix)
+{
+	unsigned int loc = glGetUniformLocation(m_ShaderId, name);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
 }

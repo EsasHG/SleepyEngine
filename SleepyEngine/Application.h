@@ -7,7 +7,6 @@ public:
 
 private:
 
-	unsigned int shaderId;
 	double prevFrameTime;
 };
 
