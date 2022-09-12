@@ -113,11 +113,15 @@
     <ClInclude Include="UiLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\QuadShader.vert">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\SingleColor.vert">
       <Filter>Source Files</Filter>
     </None>
     <None Include="Shaders\SingleColor.frag" />
+    <None Include="Shaders\QuadShader.frag" />
   </ItemGroup>
 </Project>

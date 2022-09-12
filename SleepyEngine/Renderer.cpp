@@ -11,9 +11,10 @@
 
 #include "InputManager.h"
 #include "UiLayer.h"
+
+
 Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 {
-
 	if (!gladLoadGL())
 	{
 		std::cout << "Glad did not load successfully!" << std::endl;
@@ -23,7 +24,9 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	ui = new UiLayer();
 
 	m_ShaderId = Renderer::CreateShader("Shaders/SingleColor.vert", "Shaders/SingleColor.frag");
-
+	m_QuadShaderId = Renderer::CreateShader("Shaders/QuadShader.vert", "Shaders/QuadShader.frag");
+	glUseProgram(m_QuadShaderId);
+	Renderer::SetShaderUniformInt(m_QuadShaderId, "sceneTexture", 0);
 	float quadVertices[] = {
 		// positions   // texCoords
 		-1.0f,  1.0f,  0.0f, 1.0f,
@@ -42,20 +45,39 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(4 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+
+	glGenFramebuffers(1, &FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+	glGenTextures(1, &renderedTexture);
+	glBindTexture(GL_TEXTURE_2D, renderedTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_WindowSize.x, m_WindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Incomplete framebuffer!" << std::endl;
+
+	glUseProgram(m_ShaderId);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::Draw()
 {
-	ui->Run();
-
+	m_WindowSize = ui->contentRegionSize;
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glClearColor(ui->clearColor.x, ui->clearColor.y, ui->clearColor.z, 1.0f);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+	//glEnable(GL_DEPTH_TEST);
 
+	glUseProgram(m_ShaderId);
 	glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_CULL_FACE);
-	glUseProgram(m_ShaderId);
 
 
 	glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 100.0f);
@@ -68,17 +90,34 @@ void Renderer::Draw()
 
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDisable(GL_DEPTH_TEST);
+	//
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(m_QuadShaderId);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	ui->sceneTexture = renderedTexture;
+	ui->Run();
+	RecreateFramebuffer();
+	//glBindVertexArray(VAO);
+	////glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE, renderedTexture);
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
+//
+	glUseProgram(m_ShaderId);
+
 }
 
 void Renderer::FramebufferResizeCallback(int x, int y)
 {
-	glViewport(0, 0, x, y);
-
+	glViewport(0, 0, ui->contentRegionSize.x, ui->contentRegionSize.y);
+	RecreateFramebuffer();
 }
 
 unsigned int Renderer::CreateShader(const char* vertShaderPath, const char* fragShaderPath)
 {
-
 	std::ifstream v(vertShaderPath);
 	std::string vertString;
 	if (v)
@@ -315,4 +354,20 @@ void Renderer::SetShaderUniformMat4(const char* name, glm::mat4 matrix)
 {
 	unsigned int loc = glGetUniformLocation(m_ShaderId, name);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Renderer::RecreateFramebuffer()
+{
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+	glBindTexture(GL_TEXTURE_2D, renderedTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_WindowSize.x, m_WindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Incomplete framebuffer!" << std::endl;
 }
