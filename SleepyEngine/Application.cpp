@@ -42,8 +42,9 @@ int Application::Run()
 		double time = glfwGetTime();
 		double deltaTime = time - prevFrameTime;
 		prevFrameTime = time;
-
-		if (!ImGui::GetIO().WantCaptureKeyboard && !ImGui::GetIO().WantCaptureMouse)
+		auto io = ImGui::GetIO();
+		std::cout << io.WantCaptureKeyboard	<< "mouse: " << io.WantCaptureMouse << std::endl;
+		if (!ImGui::GetIO().WantCaptureKeyboard)
 			InputManager::GetInstance().RunEvents();
 		camera.Run(deltaTime);
 

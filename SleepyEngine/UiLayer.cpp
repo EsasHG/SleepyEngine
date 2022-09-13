@@ -1,5 +1,6 @@
 #include "UiLayer.h"
 
+#include <iostream>
 #include <GLFW/glfw3.h>
 #include "Window.h"
 #include "ImGui/imgui.h"
@@ -32,6 +33,7 @@ void UiLayer::Run()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	ImGui::DockSpaceOverViewport();
+	ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
 	if (showRenderWindow)
 	{
@@ -39,8 +41,10 @@ void UiLayer::Run()
 		ImGui::BeginChild("GameRender");
 		ImVec2 crSize = ImGui::GetContentRegionAvail();
 		ImVec2 wSize = ImGui::GetWindowSize();
+		if (ImGui::ImageButton((ImTextureID)sceneTexture, wSize, ImVec2(0, 1), ImVec2(1, 0)))
+			ImGui::SetWindowFocus(NULL);
 		contentRegionSize = glm::vec2(crSize.x, crSize.y);
-		ImGui::Image((ImTextureID)sceneTexture, wSize, ImVec2(0, 1), ImVec2(1, 0));
+		//ImGui::Image((ImTextureID)sceneTexture, wSize, ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::EndChild();
 		ImGui::End();
 	}
