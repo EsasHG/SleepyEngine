@@ -66,7 +66,7 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Renderer::Draw()
+void Renderer::Draw(double deltaTime)
 {
 	m_WindowSize = ui->contentRegionSize;
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -95,19 +95,21 @@ void Renderer::Draw()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(m_QuadShaderId);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0.2f,0.3f,0.8f, 1.0f);
 
+	glClear(GL_COLOR_BUFFER_BIT);
+	glViewport(0,0,m_WindowSize.x, m_WindowSize.y);
+
+	glBindVertexArray(VAO);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE, renderedTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+//
+	glUseProgram(m_ShaderId);
 	ui->sceneTexture = renderedTexture;
 	ui->Run();
 	RecreateFramebuffer();
-	//glBindVertexArray(VAO);
-	////glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE, renderedTexture);
-	//glDrawArrays(GL_TRIANGLES, 0, 6);
-//
-	glUseProgram(m_ShaderId);
-
 }
 
 void Renderer::FramebufferResizeCallback(int x, int y)

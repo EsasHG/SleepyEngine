@@ -5,7 +5,7 @@ class Renderer
 {
 public:
 	Renderer(glm::vec2 windowSize);
-	void Draw();
+	void Draw(double deltaTime);
 	static unsigned int CreateShader(const char* vertShaderPath, const char* fragShaderPath);
 	static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);
 

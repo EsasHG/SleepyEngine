@@ -38,21 +38,25 @@ int Application::Run()
 	Camera camera;
 	while (!window.ShouldClose())
 	{
-		glfwPollEvents();
 		double time = glfwGetTime();
 		double deltaTime = time - prevFrameTime;
 		prevFrameTime = time;
 		auto io = ImGui::GetIO();
-		std::cout << io.WantCaptureKeyboard	<< "mouse: " << io.WantCaptureMouse << std::endl;
+		//std::cout << io.WantCaptureKeyboard	<< "mouse: " << io.WantCaptureMouse << std::endl;
+		
+		glm::mat4 view = camera.GetViewMatrix();
+		r.SetShaderUniformMat4("view", view);
+		glfwPollEvents();
+
 		if (!ImGui::GetIO().WantCaptureKeyboard)
 			InputManager::GetInstance().RunEvents();
 		camera.Run(deltaTime);
 
-		glm::mat4 view = camera.GetViewMatrix();
-		r.SetShaderUniformMat4("view", view);
-
-		r.Draw();
+		r.Draw(deltaTime);
 		
+
+
+
 		window.SwapBuffers();
 
 	}
