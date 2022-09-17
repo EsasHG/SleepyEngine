@@ -23,7 +23,7 @@ Window::Window(int width, int height, const char* title) : m_Width(width), m_Hei
 	}
 
 	glfwMakeContextCurrent(m_Window);
-
+	//glfwSwapInterval(0);
 	const char* description;
 	int code = glfwGetError(&description);
 	if (code != GLFW_NO_ERROR)

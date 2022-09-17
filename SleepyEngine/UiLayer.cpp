@@ -30,7 +30,7 @@ UiLayer::UiLayer()
 	}
 }
 
-void UiLayer::Run()
+void UiLayer::Run(double deltaTime)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -78,7 +78,8 @@ void UiLayer::Run()
 	if (showTestWindow3)
 	{
 		ImGui::Begin("Info", &showTestWindow3);
-		ImGui::Text("Framerate: ");
+		ImGui::Text("Framerate: %.2f", 1 / deltaTime);
+		ImGui::Text("Time Per Frame: %.3fms", deltaTime* 1000);
 
 		if(ImGui::GetIO().WantCaptureKeyboard)
 			ImGui::Text("WantCaptureKeyboard: True");
@@ -108,8 +109,6 @@ void UiLayer::Run()
 		ImGui::Checkbox("Show Window 2", &showTestWindow2);
 		ImGui::End();
 	}
-
-
 
 	if (showTestWindow2)
 	{

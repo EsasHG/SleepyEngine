@@ -30,10 +30,6 @@ int Application::Run()
 	Window window(800, 600, "Sleepy Engine");
 	Renderer r(glm::vec2(window.GetWidth(), window.GetHeight()));
 	window.EnableImGui();
-
-
-
-	
 	
 	Camera camera;
 	while (!window.ShouldClose())
@@ -53,12 +49,8 @@ int Application::Run()
 		camera.Run(deltaTime);
 
 		r.Draw(deltaTime);
-		
-
-
-
+	
 		window.SwapBuffers();
-
 	}
 	return 0;
 }

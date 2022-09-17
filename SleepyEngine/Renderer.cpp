@@ -108,7 +108,7 @@ void Renderer::Draw(double deltaTime)
 //
 	glUseProgram(m_ShaderId);
 	ui->sceneTexture = renderedTexture;
-	ui->Run();
+	ui->Run(deltaTime);
 	RecreateFramebuffer();
 }
 
