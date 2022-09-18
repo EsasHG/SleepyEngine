@@ -66,19 +66,26 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Renderer::Draw(double deltaTime)
+void Renderer::BeginFrame()
 {
+	glUseProgram(m_ShaderId);
+	ui->BeginFrame();
 	m_WindowSize = ui->contentRegionSize;
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glClearColor(ui->clearColor.x, ui->clearColor.y, ui->clearColor.z, 1.0f);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 	//glEnable(GL_DEPTH_TEST);
 
-	glUseProgram(m_ShaderId);
 	glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glDisable(GL_CULL_FACE);
 
+}
+
+
+void Renderer::Draw(double deltaTime)
+{
+	//game window draw stuff
+	glDisable(GL_CULL_FACE);
 
 	glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 100.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
@@ -90,26 +97,20 @@ void Renderer::Draw(double deltaTime)
 
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	//glDisable(GL_DEPTH_TEST);
-	//
+
+	//ImGui draw stuff
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glUseProgram(m_QuadShaderId);
-	glClearColor(0.2f,0.3f,0.8f, 1.0f);
-
-	glClear(GL_COLOR_BUFFER_BIT);
-	glViewport(0,0,m_WindowSize.x, m_WindowSize.y);
-
-	glBindVertexArray(VAO);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE, renderedTexture);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-//
-	glUseProgram(m_ShaderId);
 	ui->sceneTexture = renderedTexture;
 	ui->Run(deltaTime);
+}
+
+
+void Renderer::EndFrame()
+{
+	ui->EndFrame();
 	RecreateFramebuffer();
+	//ui->EndFrame();
 }
 
 void Renderer::FramebufferResizeCallback(int x, int y)

@@ -51,7 +51,7 @@ void Input::AddMouseButtonBinding(int button, SLE_INPUT_MODE inputMode, std::fun
 	};
 }
 
-void Input::RunEvents()
+void Input::RunKeyEvents()
 {
 	for (int key : m_ActiveKeys)
 	{
@@ -60,7 +60,11 @@ void Input::RunEvents()
 			(*it)();
 		}
 	}
+}
 
+
+void Input::RunMouseEvents()
+{
 	for (int button : m_ActiveMouseButtons)
 	{
 		for (auto it = m_HeldMouseButtonCallbacks[button].begin(); it != m_HeldMouseButtonCallbacks[button].end(); ++it)
@@ -68,8 +72,8 @@ void Input::RunEvents()
 			(*it)();
 		}
 	}
-}
 
+}
 
 void Input::HandleKeyEvents(int key, int action)
 {

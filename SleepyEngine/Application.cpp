@@ -23,34 +23,48 @@
 
 //TEMP
 
+Application::~Application()
+{
+	delete window;
+	delete renderer;
+}
+
+double Application::BeginFrame()
+{
+	double time = glfwGetTime();
+	double deltaTime = time - prevFrameTime;
+	prevFrameTime = time;
+	renderer->BeginFrame();
+
+	return deltaTime;
+}
+
 int Application::Run()
 {
-
-
-	Window window(800, 600, "Sleepy Engine");
-	Renderer r(glm::vec2(window.GetWidth(), window.GetHeight()));
-	window.EnableImGui();
+	window = new Window(800, 600, "Sleepy Engine");
+	renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
+	window->EnableImGui();
 	
 	Camera camera;
-	while (!window.ShouldClose())
+	while (!window->ShouldClose())
 	{
-		double time = glfwGetTime();
-		double deltaTime = time - prevFrameTime;
-		prevFrameTime = time;
-		auto io = ImGui::GetIO();
-		//std::cout << io.WantCaptureKeyboard	<< "mouse: " << io.WantCaptureMouse << std::endl;
+		double deltaTime = BeginFrame();
 		
 		glm::mat4 view = camera.GetViewMatrix();
-		r.SetShaderUniformMat4("view", view);
+		renderer->SetShaderUniformMat4("view", view);
 		glfwPollEvents();
 
-		if (!ImGui::GetIO().WantCaptureKeyboard)
-			InputManager::GetInstance().RunEvents();
+		InputManager::GetInstance().RunEvents();
 		camera.Run(deltaTime);
+		renderer->Draw(deltaTime);
 
-		r.Draw(deltaTime);
-	
-		window.SwapBuffers();
+		EndFrame();
 	}
 	return 0;
+}
+
+void Application::EndFrame()
+{
+	renderer->EndFrame();
+	window->SwapBuffers();
 }

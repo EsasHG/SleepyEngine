@@ -1,7 +1,7 @@
 #include "InputManager.h"
 #include <GLFW/glfw3.h>
 #include "Input.h"
-
+#include "ImGui/imgui.h"
 void InputManager::Init(GLFWwindow* window)
 {
 	if (!bInitialized)
@@ -16,10 +16,23 @@ void InputManager::Init(GLFWwindow* window)
 
 void InputManager::RunEvents()
 {
-
-	for (Input* i : m_Inputs)
+	bDispatchKeyboardEvents = !ImGui::GetIO().WantCaptureKeyboard;
+	bDispatchMouseEvents = !ImGui::GetIO().WantCaptureMouse;
+	
+	if (bDispatchKeyboardEvents)
 	{
-		i->RunEvents();
+		for (Input* i : m_Inputs)
+		{
+			i->RunKeyEvents();
+		}
+	}
+
+	if (bDispatchMouseEvents)
+	{
+		for (Input* i : m_Inputs)
+		{
+			i->RunKeyEvents();
+		}
 	}
 }
 
@@ -59,9 +72,12 @@ void InputManager::KeyCallback(GLFWwindow* window, int key, int scancode, int ac
 
 void InputManager::KeyCallbackImpl(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	for (Input* i : m_Inputs)
+	if (bDispatchKeyboardEvents)
 	{
-		i->HandleKeyEvents(key, action);
+		for (Input* i : m_Inputs)
+		{
+			i->HandleKeyEvents(key, action);
+		}
 	}
 }
 
@@ -74,9 +90,12 @@ void InputManager::CursorPosCallback(GLFWwindow* window, double xPos, double yPo
 
 void InputManager::CursorPosCallbackImpl(GLFWwindow* window, double xPos, double yPos)
 {
-	for (Input* i : m_Inputs)
+	if (bDispatchMouseEvents)
 	{
-		i->HandleMousePosEvents(xPos, yPos);
+		for (Input* i : m_Inputs)
+		{
+			i->HandleMousePosEvents(xPos, yPos);
+		}
 	}
 }
 
@@ -88,9 +107,12 @@ void InputManager::MouseButtonCallback(GLFWwindow* window, int button, int actio
 
 void InputManager::MouseButtonCallbackImpl(GLFWwindow* window, int button, int action, int mods)
 {
-	for (Input* i : m_Inputs)
+	if (bDispatchMouseEvents)
 	{
-		i->HandleMouseButtonEvents(button, action);
+		for (Input* i : m_Inputs)
+		{
+			i->HandleMouseButtonEvents(button, action);
+		}
 	}
 }
 

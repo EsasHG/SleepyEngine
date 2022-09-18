@@ -39,6 +39,9 @@ private:
 	std::vector< std::function<void(int, int)>> m_FramebufferSizeCallbacks;
 	bool bInitialized = false;
 
+	bool bDispatchKeyboardEvents = true;
+	bool bDispatchMouseEvents = true;
+
 	void AddInputComponent(Input* i);
 	friend class Input;
 };

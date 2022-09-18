@@ -21,7 +21,8 @@ public:
 	void AddMousePosBinding(std::function<void(double, double)> func);
 	void AddMouseButtonBinding(int button, SLE_INPUT_MODE mode, std::function<void()> func);
 private:
-	void RunEvents();
+	void RunKeyEvents();
+	void RunMouseEvents();
 
 	void HandleKeyEvents(int key, int action);
 	void HandleMousePosEvents(double xPos, double yPos);
