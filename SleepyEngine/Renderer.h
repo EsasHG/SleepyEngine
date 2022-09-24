@@ -5,6 +5,7 @@ class Renderer
 {
 public:
 	Renderer(glm::vec2 windowSize);
+	~Renderer();
 	void BeginFrame();
 	void Draw(double deltaTime);
 	void EndFrame();
@@ -29,6 +30,8 @@ private:
 	class UiLayer* ui;
 
 	glm::vec2 m_WindowSize;
+
+	class Mesh* quadMesh;
 
 	unsigned int m_ShaderId;
 	unsigned int m_QuadShaderId;

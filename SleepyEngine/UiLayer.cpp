@@ -39,14 +39,24 @@ void UiLayer::BeginFrame()
 
 void UiLayer::Run(double deltaTime)
 {
-	
+
 	
 	bool windowFocused = false;
 
 	if (showRenderWindow)
 	{
+		
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("Game Window", &showRenderWindow, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);
+		ImGui::Begin("Game Window", &showRenderWindow, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);// | ImGuiWindowFlags_MenuBar);
+		//if (ImGui::BeginMainMenuBar())
+		//{
+		//	ImGui::BeginMenu("Test");
+		//	//ImGui::Button("Play", ImVec2(25, 25));
+		//	ImGui::MenuItem("Test2", "CTRL+P");
+		//	ImGui::EndMenu();
+		//	ImGui::EndMainMenuBar();
+		//}
 		ImGui::BeginChild("GameRender",ImVec2(0,0), false, ImGuiWindowFlags_NoNavInputs);
 		ImVec2 crSize = ImGui::GetContentRegionAvail();
 		ImGui::Image((ImTextureID)sceneTexture, crSize, ImVec2(0, 1), ImVec2(1, 0));

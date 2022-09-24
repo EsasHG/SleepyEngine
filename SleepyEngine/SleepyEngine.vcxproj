@@ -147,6 +147,7 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="UiLayer.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Shaders\QuadShader.vert" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="UiLayer.h" />

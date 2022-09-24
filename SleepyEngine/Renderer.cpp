@@ -11,6 +11,7 @@
 
 #include "InputManager.h"
 #include "UiLayer.h"
+#include "Mesh.h"
 
 
 Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
@@ -27,27 +28,17 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	m_QuadShaderId = Renderer::CreateShader("Shaders/QuadShader.vert", "Shaders/QuadShader.frag");
 	glUseProgram(m_QuadShaderId);
 	Renderer::SetShaderUniformInt(m_QuadShaderId, "sceneTexture", 0);
-	float quadVertices[] = {
-		// positions   // texCoords
-		-1.0f,  1.0f,  0.0f, 1.0f,
-		-1.0f, -1.0f,  0.0f, 0.0f,
-		 1.0f, -1.0f,  1.0f, 0.0f,
 
-		-1.0f,  1.0f,  0.0f, 1.0f,
-		 1.0f, -1.0f,  1.0f, 0.0f,
-		 1.0f,  1.0f,  1.0f, 1.0f
-	};
+	std::vector<Vertex> vertices;
+	vertices.push_back(Vertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)));
+	vertices.push_back(Vertex(glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)));
+	vertices.push_back(Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
+	vertices.push_back(Vertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)));
+	vertices.push_back(Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
+	vertices.push_back(Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
 
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
+	quadMesh = new Mesh(vertices);
+	
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -64,6 +55,12 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	glUseProgram(m_ShaderId);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+Renderer::~Renderer()
+{
+	delete ui;
+	delete quadMesh;
 }
 
 void Renderer::BeginFrame()
@@ -94,9 +91,16 @@ void Renderer::Draw(double deltaTime)
 
 	glm::mat4 model = glm::mat4(1.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
+	quadMesh->Draw();
 
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -1.5f, 1.5f));
+	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
+	quadMesh->Draw();
+
+	//glBindVertexArray(VAO);
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	//ImGui draw stuff
 
@@ -110,7 +114,6 @@ void Renderer::EndFrame()
 {
 	ui->EndFrame();
 	RecreateFramebuffer();
-	//ui->EndFrame();
 }
 
 void Renderer::FramebufferResizeCallback(int x, int y)
