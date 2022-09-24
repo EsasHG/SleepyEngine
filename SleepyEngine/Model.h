@@ -6,17 +6,26 @@
 struct aiNode;
 struct aiMesh;
 struct aiScene;
+struct aiMaterial;
+enum aiTextureType;
 class Model
 {
 public:
-	Model(std::string path);
+	//TODO remove shaderID from constructors
+	Model(std::string path, unsigned int shaderID);
 	void Draw();
 private:
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
-
+	std::vector<Tex> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+	unsigned int LoadTexture(const char* path, std::string dir);
 	std::string directory;
 
 	std::vector<Mesh> m_meshes;
+	std::vector<Tex> m_loadedTextures;
+
+	unsigned int m_ShaderID;
+	
+
 };
 

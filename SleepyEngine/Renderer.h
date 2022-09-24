@@ -7,7 +7,7 @@ public:
 	Renderer(glm::vec2 windowSize);
 	~Renderer();
 	void BeginFrame();
-	void Draw(double deltaTime);
+	void Draw(double deltaTime, glm::mat4 view);
 	void EndFrame();
 	static unsigned int CreateShader(const char* vertShaderPath, const char* fragShaderPath);
 	static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);
@@ -36,8 +36,11 @@ private:
 
 	unsigned int m_ShaderId;
 	unsigned int m_QuadShaderId;
+	unsigned int m_TextureShaderId;
 	unsigned int VAO, VBO;
 	unsigned int FBO;
+	unsigned int RBO;
+
 	unsigned int renderedTexture;
 
 };

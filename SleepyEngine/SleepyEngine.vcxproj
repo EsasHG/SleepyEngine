@@ -171,6 +171,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Shaders\QuadShader.vert" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="UiLayer.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

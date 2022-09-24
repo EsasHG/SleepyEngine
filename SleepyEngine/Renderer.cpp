@@ -26,6 +26,8 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 
 	m_ShaderId = Renderer::CreateShader("Shaders/SingleColor.vert", "Shaders/SingleColor.frag");
 	m_QuadShaderId = Renderer::CreateShader("Shaders/QuadShader.vert", "Shaders/QuadShader.frag");
+	m_TextureShaderId = Renderer::CreateShader("Shaders/TextureShader.vert", "Shaders/TextureShader.frag");
+
 	glUseProgram(m_QuadShaderId);
 	Renderer::SetShaderUniformInt(m_QuadShaderId, "sceneTexture", 0);
 
@@ -37,8 +39,8 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	vertices.push_back(Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
 	vertices.push_back(Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
 
-	quadMesh = new Mesh(vertices);
-	guitar = new Model("Assets/backpack/backpack.obj");
+	quadMesh = new Mesh(m_ShaderId, vertices);
+	guitar = new Model("Assets/backpack/backpack.obj", m_ShaderId);
 
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -49,6 +51,11 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
+
+	glGenRenderbuffers(1, &RBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_WindowSize.x, m_WindowSize.y);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::FRAMEBUFFER:: Incomplete framebuffer!" << std::endl;
@@ -72,40 +79,45 @@ void Renderer::BeginFrame()
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glClearColor(ui->clearColor.x, ui->clearColor.y, ui->clearColor.z, 1.0f);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 }
 
 
-void Renderer::Draw(double deltaTime)
+void Renderer::Draw(double deltaTime, glm::mat4 view)
 {
 	//game window draw stuff
 	glDisable(GL_CULL_FACE);
 
 	glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 100.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
-
+	Renderer::SetShaderUniformMat4(m_ShaderId, "view", view);
 	Renderer::SetShaderUniformVec3(m_ShaderId, "color", ui->quadColor);
 
 	glm::mat4 model = glm::mat4(1.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
-	quadMesh->Draw();
-
-	guitar->Draw();
+	//quadMesh->Draw();
 
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(0.0f, -1.5f, 1.5f));
 	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
 	quadMesh->Draw();
-	//glBindVertexArray(VAO);
-	//glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	//ImGui draw stuff
+	glUseProgram(m_TextureShaderId);
+	Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
 
+	Renderer::SetShaderUniformMat4(m_TextureShaderId, "view", view);
+	model = glm::mat4(1.0f);
+	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
+	guitar->Draw();
+
+
+
+	glDisable(GL_DEPTH_TEST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	ui->sceneTexture = renderedTexture;
 	ui->Run(deltaTime);
@@ -366,8 +378,6 @@ void Renderer::SetShaderUniformMat4(const char* name, glm::mat4 matrix)
 
 void Renderer::RecreateFramebuffer()
 {
-
-
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
 	glBindTexture(GL_TEXTURE_2D, renderedTexture);
@@ -375,6 +385,10 @@ void Renderer::RecreateFramebuffer()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_WindowSize.x, m_WindowSize.y);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::FRAMEBUFFER:: Incomplete framebuffer!" << std::endl;

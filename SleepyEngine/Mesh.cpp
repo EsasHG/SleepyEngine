@@ -1,13 +1,13 @@
 #include "Mesh.h"
 #include <glad/glad.h>
-
-Mesh::Mesh(std::vector<Vertex> vertices) : m_vertices(vertices)
+#include "Renderer.h"
+Mesh::Mesh(unsigned int shaderID, std::vector<Vertex> vertices) : m_vertices(vertices)
 {
 	bIndiced = false;
 	SetupMesh();
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) : m_vertices(vertices), m_indices(indices)
+Mesh::Mesh(unsigned int shaderID, std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Tex> textures) : m_vertices(vertices), m_indices(indices), m_textures(textures)
 {
 	bIndiced = true;
 	SetupMesh();
@@ -38,8 +38,27 @@ void Mesh::SetupMesh()
 	glBindVertexArray(0);
 }
 
+//TODO: should the renderer be responsible for this?
 void Mesh::Draw()
 {
+	if (!m_textures.empty())
+	{
+		unsigned int diffuseNr = 1;
+		unsigned int specularNr = 1;
+		for (unsigned int i = 0; i < m_textures.size(); i++)
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			std::string number;
+			std::string type = m_textures[i].type;
+			if (type == "diffuse")
+				number = std::to_string(diffuseNr++);
+			else if (type == "specular")
+				number = std::to_string(specularNr++);
+			Renderer::SetShaderUniformInt(m_ShaderID, (type + number).c_str(), i);
+			glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
+		}
+	}
+
 	glBindVertexArray(m_VAO);
 
 	if (bIndiced)
@@ -48,5 +67,8 @@ void Mesh::Draw()
 		glDrawArrays(GL_TRIANGLES, 0, m_vertices.size());
 
 	glBindVertexArray(0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 
 }

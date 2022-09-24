@@ -58,7 +58,7 @@ int Application::Run()
 
 		InputManager::GetInstance().RunEvents();
 		camera.Run(deltaTime);
-		renderer->Draw(deltaTime);
+		renderer->Draw(deltaTime, view);
 
 		EndFrame();
 	}
