@@ -138,5 +138,7 @@
     </None>
     <None Include="Shaders\SingleColor.frag" />
     <None Include="Shaders\QuadShader.frag" />
+    <None Include="Shaders\textureShader.frag" />
+    <None Include="Shaders\textureShader.vert" />
   </ItemGroup>
 </Project>

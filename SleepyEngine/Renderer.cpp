@@ -12,6 +12,8 @@
 #include "InputManager.h"
 #include "UiLayer.h"
 #include "Model.h"
+//should this be here? 
+#include "Camera.h"
 
 
 Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
@@ -40,8 +42,10 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	vertices.push_back(Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
 
 	quadMesh = new Mesh(m_ShaderId, vertices);
-	guitar = new Model("Assets/backpack/backpack.obj", m_ShaderId);
-
+	guitar = new Model("Assets/backpack/backpack.obj", m_TextureShaderId);
+	planet = new Model("Assets/planet/planet.obj", m_TextureShaderId);
+	rock = new Model("Assets/rock/rock.obj", m_TextureShaderId);
+	boat = new Model("Assets/boat.fbx", m_ShaderId);
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -83,39 +87,74 @@ void Renderer::BeginFrame()
 
 	glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+}
+void Renderer::SetCamera(class Camera* camera) 
+{ 
+	m_camera = camera;
 }
 
-
-void Renderer::Draw(double deltaTime, glm::mat4 view)
+void Renderer::Draw(double deltaTime)
 {
 	//game window draw stuff
 	glDisable(GL_CULL_FACE);
 
+
+
 	glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 100.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
+	glm::mat4 view = m_camera->GetViewMatrix();
 	Renderer::SetShaderUniformMat4(m_ShaderId, "view", view);
+
 	Renderer::SetShaderUniformVec3(m_ShaderId, "color", ui->quadColor);
 
 	glm::mat4 model = glm::mat4(1.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
-	//quadMesh->Draw();
 
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -1.5f, 1.5f));
+	model = glm::translate(model, ui->pointLightPos);
 	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::scale(model,glm::vec3(0.3f, 0.3f, 0.3f));
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
 	quadMesh->Draw();
 
-	glUseProgram(m_TextureShaderId);
-	Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
+	//model = glm::mat4(1.0f);
+	//model = glm::translate(model, glm::vec3(-3.0f, 0.0f, -2.0f));
+	//Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
+	//boat->Draw();
 
+	glUseProgram(m_TextureShaderId);
+	//lighting
+
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.direction", glm::vec3(-0.6f, -1.0f, -0.3f));
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.position", ui->pointLightPos);
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.ambient", glm::vec3(0.01f, 0.01f, 0.01f));
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.constant", 1.0f);
+	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.linear", 0.09f);
+	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.quadratic", 0.032f);
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "viewPos", m_camera->GetPosition());
+
+	Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "view", view);
+
 	model = glm::mat4(1.0f);
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
 	guitar->Draw();
 
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(10.0f, 0.0f, 0.0f));
+	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
+	planet->Draw();
 
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(-5.0f, 0.0f, 2.0f));
+	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
+	rock->Draw();
 
 	glDisable(GL_DEPTH_TEST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

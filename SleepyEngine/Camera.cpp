@@ -8,6 +8,8 @@ Camera::Camera()
 	m_Input->AddKeyBinding(GLFW_KEY_S, SLE_HELD, std::bind(&Camera::MoveBackward, this));
 	m_Input->AddKeyBinding(GLFW_KEY_A, SLE_HELD, std::bind(&Camera::MoveLeft, this));
 	m_Input->AddKeyBinding(GLFW_KEY_D, SLE_HELD, std::bind(&Camera::MoveRight, this));
+	m_Input->AddKeyBinding(GLFW_KEY_Q, SLE_HELD, std::bind(&Camera::MoveDown, this));
+	m_Input->AddKeyBinding(GLFW_KEY_E, SLE_HELD, std::bind(&Camera::MoveUp, this));
 	m_Input->AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_PRESSED, std::bind(&Camera::MouseButtonPressed, this));
 	m_Input->AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_RELEASED, std::bind(&Camera::MouseButtonReleased, this));
 	m_Input->AddMousePosBinding(std::bind(&Camera::CursorMoveCallback, this, std::placeholders::_1, std::placeholders::_2));
@@ -23,6 +25,11 @@ Camera::~Camera()
 glm::mat4 Camera::GetViewMatrix()
 {
 	return glm::lookAt(position, position + front, up);
+}
+
+const glm::vec3 Camera::GetPosition() 
+{
+	return position; 
 }
 
 void Camera::Run(double deltaTime)
@@ -84,6 +91,18 @@ void Camera::MoveLeft()
 void Camera::MoveRight()
 {
 	position += right * frameCameraSpeed;
+}
+
+void Camera::MoveDown()
+{
+	position -= up * frameCameraSpeed;
+
+}
+
+void Camera::MoveUp()
+{
+	position += up * frameCameraSpeed;
+
 }
 
 void Camera::MouseButtonPressed()

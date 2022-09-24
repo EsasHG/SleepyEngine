@@ -9,6 +9,7 @@ public:
 	Camera();
 	~Camera();
 	glm::mat4 GetViewMatrix();
+	const glm::vec3 GetPosition();
 	void Run(double deltaTime);
 private:
 	void CursorMoveCallback(double xPos, double yPos);
@@ -16,6 +17,9 @@ private:
 	void MoveBackward();
 	void MoveLeft();
 	void MoveRight();
+	void MoveDown();
+	void MoveUp();
+
 	void MouseButtonPressed();
 	void MouseButtonReleased();
 

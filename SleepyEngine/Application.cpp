@@ -46,19 +46,19 @@ int Application::Run()
 	renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
 	window->EnableImGui();
 	
-	Camera camera;
+	Camera* camera = new Camera();
+	renderer->SetCamera(camera);
+
 
 	while (!window->ShouldClose())
 	{
 		double deltaTime = BeginFrame();
 		
-		glm::mat4 view = camera.GetViewMatrix();
-		renderer->SetShaderUniformMat4("view", view);
 		glfwPollEvents();
 
 		InputManager::GetInstance().RunEvents();
-		camera.Run(deltaTime);
-		renderer->Draw(deltaTime, view);
+		camera->Run(deltaTime);
+		renderer->Draw(deltaTime);
 
 		EndFrame();
 	}

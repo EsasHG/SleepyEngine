@@ -7,7 +7,7 @@ public:
 	Renderer(glm::vec2 windowSize);
 	~Renderer();
 	void BeginFrame();
-	void Draw(double deltaTime, glm::mat4 view);
+	void Draw(double deltaTime);
 	void EndFrame();
 	static unsigned int CreateShader(const char* vertShaderPath, const char* fragShaderPath);
 	static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);
@@ -24,6 +24,9 @@ public:
 	static void SetShaderUniformVec3(unsigned int m_ShaderId, const char* name, glm::vec3 vector);
 
 	static void SetShaderUniformVec2(unsigned int m_ShaderId, const char* name, glm::vec2 vector);
+
+	//TODO: Should not be here
+	void SetCamera(class Camera* camera);
 private:
 	void FramebufferResizeCallback(int x, int y);
 
@@ -33,6 +36,9 @@ private:
 
 	class Mesh* quadMesh;
 	class Model* guitar;
+	class Model* planet;
+	class Model* rock;
+	class Model* boat;
 
 	unsigned int m_ShaderId;
 	unsigned int m_QuadShaderId;
@@ -43,5 +49,7 @@ private:
 
 	unsigned int renderedTexture;
 
+	//TODO: Should not be here
+	class Camera* m_camera;
 };
 

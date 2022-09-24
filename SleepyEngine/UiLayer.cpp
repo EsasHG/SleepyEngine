@@ -102,6 +102,7 @@ void UiLayer::Run(double deltaTime)
 		ImGui::Text("Testing a window");
 		ImGui::ColorEdit3("Clear Color", (float*)&clearColor);
 		ImGui::ColorEdit3("Quad Color", (float*)&quadColor);
+		ImGui::SliderFloat3("Point Light Pos", (float*)&pointLightPos,-100.0f, 100.0f);
 		//ImGui::InputText("Test field")
 		ImGui::Checkbox("Show Window 2", &showTestWindow2);
 		ImGui::End();
