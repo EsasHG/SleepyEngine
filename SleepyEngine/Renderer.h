@@ -32,6 +32,7 @@ private:
 	glm::vec2 m_WindowSize;
 
 	class Mesh* quadMesh;
+	class Model* guitar;
 
 	unsigned int m_ShaderId;
 	unsigned int m_QuadShaderId;

@@ -10,6 +10,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdio.h>
+#include <assimp/Importer.hpp>
 
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
@@ -20,7 +21,7 @@
 #include "Camera.h"
 #include "Window.h"
 #include "UiLayer.h"
-
+#include "Model.h"
 //TEMP
 
 Application::~Application()
@@ -39,13 +40,14 @@ double Application::BeginFrame()
 	return deltaTime;
 }
 
-int Application::Run()
+int Application::Run() 
 {
 	window = new Window(800, 600, "Sleepy Engine");
 	renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
 	window->EnableImGui();
 	
 	Camera camera;
+
 	while (!window->ShouldClose())
 	{
 		double deltaTime = BeginFrame();

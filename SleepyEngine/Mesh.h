@@ -14,12 +14,16 @@ class Mesh
 {
 public:
 	Mesh(std::vector<Vertex> vertices);
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 	void Draw();
 private:
 
 	void SetupMesh();
 	std::vector<Vertex> m_vertices;
+	std::vector<unsigned int> m_indices;
 	unsigned int m_VAO;
 	unsigned int m_VBO;
+	unsigned int m_EBO;
+	bool bIndiced;
 };
 

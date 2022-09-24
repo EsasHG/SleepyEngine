@@ -11,7 +11,7 @@
 
 #include "InputManager.h"
 #include "UiLayer.h"
-#include "Mesh.h"
+#include "Model.h"
 
 
 Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
@@ -38,7 +38,8 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	vertices.push_back(Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
 
 	quadMesh = new Mesh(vertices);
-	
+	guitar = new Model("Assets/backpack/backpack.obj");
+
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -93,12 +94,13 @@ void Renderer::Draw(double deltaTime)
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
 	quadMesh->Draw();
 
+	guitar->Draw();
+
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(0.0f, -1.5f, 1.5f));
 	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
 	quadMesh->Draw();
-
 	//glBindVertexArray(VAO);
 	//glDrawArrays(GL_TRIANGLES, 0, 6);
 
