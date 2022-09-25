@@ -42,7 +42,7 @@ double Application::BeginFrame()
 
 int Application::Run() 
 {
-	window = new Window(800, 600, "Sleepy Engine");
+	window = new Window(1920, 1080, "Sleepy Engine");
 	renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
 	window->EnableImGui();
 	
