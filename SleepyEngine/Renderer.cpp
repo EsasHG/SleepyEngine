@@ -125,14 +125,14 @@ void Renderer::Draw(double deltaTime)
 	glUseProgram(m_TextureShaderId);
 	//lighting
 
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.direction", glm::vec3(-0.6f, -1.0f, -0.3f));
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.direction", ui->dirLightDir);
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.diffuse", ui->dirLightDiffuse);
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.position", ui->pointLightPos);
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.ambient", glm::vec3(0.01f, 0.01f, 0.01f));
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.diffuse", ui->pointLightDiffuse);
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.constant", 1.0f);
 	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.linear", 0.09f);

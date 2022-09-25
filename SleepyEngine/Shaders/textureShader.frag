@@ -48,7 +48,7 @@ vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
     vec3 halfwayDir = normalize(lightDir + viewDir);
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0),32);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0),2);
 
     vec3 ambient = light.ambient * vec3(texture(diffuse1,fs_in.TexCoords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(diffuse1, fs_in.TexCoords));
@@ -88,7 +88,7 @@ void main()
     vec3 result = vec3(0.0,0.0,0.0);
     result += CalculateDirLight(dirLight, norm, viewDir);
     result += CalculatePointLight(pointLight, norm, fs_in.FragPos, viewDir);
-	//FragColor = texture(diffuse1, fs_in.TexCoords);
 	FragColor = vec4(result, 1.0);
+	//FragColor = texture(diffuse1, fs_in.TexCoords);
 
 }

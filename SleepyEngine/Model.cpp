@@ -61,8 +61,8 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			norm = glm::vec3(
 				mesh->mNormals[i].x,
-				mesh->mNormals[i].x,
-				mesh->mNormals[i].y);
+				mesh->mNormals[i].y,
+				mesh->mNormals[i].z);
 		}
 		else
 		{
