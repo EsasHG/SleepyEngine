@@ -26,6 +26,8 @@ private:
 	bool showTestWindow2 = true;
 	bool showRenderWindow = true;
 	bool showTestWindow3 = true;
+	bool pointLightSelected = false;
+	bool dirLightSelected = false;
 
 
 };

@@ -45,8 +45,6 @@ void UiLayer::Run(double deltaTime)
 
 	if (showRenderWindow)
 	{
-		
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Game Window", &showRenderWindow, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);// | ImGuiWindowFlags_MenuBar);
 		//if (ImGui::BeginMainMenuBar())
@@ -103,12 +101,16 @@ void UiLayer::Run(double deltaTime)
 
 		ImGui::ColorEdit3("Clear Color", (float*)&clearColor);
 		ImGui::ColorEdit3("Quad Color", (float*)&quadColor);
-
-		ImGui::SliderFloat3("Point Light Position", (float*)&pointLightPos, -10.0f, 10.0f);
-		ImGui::ColorEdit3("Point Light Diffuse", (float*)&pointLightDiffuse);
-
-		ImGui::InputFloat3("Dir Light Direction", (float*)&dirLightDir);// -10.0f, 10.0f);
-		ImGui::ColorEdit3("Dir Light Diffuse", (float*)&dirLightDiffuse);
+		if (pointLightSelected)
+		{
+			ImGui::SliderFloat3("Point Light Position", (float*)&pointLightPos, -10.0f, 10.0f);
+			ImGui::ColorEdit3("Point Light Diffuse", (float*)&pointLightDiffuse);
+		}
+		if (dirLightSelected)
+		{
+			ImGui::InputFloat3("Dir Light Direction", (float*)&dirLightDir);// -10.0f, 10.0f);
+			ImGui::ColorEdit3("Dir Light Diffuse", (float*)&dirLightDiffuse);
+		}
 		//ImGui::InputText("Test field")
 		ImGui::Checkbox("Show Window 2", &showTestWindow2);
 		ImGui::End();
@@ -116,11 +118,90 @@ void UiLayer::Run(double deltaTime)
 
 	if (showTestWindow2)
 	{
-		ImGui::Begin("ImGui Window 2 !", &showTestWindow2);
-		ImGui::Text("Testing a window 2 ");
-		//ImGui::ColorEdit3("Clear Color", (float*)&clearColor);
-		//ImGui::ColorEdit3("Quad Color", (float*)&quadColor);
-		ImGui::InputText("Test field", inputText, IM_ARRAYSIZE(inputText));
+		ImGui::Begin("Object tree!", &showTestWindow2);
+		ImGui::BeginTable("Table test", 2);
+		ImGui::PushID(1);
+		ImGui::TableNextColumn();
+		ImGui::TableSetColumnIndex(0);
+		bool bOpen = ImGui::TreeNode("Object");
+		static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+		static int selection_mask = (1 << 2);
+		int node_clicked = -1;
+
+		
+		for (int i = 0; i < 2; i++)
+		{
+			ImGuiTreeNodeFlags node_flags = base_flags;
+			const bool is_selected = (selection_mask & (1 << i)) != 0;
+			if (is_selected)
+			{
+				node_flags |= ImGuiTreeNodeFlags_Selected;
+				if (i == 0)
+					pointLightSelected = true;
+				else if (i == 1)
+					dirLightSelected = true;
+
+			}
+			else
+			{
+				if (i == 0)
+					pointLightSelected = false;
+				else if (i == 1)
+					dirLightSelected = false;
+			}
+			bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Selectable Node %d", i);
+			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+			{
+				node_clicked = i;
+				pointLightSelected;
+			}
+			if (node_open)
+			{
+				ImGui::BulletText("Open");
+				ImGui::TreePop();
+			}
+		}
+		if (node_clicked != -1)
+		{
+			// Update selection state
+			// (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
+			if (ImGui::GetIO().KeyCtrl)
+				selection_mask ^= (1 << node_clicked);          // CTRL+click to toggle
+			else //if (!(selection_mask & (1 << node_clicked))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
+				selection_mask = (1 << node_clicked);           // Click to single-select
+		}
+		
+
+
+		//bool node_open = ImGui::TreeNodeEx("Directional Light", base_flags);
+		//if (ImGui::IsItemClicked())
+		//{
+		//	node_clicked = 0;
+		//	dirLightSelected;
+		//}
+
+
+		//bool node_open = ImGui::TreeNodeEx("Directional Light", base_flags);
+
+		//ImGui::Selectable("Point Light", &pointLightSelected);
+		//ImGui::Selectable("Directional Light", &dirLightSelected);
+		//ImGui::TableSetColumnIndex(1);
+		//if (bOpen)
+		//{
+		//	ImGui::TableNextRow();
+		//	ImGui::TableSetColumnIndex(0); 
+		//	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet;
+		//	//ImGui::TreeNodeEx("Field", flags);
+
+		//	ImGui::TreePop();
+
+		//}
+		if(bOpen)
+			ImGui::TreePop();
+
+		ImGui::PopID();
+
+		ImGui::EndTable();
 
 		ImGui::End();
 	}

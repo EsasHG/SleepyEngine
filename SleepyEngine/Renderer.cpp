@@ -98,8 +98,6 @@ void Renderer::Draw(double deltaTime)
 	//game window draw stuff
 	glDisable(GL_CULL_FACE);
 
-
-
 	glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 100.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
 	glm::mat4 view = m_camera->GetViewMatrix();
