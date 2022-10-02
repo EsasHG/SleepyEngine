@@ -7,7 +7,6 @@ static InputManager* s_InputManager;
 
 class InputManager
 {
-
 public:
 	static InputManager& GetInstance() {
 		if(!s_InputManager)
