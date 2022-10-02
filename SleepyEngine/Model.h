@@ -12,8 +12,8 @@ class Model
 {
 public:
 	//TODO remove shaderID from constructors
-	Model(std::string path, unsigned int shaderID);
-	void Draw();
+	Model(std::string path);
+	void Draw(unsigned int shaderID);
 private:
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
@@ -24,7 +24,6 @@ private:
 	std::vector<Mesh> m_meshes;
 	std::vector<Tex> m_loadedTextures;
 
-	unsigned int m_ShaderID;
 	
 
 };

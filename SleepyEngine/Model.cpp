@@ -7,7 +7,7 @@
 #include <iostream>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-Model::Model(std::string path, unsigned int shaderID) : m_ShaderID(shaderID)
+Model::Model(std::string path)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -22,11 +22,11 @@ Model::Model(std::string path, unsigned int shaderID) : m_ShaderID(shaderID)
 	ProcessNode(scene->mRootNode, scene);
 }
 
-void Model::Draw()
+void Model::Draw(unsigned int shaderID)
 {
 	for (Mesh m : m_meshes)
 	{
-		m.Draw();
+		m.Draw(shaderID);
 	}
 }
 
@@ -100,7 +100,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 	
-	return Mesh(m_ShaderID, vertices, indices, textures);
+	return Mesh(vertices, indices, textures);
 }
 
 std::vector<Tex> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

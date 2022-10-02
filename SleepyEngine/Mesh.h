@@ -24,9 +24,9 @@ class Mesh
 {
 public:
 	//TODO remove shaderID from constructors
-	Mesh(unsigned int shaderID, std::vector<Vertex> vertices);
-	Mesh(unsigned int shaderID, std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Tex> textures);
-	void Draw();
+	Mesh(std::vector<Vertex> vertices);
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Tex> textures);
+	void Draw(unsigned int shaderID);
 private:
 
 	void SetupMesh();
@@ -36,7 +36,6 @@ private:
 	unsigned int m_VAO;
 	unsigned int m_VBO;
 	unsigned int m_EBO;
-	unsigned int m_ShaderID;
 	bool bIndiced;
 };
 

@@ -1,6 +1,11 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <entt/entt.hpp>
+#include <map>
+
+class MeshComponent;
+class TransformComponent;
 class Renderer
 {
 public:
@@ -8,7 +13,9 @@ public:
 	~Renderer();
 	void BeginFrame();
 	void Draw(double deltaTime);
+	static void DrawMesh(MeshComponent mesh, TransformComponent transform);
 	void EndFrame();
+	static void CheckGLError(std::string placeMessage);
 	static unsigned int CreateShader(const char* vertShaderPath, const char* fragShaderPath);
 	static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);
 
@@ -34,7 +41,7 @@ private:
 
 	glm::vec2 m_WindowSize;
 
-	class Mesh* quadMesh;
+
 	class Model* guitar;
 	class Model* planet;
 	class Model* rock;
@@ -51,5 +58,8 @@ private:
 
 	//TODO: Should not be here
 	class Camera* m_camera;
+
+	entt::registry registry;
+
 };
 

@@ -8,10 +8,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <functional>
-
 #include "InputManager.h"
 #include "UiLayer.h"
 #include "Model.h"
+#include "ModelLibrary.h"
+#include "Components/TransformComponent.h"
+#include "Components/MeshComponent.h"
 //should this be here? 
 #include "Camera.h"
 
@@ -26,9 +28,14 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Renderer::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
 	ui = new UiLayer();
 
+
+
 	m_ShaderId = Renderer::CreateShader("Shaders/SingleColor.vert", "Shaders/SingleColor.frag");
+	ModelLibrary::GetInstance().AddShader("color", m_ShaderId);
 	m_QuadShaderId = Renderer::CreateShader("Shaders/QuadShader.vert", "Shaders/QuadShader.frag");
 	m_TextureShaderId = Renderer::CreateShader("Shaders/TextureShader.vert", "Shaders/TextureShader.frag");
+	ModelLibrary::GetInstance().AddShader("default", m_TextureShaderId);
+
 
 	glUseProgram(m_QuadShaderId);
 	Renderer::SetShaderUniformInt(m_QuadShaderId, "sceneTexture", 0);
@@ -41,11 +48,15 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	vertices.push_back(Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
 	vertices.push_back(Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
 
-	quadMesh = new Mesh(m_ShaderId, vertices);
-	guitar = new Model("Assets/backpack/backpack.obj", m_TextureShaderId);
-	planet = new Model("Assets/planet/planet.obj", m_TextureShaderId);
-	rock = new Model("Assets/rock/rock.obj", m_TextureShaderId);
-	boat = new Model("Assets/boat.fbx", m_ShaderId);
+	 
+	//auto quadEntity = registry.create();
+	//registry.emplace<TransformComponent>(quadEntity);
+	//registry.emplace<Mesh>(quadEntity, vertices);
+	//quadMesh = new Mesh(m_ShaderId, vertices);
+	guitar = new Model("Assets/backpack/backpack.obj");
+	planet = new Model("Assets/planet/planet.obj");
+	rock = new Model("Assets/rock/rock.obj");
+	boat = new Model("Assets/boat.fbx");
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -72,11 +83,12 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 Renderer::~Renderer()
 {
 	delete ui;
-	delete quadMesh;
 }
 
 void Renderer::BeginFrame()
 {
+	CheckGLError("Start of BeginFrame");
+
 	glUseProgram(m_ShaderId);
 	ui->BeginFrame();
 	m_WindowSize = ui->contentRegionSize;
@@ -87,6 +99,17 @@ void Renderer::BeginFrame()
 
 	glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(m_ShaderId);
+
+	glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 100.0f);
+	Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
+	glm::mat4 view = m_camera->GetViewMatrix();
+	Renderer::SetShaderUniformMat4(m_ShaderId, "view", view);
+
+	Renderer::SetShaderUniformVec3(m_ShaderId, "color", ui->quadColor);
+	CheckGLError("End of BeginFrame");
+
 }
 void Renderer::SetCamera(class Camera* camera) 
 { 
@@ -95,6 +118,7 @@ void Renderer::SetCamera(class Camera* camera)
 
 void Renderer::Draw(double deltaTime)
 {
+	glUseProgram(m_ShaderId);
 	//game window draw stuff
 	glDisable(GL_CULL_FACE);
 
@@ -108,12 +132,25 @@ void Renderer::Draw(double deltaTime)
 	glm::mat4 model = glm::mat4(1.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
 
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, ui->pointLightPos);
-	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	model = glm::scale(model,glm::vec3(0.3f, 0.3f, 0.3f));
-	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
-	quadMesh->Draw();
+	//model = glm::mat4(1.0f);
+	//model = glm::translate(model, ui->pointLightPos);
+	//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//model = glm::scale(model,glm::vec3(0.3f, 0.3f, 0.3f));
+	//Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
+	
+	//auto regView = registry.view<TransformComponent, Mesh>();
+	//for (auto [entity, transform, mesh] : regView.each())
+	//{
+	//	transform.position = ui->pointLightPos;
+	//	model = glm::mat4(1.0f);
+	//	model = glm::translate(model, transform.position);
+	//	//model = glm::rotate(model, glm::radians(90.0f), transform.rotation);
+	//	model = glm::scale(model, transform.scale);
+	//	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
+	//
+	//	mesh.Draw(m_ShaderId);
+	//}
+	//quadMesh->Draw();
 
 	//model = glm::mat4(1.0f);
 	//model = glm::translate(model, glm::vec3(-3.0f, 0.0f, -2.0f));
@@ -142,23 +179,47 @@ void Renderer::Draw(double deltaTime)
 
 	model = glm::mat4(1.0f);
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	guitar->Draw();
+	guitar->Draw(m_TextureShaderId);
 
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(10.0f, 0.0f, 0.0f));
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	planet->Draw();
+	planet->Draw(m_TextureShaderId);
 
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(-5.0f, 0.0f, 2.0f));
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	rock->Draw();
+	rock->Draw(m_TextureShaderId);
 
 	glDisable(GL_DEPTH_TEST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	ui->sceneTexture = renderedTexture;
 	ui->Run(deltaTime);
+	CheckGLError("End of Draw");
 }
+
+void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
+{
+	CheckGLError("Start of DrawMesh");
+
+	unsigned int shaderID = ModelLibrary::GetInstance().GetShader(mesh.m_shaderID);
+	glUseProgram(shaderID);
+
+	transform.position = glm::vec3(1.0f, 1.0f, 1.0f);
+	transform.scale = glm::vec3(0.2f, 0.2f, 0.2f);
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, transform.position);
+	//model = glm::rotate(model, glm::radians(90.0f), transform.rotation);
+	model = glm::scale(model, transform.scale);
+
+	Renderer::SetShaderUniformMat4(shaderID, "model", model);
+
+	Mesh* m = ModelLibrary::GetInstance().GetMesh(mesh.m_meshID);
+	m->Draw(shaderID);
+	CheckGLError("End of DrawMesh");
+
+}
+
 
 
 void Renderer::EndFrame()
@@ -172,6 +233,49 @@ void Renderer::FramebufferResizeCallback(int x, int y)
 	glViewport(0, 0, ui->contentRegionSize.x, ui->contentRegionSize.y);
 	RecreateFramebuffer();
 }
+
+
+void Renderer::CheckGLError(std::string placeMessage)
+
+{
+	while (true)
+	{
+		const GLenum err = glGetError();
+		if (GL_NO_ERROR == err)
+			break;
+		std::string errorstring;
+		switch (err)
+		{
+		case GL_NO_ERROR:
+			errorstring = "No error";
+			break;
+		case GL_INVALID_ENUM:
+			errorstring = "Invalid enum";
+			break;
+		case GL_INVALID_VALUE:
+			errorstring = "Invalid value";
+			break;
+		case GL_INVALID_OPERATION:
+			errorstring = "Invalid operation";
+			break;
+		case GL_STACK_OVERFLOW:
+			errorstring = "Stack overflow";
+			break;
+		case GL_STACK_UNDERFLOW:
+			errorstring = "Stack underflow";
+			break;
+		case GL_OUT_OF_MEMORY:
+			errorstring = "Out of memory";
+			break;
+		default:
+			errorstring = "Unknown error";
+			break;
+		}
+
+		std::cout << "GL Error: " << errorstring << " Placement: " << placeMessage << std::endl;
+	}
+}
+
 
 unsigned int Renderer::CreateShader(const char* vertShaderPath, const char* fragShaderPath)
 {
@@ -257,6 +361,8 @@ unsigned int Renderer::CreateShader(const char* vertShaderPath, const char* frag
 
     return Id;
 }
+
+
 
 /// <summary>
 /// Untested

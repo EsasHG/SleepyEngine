@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <assimp/Importer.hpp>
+#include <entt/entt.hpp>
 
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
@@ -22,6 +23,7 @@
 #include "Window.h"
 #include "UiLayer.h"
 #include "Model.h"
+#include "Scene.h"
 //TEMP
 
 Application::~Application()
@@ -48,8 +50,7 @@ int Application::Run()
 	
 	Camera* camera = new Camera();
 	renderer->SetCamera(camera);
-
-
+	Scene scene;
 	while (!window->ShouldClose())
 	{
 		double deltaTime = BeginFrame();
@@ -58,6 +59,7 @@ int Application::Run()
 
 		InputManager::GetInstance().RunEvents();
 		camera->Run(deltaTime);
+		scene.Update();
 		renderer->Draw(deltaTime);
 
 		EndFrame();
