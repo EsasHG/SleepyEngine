@@ -75,6 +75,7 @@ StyleCopReport.xml
 *.ilk
 *.meta
 *.obj
+!Assets/**/*.obj
 *.iobj
 *.pch
 *.pdb
@@ -396,3 +397,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+SleepyEngine/imgui.ini
+SleepyEngine/imgui.ini
