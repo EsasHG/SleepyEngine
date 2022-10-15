@@ -41,12 +41,6 @@ private:
 
 	glm::vec2 m_WindowSize;
 
-
-	class Model* guitar;
-	class Model* planet;
-	class Model* rock;
-	class Model* boat;
-
 	unsigned int m_ShaderId;
 	unsigned int m_QuadShaderId;
 	unsigned int m_TextureShaderId;

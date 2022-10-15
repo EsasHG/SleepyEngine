@@ -99,7 +99,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		std::vector<Tex> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
-	
+	//CreateEntity, addmeshcomponent, add transform, set parent
 	return Mesh(vertices, indices, textures);
 }
 

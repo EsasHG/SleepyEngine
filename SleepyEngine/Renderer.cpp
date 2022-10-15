@@ -53,10 +53,7 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	//registry.emplace<TransformComponent>(quadEntity);
 	//registry.emplace<Mesh>(quadEntity, vertices);
 	//quadMesh = new Mesh(m_ShaderId, vertices);
-	guitar = new Model("Assets/backpack/backpack.obj");
-	planet = new Model("Assets/planet/planet.obj");
-	rock = new Model("Assets/rock/rock.obj");
-	boat = new Model("Assets/boat.fbx");
+	
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -177,19 +174,7 @@ void Renderer::Draw(double deltaTime)
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "view", view);
 
-	model = glm::mat4(1.0f);
-	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	guitar->Draw(m_TextureShaderId);
 
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(10.0f, 0.0f, 0.0f));
-	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	planet->Draw(m_TextureShaderId);
-
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(-5.0f, 0.0f, 2.0f));
-	Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	rock->Draw(m_TextureShaderId);
 
 	glDisable(GL_DEPTH_TEST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -205,8 +190,6 @@ void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 	unsigned int shaderID = ModelLibrary::GetInstance().GetShader(mesh.m_shaderID);
 	glUseProgram(shaderID);
 
-	transform.position = glm::vec3(1.0f, 1.0f, 1.0f);
-	transform.scale = glm::vec3(0.2f, 0.2f, 0.2f);
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
 	//model = glm::rotate(model, glm::radians(90.0f), transform.rotation);
