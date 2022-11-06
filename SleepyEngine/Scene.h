@@ -15,7 +15,7 @@ public:
 	void Update();
 
 private:
-	Entity* CreateEntity();
+	Entity* CreateEntity(std::string entityName);
 
 
 	entt::registry m_registry;

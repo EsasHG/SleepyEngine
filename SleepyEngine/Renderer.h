@@ -53,7 +53,5 @@ private:
 	//TODO: Should not be here
 	class Camera* m_camera;
 
-	entt::registry registry;
-
 };
 

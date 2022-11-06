@@ -6,7 +6,6 @@
 #include <sstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <functional>
 #include "InputManager.h"
 #include "UiLayer.h"
@@ -14,6 +13,7 @@
 #include "ModelLibrary.h"
 #include "Components/TransformComponent.h"
 #include "Components/MeshComponent.h"
+#include "TransformSystem.h"
 //should this be here? 
 #include "Camera.h"
 
@@ -112,7 +112,7 @@ void Renderer::SetCamera(class Camera* camera)
 { 
 	m_camera = camera;
 }
-
+//TODO: Remove? seems to not be needed if we call DrawMesh from Scene
 void Renderer::Draw(double deltaTime)
 {
 	glUseProgram(m_ShaderId);
@@ -190,10 +190,10 @@ void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 	unsigned int shaderID = ModelLibrary::GetInstance().GetShader(mesh.m_shaderID);
 	glUseProgram(shaderID);
 
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, transform.position);
-	//model = glm::rotate(model, glm::radians(90.0f), transform.rotation);
-	model = glm::scale(model, transform.scale);
+	glm::mat4 model = TransformSystem::GetModelMatrix(&transform);
+	//model = glm::translate(model, transform.position);
+	////model = glm::rotate(model, glm::radians(90.0f), transform.rotation);
+	//model = glm::scale(model, transform.scale);
 
 	Renderer::SetShaderUniformMat4(shaderID, "model", model);
 

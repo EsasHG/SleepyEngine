@@ -156,6 +156,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Components\TransformComponent.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="TransformSystem.cpp" />
     <ClCompile Include="UiLayer.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -184,6 +185,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Components\TransformComponent.h" />
+    <ClInclude Include="TransformSystem.h" />
     <ClInclude Include="UiLayer.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
