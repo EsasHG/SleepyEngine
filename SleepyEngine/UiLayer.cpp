@@ -95,11 +95,12 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		ImGui::End();
 	}
 
-
 	//object tree window
 	if (showObjectTreeWindow)
 	{
 		entityToSelect = nullptr;
+		reorderedEntity = nullptr;
+		transformAboveReorder = nullptr;
 
 		id = 0;
 
@@ -220,8 +221,6 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		ImGui::End();
 	}
 
-
-
 	//update selection for next frame
 	if (entityToSelect != nullptr)
 	{
@@ -236,13 +235,16 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		}
 	}
 
+	if (reorderedEntity && transformAboveReorder)
+	{
+		ReorderObjectTree(transformAboveReorder);
+
+	}
+
 }
 
 void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* entity)
 {
-
-	//ImGui::PushID(entity->m_Name.c_str());
-
 	ImGuiTreeNodeFlags node_flags = base_flags;
 
 	TransformComponent* transform = entity->GetComponent<TransformComponent>();
@@ -293,6 +295,41 @@ void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* enti
 		}
 		ImGui::TreePop();
 	}
+
+	ImGui::PushID(++id);
+	ImGui::InvisibleButton("test",ImVec2(ImGui::GetContentRegionAvail().x,2));
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
+		{
+			//Currently don't use the payload. Don't like that :(
+			if (draggedEntity)
+			{
+				reorderedEntity = draggedEntity;
+				transformAboveReorder = transform;
+			}
+				//TransformSystem::SetParent(entity, draggedEntity);
+		}
+		ImGui::EndDragDropTarget();
+	}
+	//ImGui::Spacing();
+	ImGui::PopID();
+}
+
+void UiLayer::ReorderObjectTree(TransformComponent*& transform)
+{
+
+	if (reorderedEntity == transform->m_Entity) { return; } //trying to drag right below itself
+	TransformSystem::SetParent(transform->parent->m_Entity, reorderedEntity);
+	int oldIndex = transform->parent->children.size() - 1;
+
+	auto it = std::find(transform->parent->children.begin(), transform->parent->children.end(), transform);
+	int newIndex = 0;
+	if (it != transform->parent->children.end())
+		newIndex = std::distance(transform->parent->children.begin(), it)+1;
+
+	if (oldIndex > newIndex)
+		std::rotate(transform->parent->children.rend() - oldIndex - 1, transform->parent->children.rend() - oldIndex, transform->parent->children.rend() - newIndex);
 }
 
 void UiLayer::EndFrame()
