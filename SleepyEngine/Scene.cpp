@@ -16,6 +16,7 @@
 #include "TransformSystem.h"
 Scene::Scene()
 {
+	
 	Entity* ent = CreateEntity("quad");
 
 	std::vector<Vertex> vertices;
@@ -35,7 +36,6 @@ Scene::Scene()
 	//Entity* guitarBackpack = CreateEntity();
 	//guitarBackpack->AddComponent<MeshComponent>("Assets/backpack/backpack.obj", "default", "texture");
 
-
 	//guitar = new Model("Assets/backpack/backpack.obj");
 	std::vector<std::string> planetMeshes = ModelLibrary::GetInstance().AddMesh("Assets/planet/planet.obj");
 	std::vector<Entity*> planetEntities;
@@ -53,8 +53,11 @@ Scene::Scene()
 	{
 		Entity* e = CreateEntity(mesh);
 		e->AddComponent<MeshComponent>(mesh);
+		if (guitarEntities.size()>0)
+		{
+			TransformSystem::SetParent(guitarEntities[0], e);
+		}
 		guitarEntities.push_back(e);
-		TransformSystem::SetParent(ent, e);
 
 //		TransformSystem::SetScale(e, glm::vec3(0.5f, 0.5f, 0.5f));
 //		TransformSystem::SetRotation(e, 90.0f, 0.0f, -45.0f);
@@ -73,8 +76,17 @@ Scene::Scene()
 
 Entity* Scene::CreateEntity(std::string entityName)
 {
+	if (!m_SceneEntity)
+	{
+		m_SceneEntity = new Entity("Scene", this);
+		m_SceneEntity->AddComponent<TransformComponent>();
+		m_SceneEntity->GetComponent<TransformComponent>()->m_Name = "Scene";
+	}
 	Entity* entity  = new Entity(entityName, this);
 	entity->AddComponent<TransformComponent>();
+	entity->GetComponent<TransformComponent>()->m_Name = entityName;
+	TransformSystem::SetParent(m_SceneEntity, entity);
+
 	return entity;
 }
 
@@ -86,20 +98,5 @@ void Scene::Update()
 	{
 		Renderer::DrawMesh(mesh, transform);
 	}
-
-
-	//model = glm::mat4(1.0f);
-	//Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	//guitar->Draw(m_TextureShaderId);
-
-	//model = glm::mat4(1.0f);
-	//model = glm::translate(model, glm::vec3(10.0f, 0.0f, 0.0f));
-	//Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	//planet->Draw(m_TextureShaderId);
-
-	//model = glm::mat4(1.0f);
-	//model = glm::translate(model, glm::vec3(-5.0f, 0.0f, 2.0f));
-	//Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	//rock->Draw(m_TextureShaderId);
 }
 

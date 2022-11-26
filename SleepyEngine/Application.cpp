@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <assimp/Importer.hpp>
 #include <entt/entt.hpp>
+#include <functional>
 
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
@@ -24,11 +25,15 @@
 #include "UiLayer.h"
 #include "Model.h"
 #include "Scene.h"
-//TEMP
+#include "UiLayer.h"
+
 
 Application::~Application()
 {
+
+
 	delete window;
+	delete ui;
 	delete renderer;
 }
 
@@ -37,7 +42,9 @@ double Application::BeginFrame()
 	double time = glfwGetTime();
 	double deltaTime = time - prevFrameTime;
 	prevFrameTime = time;
-	renderer->BeginFrame();
+	ui->BeginFrame();
+
+	renderer->BeginFrame(ui->contentRegionSize);
 
 	return deltaTime;
 }
@@ -45,6 +52,9 @@ double Application::BeginFrame()
 int Application::Run() 
 {
 	window = new Window(1920, 1080, "Sleepy Engine");
+	ui = new UiLayer();
+	InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Application::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
+
 	renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
 	window->EnableImGui();
 	
@@ -60,8 +70,10 @@ int Application::Run()
 		InputManager::GetInstance().RunEvents();
 		camera->Run(deltaTime);
 		scene.Update();
-		renderer->Draw(deltaTime);
+		ui->sceneTexture = renderer->Draw(deltaTime);
 
+		entt::basic_view<entt::entity, entt::get_t<TransformComponent>, entt::exclude_t<>, void> regView = scene.m_registry.view<TransformComponent>();
+		ui->Run(deltaTime, scene.m_SceneEntity);
 		EndFrame();
 	}
 	return 0;
@@ -69,6 +81,13 @@ int Application::Run()
 
 void Application::EndFrame()
 {
+	ui->EndFrame();
 	renderer->EndFrame();
 	window->SwapBuffers();
+}
+
+
+void Application::FramebufferResizeCallback(int x, int y)
+{
+	renderer->ResizeViewport(ui->contentRegionSize.x, ui->contentRegionSize.y);
 }

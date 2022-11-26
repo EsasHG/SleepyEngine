@@ -142,7 +142,23 @@ void TransformSystem::SetParent(Entity* parent, Entity* child)
 
 	if (tChild->parent)
 	{
-		Unparent(child);
+		//finds positions
+		glm::vec3 globalPos, globalRot, globalScale;
+		globalPos = GetGlobalPosition(tChild);
+		globalRot = GetGlobalRotation(tChild);
+		globalScale = GetGlobalScale(tChild);
+
+		//unparents
+		auto* parent = tChild->parent;
+		auto it = std::find(parent->children.begin(), parent->children.end(), tChild);
+		if (it != parent->children.end())
+			parent->children.erase(it);
+		tChild->parent = nullptr;
+
+		//Sets positions
+		SetPosition(child, globalPos);
+		SetRotation(child, globalRot);
+		SetScale(child, globalScale);
 	}
 	tParent->children.push_back(tChild);
 	tChild->parent = tParent;
@@ -153,18 +169,25 @@ void TransformSystem::Unparent(Entity* e)
 	auto* transform = e->GetComponent<TransformComponent>();
 	if (transform->parent)
 	{
+
+		//finds positions
 		glm::vec3 globalPos, globalRot, globalScale;
 		globalPos = GetGlobalPosition(transform);
 		globalRot = GetGlobalRotation(transform);
 		globalScale = GetGlobalScale(transform);
 
-
-		auto* parent = transform->parent;
+		//removes from children
+		auto* parent = transform->parent;                
 		auto it = std::find(parent->children.begin(), parent->children.end(), transform);
 		if (it != parent->children.end())
 			parent->children.erase(it);
-		transform->parent = nullptr;
 		
+		//Sets parent to scene
+		TransformComponent* sceneTransform = e->m_scene->m_SceneEntity->GetComponent<TransformComponent>();
+		sceneTransform->children.push_back(transform);
+		transform->parent = sceneTransform;
+		
+		//Sets positions
 		SetPosition(e, globalPos);
 		SetRotation(e, globalRot);
 		SetScale(e, globalScale);

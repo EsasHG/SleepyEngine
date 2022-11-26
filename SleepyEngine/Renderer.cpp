@@ -8,7 +8,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <functional>
 #include "InputManager.h"
-#include "UiLayer.h"
 #include "Model.h"
 #include "ModelLibrary.h"
 #include "Components/TransformComponent.h"
@@ -24,11 +23,6 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	{
 		std::cout << "Glad did not load successfully!" << std::endl;
 	}
-
-	InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Renderer::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
-	ui = new UiLayer();
-
-
 
 	m_ShaderId = Renderer::CreateShader("Shaders/SingleColor.vert", "Shaders/SingleColor.frag");
 	ModelLibrary::GetInstance().AddShader("color", m_ShaderId);
@@ -79,18 +73,25 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 
 Renderer::~Renderer()
 {
-	delete ui;
 }
 
-void Renderer::BeginFrame()
+void Renderer::BeginFrame(glm::vec2 windowSize)
 {
 	CheckGLError("Start of BeginFrame");
 
 	glUseProgram(m_ShaderId);
-	ui->BeginFrame();
-	m_WindowSize = ui->contentRegionSize;
+
+	//if 0 we might get a divide by 0 error below. This should really be handled some other way
+	//was not like this earlier. No idea why it started happening
+	if (windowSize.y != 0)
+		m_WindowSize = windowSize;
+	else
+		m_WindowSize = glm::vec2(windowSize.x, 1);
+	
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-	glClearColor(ui->clearColor.x, ui->clearColor.y, ui->clearColor.z, 1.0f);
+	glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
+	glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 	glEnable(GL_DEPTH_TEST);
 
@@ -104,7 +105,8 @@ void Renderer::BeginFrame()
 	glm::mat4 view = m_camera->GetViewMatrix();
 	Renderer::SetShaderUniformMat4(m_ShaderId, "view", view);
 
-	Renderer::SetShaderUniformVec3(m_ShaderId, "color", ui->quadColor);
+	glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
+	Renderer::SetShaderUniformVec3(m_ShaderId, "color", quadColor);
 	CheckGLError("End of BeginFrame");
 
 }
@@ -112,8 +114,9 @@ void Renderer::SetCamera(class Camera* camera)
 { 
 	m_camera = camera;
 }
-//TODO: Remove? seems to not be needed if we call DrawMesh from Scene
-void Renderer::Draw(double deltaTime)
+
+//TODO: Remove? seems to not be needed if we call DrawMesh from Scene. Need to make lights use ECS first
+unsigned int Renderer::Draw(double deltaTime)
 {
 	glUseProgram(m_ShaderId);
 	//game window draw stuff
@@ -124,47 +127,28 @@ void Renderer::Draw(double deltaTime)
 	glm::mat4 view = m_camera->GetViewMatrix();
 	Renderer::SetShaderUniformMat4(m_ShaderId, "view", view);
 
-	Renderer::SetShaderUniformVec3(m_ShaderId, "color", ui->quadColor);
+	glm::vec3 pointLightPos = glm::vec3(0.4f, 0.4f, 0.4f);
+	glm::vec3 pointLightDiffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+	glm::vec3 dirLightDir = glm::vec3(-0.2f, -0.6f, -0.3f);
+	glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
+	glm::vec3 dirLightDiffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+	Renderer::SetShaderUniformVec3(m_ShaderId, "color", quadColor);
 
 	glm::mat4 model = glm::mat4(1.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
 
-	//model = glm::mat4(1.0f);
-	//model = glm::translate(model, ui->pointLightPos);
-	//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	//model = glm::scale(model,glm::vec3(0.3f, 0.3f, 0.3f));
-	//Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
-	
-	//auto regView = registry.view<TransformComponent, Mesh>();
-	//for (auto [entity, transform, mesh] : regView.each())
-	//{
-	//	transform.position = ui->pointLightPos;
-	//	model = glm::mat4(1.0f);
-	//	model = glm::translate(model, transform.position);
-	//	//model = glm::rotate(model, glm::radians(90.0f), transform.rotation);
-	//	model = glm::scale(model, transform.scale);
-	//	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
-	//
-	//	mesh.Draw(m_ShaderId);
-	//}
-	//quadMesh->Draw();
-
-	//model = glm::mat4(1.0f);
-	//model = glm::translate(model, glm::vec3(-3.0f, 0.0f, -2.0f));
-	//Renderer::SetShaderUniformMat4(m_TextureShaderId, "model", model);
-	//boat->Draw();
 
 	glUseProgram(m_TextureShaderId);
 	//lighting
 
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.direction", ui->dirLightDir);
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.direction", dirLightDir);
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.diffuse", ui->dirLightDiffuse);
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.diffuse", dirLightDiffuse);
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.position", ui->pointLightPos);
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.position", pointLightPos);
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.ambient", glm::vec3(0.01f, 0.01f, 0.01f));
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.diffuse", ui->pointLightDiffuse);
+	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.diffuse", pointLightDiffuse);
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.constant", 1.0f);
 	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.linear", 0.09f);
@@ -178,9 +162,9 @@ void Renderer::Draw(double deltaTime)
 
 	glDisable(GL_DEPTH_TEST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	ui->sceneTexture = renderedTexture;
-	ui->Run(deltaTime);
-	CheckGLError("End of Draw");
+	return renderedTexture;
+
+	//CheckGLError("End of Draw");
 }
 
 void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
@@ -207,13 +191,12 @@ void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 
 void Renderer::EndFrame()
 {
-	ui->EndFrame();
 	RecreateFramebuffer();
 }
 
-void Renderer::FramebufferResizeCallback(int x, int y)
+void Renderer::ResizeViewport(int x, int y)
 {
-	glViewport(0, 0, ui->contentRegionSize.x, ui->contentRegionSize.y);
+	glViewport(0, 0, x, y);
 	RecreateFramebuffer();
 }
 

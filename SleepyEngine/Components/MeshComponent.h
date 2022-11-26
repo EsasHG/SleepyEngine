@@ -10,8 +10,9 @@
 class MeshComponent : Component
 {
 public:
-	MeshComponent(std::string mesh, std::string material = "default", std::string shader = "default")
+	MeshComponent(Entity* entity, std::string mesh, std::string material = "default", std::string shader = "default")
 	{
+		m_Entity = entity;
 		if(ModelLibrary::GetInstance().MeshExists(mesh))
 		{
 			m_meshID = mesh;

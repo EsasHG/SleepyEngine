@@ -12,7 +12,7 @@ public:
 	template<typename T, typename ... Args>
 	T& AddComponent(Args&&... args)
 	{
-		return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+		return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Entity*>(this),std::forward<Args>(args)...);
 	}
 
 	template<typename T>
@@ -30,5 +30,7 @@ public:
 private:
 	Scene* m_scene;
 	entt::entity m_entityHandle;
+
+	friend class TransformSystem; //so transformsystem can find m_scene and set that as parent when unparenting
 };
 

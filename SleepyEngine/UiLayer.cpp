@@ -2,10 +2,13 @@
 
 #include <iostream>
 #include <GLFW/glfw3.h>
+
 #include "Window.h"
+#include "Entity.h"
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
+#include "TransformSystem.h"
 
 UiLayer::UiLayer()
 {
@@ -37,7 +40,7 @@ void UiLayer::BeginFrame()
 	ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 }
 
-void UiLayer::Run(double deltaTime)
+void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 {
 	bool windowFocused = false;
 
@@ -92,10 +95,103 @@ void UiLayer::Run(double deltaTime)
 		ImGui::End();
 	}
 
-	if (showTestWindow1)
+	
+
+	//object tree window
+	if (showObjectTreeWindow)
 	{
-		ImGui::Begin("ImGui Window!", &showTestWindow1);
-		ImGui::Text("Testing a window");
+		entityToSelect = nullptr;
+
+		id = 0;
+
+		ImGui::Begin("Object tree", &showObjectTreeWindow);
+		//ImGui::PushID(++id);
+		static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+
+		ImGuiTreeNodeFlags node_flags = base_flags;
+		node_flags |= ImGuiTreeNodeFlags_DefaultOpen;
+
+
+		TransformComponent* transform = sceneEntity->GetComponent<TransformComponent>();
+
+		//UI changes if there are no children
+		if (transform->children.empty())
+			node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+
+
+		//check selection
+		auto it = std::find(selectedEntities.begin(), selectedEntities.end(), sceneEntity);
+		const bool is_selected = (it != selectedEntities.end());
+		if (is_selected)
+			node_flags |= ImGuiTreeNodeFlags_Selected;
+
+		//make node
+		bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)transform, node_flags, sceneEntity->m_Name.c_str());
+
+		//add to selection next frame
+		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+			entityToSelect = sceneEntity;
+		
+		//handle children
+		if (node_open)
+		{
+			if (!transform->children.empty())
+			{
+				for (TransformComponent* t : transform->children)
+				{
+					ProcessTreeNode(base_flags, t->m_Entity);
+				}
+			}
+			ImGui::TreePop();
+		}
+
+		//ImGui::PopID();
+
+		ImGui::End();
+	}
+
+	if (showObjectWindow) //Needs to be after Object tree window for parent button to work
+	{
+		ImGui::Begin("Object Details", &showObjectWindow);
+		if (selectedEntities.size() == 0)
+		{
+			ImGui::Text("No objects selected!");
+
+		}
+		else if (selectedEntities.size() == 1)
+		{
+			Entity* entity = selectedEntities[0];
+
+			ImGui::Text(entity->m_Name.c_str());
+
+			//transform component
+			TransformComponent* transform = entity->GetComponent<TransformComponent>();
+
+			glm::vec3 pos = TransformSystem::GetPosition(transform);
+			glm::vec3 rot = TransformSystem::GetRotation(transform);
+			glm::vec3 scale = TransformSystem::GetScale(transform);
+
+			ImGui::InputFloat3("Position", (float*)&pos);
+			ImGui::InputFloat3("Rotation", (float*)&rot);
+			ImGui::InputFloat3("Scale", (float*)&scale);
+
+			TransformSystem::SetPosition(transform->m_Entity, pos);
+			TransformSystem::SetRotation(transform->m_Entity, rot);
+			TransformSystem::SetScale(transform->m_Entity, scale);
+
+			if (transform->parent)
+			{
+				ImGui::Text("Parent:");
+				if (ImGui::Button(transform->parent->m_Entity->m_Name.c_str()))
+				{
+					entityToSelect = transform->parent->m_Entity;
+				}
+			}
+		}
+		else
+		{
+			ImGui::Text("Multiple objects selected!");
+		}
 
 		if (sceneSelected)
 		{
@@ -109,95 +205,87 @@ void UiLayer::Run(double deltaTime)
 		}
 		if (dirLightSelected)
 		{
-			ImGui::InputFloat3("Dir Light Direction", (float*)&dirLightDir);// -10.0f, 10.0f);
+			ImGui::InputFloat3("Dir Light Direction", (float*)&dirLightDir);
 			ImGui::ColorEdit3("Dir Light Diffuse", (float*)&dirLightDiffuse);
 		}
-		//ImGui::InputText("Test field")
-		ImGui::Checkbox("Show Window 2", &showTestWindow2);
 		ImGui::End();
 	}
 
-	if (showTestWindow2)
+
+
+	//update selection for next frame
+	if (entityToSelect != nullptr)
 	{
-		ImGui::Begin("Object tree!", &showTestWindow2);
-		ImGui::PushID(1);
-		static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-		static int selection_mask = (1 << 2);
-		int node_clicked = -1;
-
-		ImGuiTreeNodeFlags node_flags = base_flags;
-		const bool is_selected = (selection_mask & (1 << 1)) != 0;
-		if (is_selected)
+		// Update selection state
+		// (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
+		if (ImGui::GetIO().KeyCtrl)
+			selectedEntities.push_back(entityToSelect);		// CTRL+click to toggle
+		else //if (!(selection_mask & (1 << node_clicked))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
 		{
-			node_flags |= ImGuiTreeNodeFlags_Selected;
-			sceneSelected = true;
+			selectedEntities.clear();						// Click to single-select
+			selectedEntities.push_back(entityToSelect);
 		}
-		else
-		{
-			sceneSelected = false;
-		}
-
-		bool bOpen = ImGui::TreeNodeEx((void*)(intptr_t)0, node_flags, "Scene");
-		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-		{
-			node_clicked = 1;
-		}
-		if (bOpen)
-		{
-			for (int i = 2; i <= 3; i++)
-			{
-				ProcessTreeNode(base_flags, selection_mask, i, node_clicked);
-			}
-			
-			ImGui::TreePop();
-		}
-		if (node_clicked != -1)
-		{
-			// Update selection state
-			// (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
-			if (ImGui::GetIO().KeyCtrl)
-				selection_mask ^= (1 << node_clicked);          // CTRL+click to toggle
-			else //if (!(selection_mask & (1 << node_clicked))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
-				selection_mask = (1 << node_clicked);           // Click to single-select
-		}
-
-		ImGui::PopID();
-
-		ImGui::End();
 	}
 
-	
 }
 
-void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, int selection_mask, int i, int& node_clicked)
+void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* entity)
 {
-	ImGuiTreeNodeFlags node_flags = base_flags;
-	const bool is_selected = (selection_mask & (1 << i)) != 0;
-	if (is_selected)
-	{
-		node_flags |= ImGuiTreeNodeFlags_Selected;
 
-		if (i == 2)
-			pointLightSelected = true;
-		else if (i == 3)
-			dirLightSelected = true;
-	}
-	else
-	{
-		if (i == 2)
-			pointLightSelected = false;
-		else if (i == 3)
-			dirLightSelected = false;
-	}
-	bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Selectable Node %d", i);
+	//ImGui::PushID(entity->m_Name.c_str());
+
+	ImGuiTreeNodeFlags node_flags = base_flags;
+
+	TransformComponent* transform = entity->GetComponent<TransformComponent>();
+
+	//UI changes if there are no children
+	if (transform->children.empty())
+		node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet; // | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+	
+	//check selection
+	auto it = std::find(selectedEntities.begin(), selectedEntities.end(), entity);
+	const bool is_selected = (it != selectedEntities.end());
+	if (is_selected)
+		node_flags |= ImGuiTreeNodeFlags_Selected;
+	
+	//make node
+	bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)transform, node_flags, entity->m_Name.c_str());
+	//add to selection next frame
 	if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+		entityToSelect = entity;
+	
+
+	if (ImGui::BeginDragDropTarget())
 	{
-		node_clicked = i;
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
+		{
+
+		}
+		ImGui::EndDragDropTarget();
 	}
+
+	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+	{
+		ImGui::SetDragDropPayload("ENTITYPOINTER", &entity, sizeof(Entity));
+		//ImGui::Text(entity->m_Name.c_str());
+		ImGui::EndDragDropSource();
+	}
+
+
+	//handle children
 	if (node_open)
 	{
+		if (!transform->children.empty())
+		{
+			for (TransformComponent* t : transform->children)
+			{
+				ProcessTreeNode(base_flags, t->m_Entity);
+			}
+		}
 		ImGui::TreePop();
 	}
+
+	//ImGui::PopID();
 }
 
 void UiLayer::EndFrame()

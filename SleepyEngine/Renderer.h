@@ -11,8 +11,8 @@ class Renderer
 public:
 	Renderer(glm::vec2 windowSize);
 	~Renderer();
-	void BeginFrame();
-	void Draw(double deltaTime);
+	void BeginFrame(glm::vec2 windowSize);
+	unsigned int Draw(double deltaTime);
 	static void DrawMesh(MeshComponent mesh, TransformComponent transform);
 	void EndFrame();
 	static void CheckGLError(std::string placeMessage);
@@ -34,10 +34,10 @@ public:
 
 	//TODO: Should not be here
 	void SetCamera(class Camera* camera);
-private:
-	void FramebufferResizeCallback(int x, int y);
+	void ResizeViewport(int x, int y);
 
-	class UiLayer* ui;
+private:
+
 
 	glm::vec2 m_WindowSize;
 

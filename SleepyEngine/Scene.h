@@ -14,6 +14,7 @@ public:
 
 	void Update();
 
+	Entity* m_SceneEntity;
 private:
 	Entity* CreateEntity(std::string entityName);
 
@@ -21,6 +22,7 @@ private:
 	entt::registry m_registry;
 
 	friend class Entity;
+	friend class Application;
 
 	//temp
 	class Model* guitar;

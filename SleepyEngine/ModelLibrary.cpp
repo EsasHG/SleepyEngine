@@ -74,7 +74,7 @@ std::vector<std::string> ModelLibrary::LoadModel(std::string path)
 		return meshNames;
 	}
 	std::string directory = path.substr(0, path.find_last_of("/"));
-	std::string meshName = path.substr(path.find_last_of("/"), path.length());
+	std::string meshName = path.substr(path.find_last_of("/")+1, path.length());
 	meshNames = ProcessModelNode(scene->mRootNode, scene, meshName, directory);
 	return meshNames;
 }

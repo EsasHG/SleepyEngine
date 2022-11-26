@@ -10,7 +10,11 @@ public:
 	double BeginFrame();
 	int Run();
 	void EndFrame();
+
+	void FramebufferResizeCallback(int x, int y);
 private:
+
+	class UiLayer* ui;
 
 	double prevFrameTime;
 	class Window* window;
