@@ -38,6 +38,7 @@ private:
 
 	Entity* entityToSelect = nullptr;
 	std::vector<Entity*> selectedEntities;
+	Entity* draggedEntity;
 };
 	static char inputText[128];
 

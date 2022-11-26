@@ -95,7 +95,6 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		ImGui::End();
 	}
 
-	
 
 	//object tree window
 	if (showObjectTreeWindow)
@@ -110,7 +109,6 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 
 		ImGuiTreeNodeFlags node_flags = base_flags;
 		node_flags |= ImGuiTreeNodeFlags_DefaultOpen;
-
 
 		TransformComponent* transform = sceneEntity->GetComponent<TransformComponent>();
 
@@ -132,6 +130,17 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 			entityToSelect = sceneEntity;
 		
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
+			{
+				//Currently don't use the payload. Don't like that :(
+				if (draggedEntity)
+					TransformSystem::SetParent(sceneEntity, draggedEntity);
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		//handle children
 		if (node_open)
 		{
@@ -259,18 +268,20 @@ void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* enti
 	{
 		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
 		{
-
+			//Currently don't use the payload. Don't like that :(
+			if(draggedEntity)
+				TransformSystem::SetParent(entity, draggedEntity);
 		}
 		ImGui::EndDragDropTarget();
 	}
 
 	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 	{
-		ImGui::SetDragDropPayload("ENTITYPOINTER", &entity, sizeof(Entity));
-		//ImGui::Text(entity->m_Name.c_str());
+		draggedEntity = entity;
+		ImGui::SetDragDropPayload("ENTITYPOINTER", entity, sizeof(Entity*));
+		ImGui::Text(entity->m_Name.c_str());
 		ImGui::EndDragDropSource();
 	}
-
 
 	//handle children
 	if (node_open)
@@ -278,14 +289,10 @@ void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* enti
 		if (!transform->children.empty())
 		{
 			for (TransformComponent* t : transform->children)
-			{
-				ProcessTreeNode(base_flags, t->m_Entity);
-			}
+				ProcessTreeNode(base_flags, t->m_Entity);	
 		}
 		ImGui::TreePop();
 	}
-
-	//ImGui::PopID();
 }
 
 void UiLayer::EndFrame()
