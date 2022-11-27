@@ -13,8 +13,7 @@ public:
 	UiLayer();
 	void BeginFrame();
 	void Run(double deltaTime, Entity* sceneEntity);
-	void ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* entity);
-	void ReorderObjectTree(TransformComponent*& transform);
+
 	void EndFrame();
 	glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
 	glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
@@ -28,6 +27,17 @@ public:
 
 	int id;
 private:
+	//object tree window
+	void SetupObjectTree(Entity* sceneEntity);
+	void ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* entity);
+	void ReorderObjectTree(Entity* newParent, int newIndex, Entity* entityToMove);
+
+	//object window
+	void SetupObjectWindow();
+	void ShowTransformComp(TransformComponent* transform);
+	void ShowDirLightComp(class DirLightComponent* dirLight);
+	void ShowPointLightComp(class PointLightComponent* pointLight);
+
 
 	bool showObjectWindow = true;
 	bool showObjectTreeWindow = true;
@@ -39,9 +49,11 @@ private:
 
 	Entity* entityToSelect = nullptr;
 	std::vector<Entity*> selectedEntities;
-	Entity* draggedEntity;
-	Entity* reorderedEntity;
-	TransformComponent* transformAboveReorder;
+
+	Entity* entityToMove;
+	Entity* newParentEntity;
+
+	int newIndex =-1;
 };
 	static char inputText[128];
 

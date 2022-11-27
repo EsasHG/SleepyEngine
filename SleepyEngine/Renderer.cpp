@@ -12,6 +12,7 @@
 #include "ModelLibrary.h"
 #include "Components/TransformComponent.h"
 #include "Components/MeshComponent.h"
+#include "Components/LightComponent.h"
 #include "TransformSystem.h"
 //should this be here? 
 #include "Camera.h"
@@ -141,18 +142,7 @@ unsigned int Renderer::Draw(double deltaTime)
 	glUseProgram(m_TextureShaderId);
 	//lighting
 
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.direction", dirLightDir);
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.diffuse", dirLightDiffuse);
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.position", pointLightPos);
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.ambient", glm::vec3(0.01f, 0.01f, 0.01f));
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.diffuse", pointLightDiffuse);
-	Renderer::SetShaderUniformVec3(m_TextureShaderId, "pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.constant", 1.0f);
-	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.linear", 0.09f);
-	Renderer::SetShaderUniformFloat(m_TextureShaderId, "pointLight.quadratic", 0.032f);
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "viewPos", m_camera->GetPosition());
 
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
@@ -187,7 +177,26 @@ void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 
 }
 
+void Renderer::SetPointLightValues(unsigned int shaderID, TransformComponent& transform, PointLightComponent& pointLight)
+{
+	glUseProgram(shaderID);
+	Renderer::SetShaderUniformVec3(shaderID, "pointLight.position", TransformSystem::GetGlobalPosition(&transform));
+	Renderer::SetShaderUniformVec3(shaderID, "pointLight.ambient", pointLight.m_ambient);
+	Renderer::SetShaderUniformVec3(shaderID, "pointLight.diffuse", pointLight.m_diffuse);
+	Renderer::SetShaderUniformVec3(shaderID, "pointLight.specular", pointLight.m_specular);
+	Renderer::SetShaderUniformFloat(shaderID, "pointLight.constant", pointLight.m_constant);
+	Renderer::SetShaderUniformFloat(shaderID, "pointLight.linear", pointLight.m_linear);
+	Renderer::SetShaderUniformFloat(shaderID, "pointLight.quadratic",pointLight.m_quadratic);
+}
 
+void Renderer::SetDirLightValues(unsigned int shaderID, TransformComponent& transform, DirLightComponent& dirLight)
+{
+	glUseProgram(shaderID);
+	Renderer::SetShaderUniformVec3(shaderID, "dirLight.direction", dirLight.m_direction);
+	Renderer::SetShaderUniformVec3(shaderID, "dirLight.ambient", dirLight.m_ambient);
+	Renderer::SetShaderUniformVec3(shaderID, "dirLight.diffuse", dirLight.m_diffuse);
+	Renderer::SetShaderUniformVec3(shaderID, "dirLight.specular", dirLight.m_specular);
+}
 
 void Renderer::EndFrame()
 {

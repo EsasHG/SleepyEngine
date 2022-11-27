@@ -8,6 +8,7 @@
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
+#include "Components/LightComponent.h"
 #include "TransformSystem.h"
 
 UiLayer::UiLayer()
@@ -97,128 +98,13 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 
 	//object tree window
 	if (showObjectTreeWindow)
-	{
-		entityToSelect = nullptr;
-		reorderedEntity = nullptr;
-		transformAboveReorder = nullptr;
-
-		id = 0;
-
-		ImGui::Begin("Object tree", &showObjectTreeWindow);
-		//ImGui::PushID(++id);
-		static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-
-		ImGuiTreeNodeFlags node_flags = base_flags;
-		node_flags |= ImGuiTreeNodeFlags_DefaultOpen;
-
-		TransformComponent* transform = sceneEntity->GetComponent<TransformComponent>();
-
-		//UI changes if there are no children
-		if (transform->children.empty())
-			node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
-
-
-		//check selection
-		auto it = std::find(selectedEntities.begin(), selectedEntities.end(), sceneEntity);
-		const bool is_selected = (it != selectedEntities.end());
-		if (is_selected)
-			node_flags |= ImGuiTreeNodeFlags_Selected;
-
-		//make node
-		bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)transform, node_flags, sceneEntity->m_Name.c_str());
-
-		//add to selection next frame
-		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-			entityToSelect = sceneEntity;
-		
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
-			{
-				//Currently don't use the payload. Don't like that :(
-				if (draggedEntity)
-					TransformSystem::SetParent(sceneEntity, draggedEntity);
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		//handle children
-		if (node_open)
-		{
-			if (!transform->children.empty())
-			{
-				for (TransformComponent* t : transform->children)
-				{
-					ProcessTreeNode(base_flags, t->m_Entity);
-				}
-			}
-			ImGui::TreePop();
-		}
-
-		//ImGui::PopID();
-
-		ImGui::End();
-	}
+		SetupObjectTree(sceneEntity);
+	
 
 	if (showObjectWindow) //Needs to be after Object tree window for parent button to work
 	{
-		ImGui::Begin("Object Details", &showObjectWindow);
-		if (selectedEntities.size() == 0)
-		{
-			ImGui::Text("No objects selected!");
-
-		}
-		else if (selectedEntities.size() == 1)
-		{
-			Entity* entity = selectedEntities[0];
-
-			ImGui::Text(entity->m_Name.c_str());
-
-			//transform component
-			TransformComponent* transform = entity->GetComponent<TransformComponent>();
-
-			glm::vec3 pos = TransformSystem::GetPosition(transform);
-			glm::vec3 rot = TransformSystem::GetRotation(transform);
-			glm::vec3 scale = TransformSystem::GetScale(transform);
-
-			ImGui::InputFloat3("Position", (float*)&pos);
-			ImGui::InputFloat3("Rotation", (float*)&rot);
-			ImGui::InputFloat3("Scale", (float*)&scale);
-
-			TransformSystem::SetPosition(transform->m_Entity, pos);
-			TransformSystem::SetRotation(transform->m_Entity, rot);
-			TransformSystem::SetScale(transform->m_Entity, scale);
-
-			if (transform->parent)
-			{
-				ImGui::Text("Parent:");
-				if (ImGui::Button(transform->parent->m_Entity->m_Name.c_str()))
-				{
-					entityToSelect = transform->parent->m_Entity;
-				}
-			}
-		}
-		else
-		{
-			ImGui::Text("Multiple objects selected!");
-		}
-
-		if (sceneSelected)
-		{
-			ImGui::ColorEdit3("Clear Color", (float*)&clearColor);
-			ImGui::ColorEdit3("Quad Color", (float*)&quadColor);
-		}
-		if (pointLightSelected)
-		{
-			ImGui::SliderFloat3("Point Light Position", (float*)&pointLightPos, -10.0f, 10.0f);
-			ImGui::ColorEdit3("Point Light Diffuse", (float*)&pointLightDiffuse);
-		}
-		if (dirLightSelected)
-		{
-			ImGui::InputFloat3("Dir Light Direction", (float*)&dirLightDir);
-			ImGui::ColorEdit3("Dir Light Diffuse", (float*)&dirLightDiffuse);
-		}
-		ImGui::End();
+		SetupObjectWindow();
+		
 	}
 
 	//update selection for next frame
@@ -235,11 +121,101 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		}
 	}
 
-	if (reorderedEntity && transformAboveReorder)
-	{
-		ReorderObjectTree(transformAboveReorder);
+	//update parenting
+	if (newIndex != -1 && newParentEntity && entityToMove)
+		ReorderObjectTree(newParentEntity, newIndex, entityToMove);
+}
 
+void UiLayer::SetupObjectTree(Entity* sceneEntity)
+{
+
+	//reset reparenting variables
+	entityToSelect = nullptr;
+	newParentEntity = nullptr;
+	entityToMove = nullptr;
+	newIndex = -1;
+
+	id = 0;
+
+	ImGui::Begin("Object tree", &showObjectTreeWindow);
+	//ImGui::PushID(++id);
+	static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+
+	ImGuiTreeNodeFlags node_flags = base_flags;
+	node_flags |= ImGuiTreeNodeFlags_DefaultOpen;
+
+	TransformComponent* transform = sceneEntity->GetComponent<TransformComponent>();
+
+	//UI changes if there are no children
+	if (transform->m_children.empty())
+		node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+
+
+	//check selection
+	auto it = std::find(selectedEntities.begin(), selectedEntities.end(), sceneEntity);
+	const bool is_selected = (it != selectedEntities.end());
+	if (is_selected)
+		node_flags |= ImGuiTreeNodeFlags_Selected;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
+	//ImGui::PushStyleColor(ImGuiCol_DragDropTarget, ImVec4(0.4f, 0.5f, 0.95f, 0.900f));
+
+	//make node
+	bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)transform, node_flags, sceneEntity->m_Name.c_str());
+
+	//add to selection next frame
+	if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+		entityToSelect = sceneEntity;
+
+	//Drag target on Scene
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
+		{
+			Entity* ent = (Entity*)payload->Data;
+			if (ent)
+			{
+				entityToMove = ent;
+				newParentEntity = sceneEntity;
+				newIndex = 0;
+			}
+		}
+		ImGui::EndDragDropTarget();
 	}
+
+	//handle children
+	if (node_open)
+	{
+		if (!transform->m_children.empty())
+		{
+			//drag target above first child
+			ImGui::PushID(++id);
+			ImGui::InvisibleButton("dragTarget", ImVec2(ImGui::GetContentRegionAvail().x, 5));
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
+				{
+					Entity* ent = (Entity*)payload->Data;
+					if (ent)
+					{
+						entityToMove = ent;
+						newParentEntity = sceneEntity;
+						newIndex = 0;
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+			ImGui::PopID();
+
+			for (TransformComponent* t : transform->m_children)
+				ProcessTreeNode(base_flags, t->m_Entity);
+		}
+		ImGui::TreePop();
+	}
+	//ImGui::PopStyleColor();
+	ImGui::PopStyleVar();
+	ImGui::End();
+
 
 }
 
@@ -250,7 +226,7 @@ void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* enti
 	TransformComponent* transform = entity->GetComponent<TransformComponent>();
 
 	//UI changes if there are no children
-	if (transform->children.empty())
+	if (transform->m_children.empty())
 		node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet; // | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 	
 	//check selection
@@ -265,22 +241,25 @@ void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* enti
 	if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 		entityToSelect = entity;
 	
-
+	//drag target on tree
 	if (ImGui::BeginDragDropTarget())
 	{
 		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
 		{
-			//Currently don't use the payload. Don't like that :(
-			if(draggedEntity)
-				TransformSystem::SetParent(entity, draggedEntity);
+			Entity* ent = (Entity*)payload->Data;
+			if (ent)
+			{
+				entityToMove = ent;
+				newParentEntity = entity;
+				newIndex = 0;
+			}
 		}
 		ImGui::EndDragDropTarget();
 	}
 
 	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 	{
-		draggedEntity = entity;
-		ImGui::SetDragDropPayload("ENTITYPOINTER", entity, sizeof(Entity*));
+		ImGui::SetDragDropPayload("ENTITYPOINTER", entity, sizeof(Entity));
 		ImGui::Text(entity->m_Name.c_str());
 		ImGui::EndDragDropSource();
 	}
@@ -288,48 +267,191 @@ void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* enti
 	//handle children
 	if (node_open)
 	{
-		if (!transform->children.empty())
+		if (!transform->m_children.empty())
 		{
-			for (TransformComponent* t : transform->children)
+			//drag target above first child
+			ImGui::PushID(++id);
+			ImGui::InvisibleButton("dragTarget", ImVec2(ImGui::GetContentRegionAvail().x, 5));
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
+				{
+					Entity* ent = (Entity*)payload->Data;
+
+					//Currently don't use the payload. Don't like that :(
+					if (ent)
+					{
+						entityToMove = ent;
+						newParentEntity = entity;
+						newIndex = 0;
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+			ImGui::PopID();
+
+			for (TransformComponent* t : transform->m_children)
 				ProcessTreeNode(base_flags, t->m_Entity);	
 		}
 		ImGui::TreePop();
 	}
 
+	//drag target below
 	ImGui::PushID(++id);
-	ImGui::InvisibleButton("test",ImVec2(ImGui::GetContentRegionAvail().x,2));
+	ImGui::InvisibleButton("dragTarget",ImVec2(ImGui::GetContentRegionAvail().x,5));
 	if (ImGui::BeginDragDropTarget())
 	{
 		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
 		{
+
+			Entity* ent = (Entity*)payload->Data;
+
 			//Currently don't use the payload. Don't like that :(
-			if (draggedEntity)
+			if (ent)
 			{
-				reorderedEntity = draggedEntity;
-				transformAboveReorder = transform;
+				entityToMove = ent;
+				TransformComponent* targetTransform = entity->GetComponent<TransformComponent>();
+				newParentEntity = targetTransform->m_parent->m_Entity;
+
+				std::vector<TransformComponent*>& childGroup = targetTransform->m_parent->m_children;
+
+				auto it = std::find(childGroup.begin(), childGroup.end(), entity->GetComponent<TransformComponent>());
+
+				if (it != childGroup.end())
+					newIndex = std::distance(childGroup.begin(), it) + 1;
 			}
-				//TransformSystem::SetParent(entity, draggedEntity);
 		}
 		ImGui::EndDragDropTarget();
 	}
-	//ImGui::Spacing();
 	ImGui::PopID();
 }
 
-void UiLayer::ReorderObjectTree(TransformComponent*& transform)
+void UiLayer::ReorderObjectTree(Entity* newParent, int newIndex, Entity* entityToMove)
 {
+	if (entityToMove == newParent) { return; } //trying to drag right below itself
 
-	if (reorderedEntity == transform->m_Entity) { return; } //trying to drag right below itself
-	TransformSystem::SetParent(transform->parent->m_Entity, reorderedEntity);
-	int oldIndex = transform->parent->children.size() - 1;
+	TransformComponent* parentTransform = newParent->GetComponent<TransformComponent>();
+	TransformSystem::SetParent(parentTransform->m_Entity, entityToMove);
 
-	auto it = std::find(transform->parent->children.begin(), transform->parent->children.end(), transform);
-	int newIndex = 0;
-	if (it != transform->parent->children.end())
-		newIndex = std::distance(transform->parent->children.begin(), it)+1;
+	std::vector<TransformComponent*>& childGroup = parentTransform->m_children;
+
+	int oldIndex = childGroup.size() - 1;
 
 	if (oldIndex > newIndex)
-		std::rotate(transform->parent->children.rend() - oldIndex - 1, transform->parent->children.rend() - oldIndex, transform->parent->children.rend() - newIndex);
+		std::rotate(childGroup.rend() - oldIndex - 1, childGroup.rend() - oldIndex, childGroup.rend() - newIndex);
+}
+
+void UiLayer::SetupObjectWindow()
+{
+	ImGui::Begin("Object Details", &showObjectWindow);
+	if (selectedEntities.size() == 0)
+	{
+		ImGui::Text("No objects selected!");
+	}
+	else if (selectedEntities.size() == 1)
+	{
+		Entity* entity = selectedEntities[0];
+
+		ImGui::Text(entity->m_Name.c_str());
+		//static char strName[128];
+		//ImGui::InputText("Object Name", strName, IM_ARRAYSIZE(strName),0,0,(void*)entity->m_Name.c_str());
+		//entity->m_Name = strName;
+
+		TransformComponent* transform = entity->GetComponent<TransformComponent>();
+		if (transform)
+		{
+			ShowTransformComp(transform);
+			ImGui::Separator();
+		}
+		DirLightComponent* dirLight = entity->GetComponent<DirLightComponent>();
+		if (dirLight)
+		{
+			ShowDirLightComp(dirLight);
+		}
+		PointLightComponent* pointLight = entity->GetComponent<PointLightComponent>();
+		if (pointLight)
+		{
+			ShowPointLightComp(pointLight);
+		}
+
+	}
+	else
+	{
+		ImGui::Text("Multiple objects selected!");
+	}
+
+	if (sceneSelected)
+	{
+		ImGui::ColorEdit3("Clear Color", (float*)&clearColor);
+		ImGui::ColorEdit3("Quad Color", (float*)&quadColor);
+	}
+	if (pointLightSelected)
+	{
+		ImGui::SliderFloat3("Point Light Position", (float*)&pointLightPos, -10.0f, 10.0f);
+		ImGui::ColorEdit3("Point Light Diffuse", (float*)&pointLightDiffuse);
+	}
+	if (dirLightSelected)
+	{
+		ImGui::InputFloat3("Dir Light Direction", (float*)&dirLightDir);
+		ImGui::ColorEdit3("Dir Light Diffuse", (float*)&dirLightDiffuse);
+	}
+	ImGui::End();
+
+
+}
+
+void UiLayer::ShowTransformComp(TransformComponent* transform)
+{
+	//transform component
+
+	glm::vec3 pos = TransformSystem::GetPosition(transform);
+	glm::vec3 rot = TransformSystem::GetRotation(transform);
+	glm::vec3 scale = TransformSystem::GetScale(transform);
+
+	ImGui::DragFloat3("Position", (float*)&pos, 0.01f, -100, 100);
+	ImGui::DragFloat3("Rotation", (float*)&rot, 0.01f, -180, 180);
+	ImGui::DragFloat3("Scale", (float*)&scale, 0.01f, -100, 100);
+
+	TransformSystem::SetPosition(transform->m_Entity, pos);
+	TransformSystem::SetRotation(transform->m_Entity, rot);
+	TransformSystem::SetScale(transform->m_Entity, scale);
+
+	if (transform->m_parent )
+	{
+		ImGui::Text("Parent:");
+		if (ImGui::Button(transform->m_parent->m_Entity->m_Name.c_str()))
+		{
+			entityToSelect = transform->m_parent->m_Entity;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Unparent"))
+		{
+			TransformSystem::Unparent(transform->m_Entity);
+		}
+	}
+
+}
+
+void UiLayer::ShowDirLightComp(DirLightComponent* dirLight)
+{
+	glm::vec3 m_ambient;
+	glm::vec3 m_diffuse;
+	glm::vec3 m_specular;
+	ImGui::DragFloat3("Direction", (float*)&dirLight->m_direction, 0.01f,-1.0f, 1.0f);
+	ImGui::ColorEdit3("Ambient", (float*)&dirLight->m_ambient);
+	ImGui::ColorEdit3("Diffuse", (float*)&dirLight->m_diffuse);
+	ImGui::ColorEdit3("Specular", (float*)&dirLight->m_specular);
+}
+
+void UiLayer::ShowPointLightComp(PointLightComponent* pointLight)
+{
+	ImGui::ColorEdit3("Ambient", (float*)&pointLight->m_ambient);
+	ImGui::ColorEdit3("Diffuse", (float*)&pointLight->m_diffuse);
+	ImGui::ColorEdit3("Specular", (float*)&pointLight->m_specular);
+	ImGui::DragFloat("Constant", &pointLight->m_constant, 0.005f, 0.0f, 2.0f);
+	ImGui::DragFloat("Linear", &pointLight->m_linear, 0.005f, 0.0f,2.0f);
+	ImGui::DragFloat("Quadratic", &pointLight->m_quadratic, 0.005f,0.0f,2.0f);
+
 }
 
 void UiLayer::EndFrame()

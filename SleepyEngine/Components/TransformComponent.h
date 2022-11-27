@@ -8,21 +8,18 @@ class TransformComponent : public Component
 {
 public:
 	TransformComponent(Entity* entity, glm::vec3 pos = glm::vec3(0.0f), glm::vec3 rot = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f)) :
-		position(pos), rotation(rot), scale(scale) 
+		m_position(pos), m_rotation(rot), m_scale(scale) 
 	{
 		m_Entity = entity;
 	};
 
-	std::string m_Name;
-
 private:
-	//TODO: add m_ in variable names here?
-	glm::vec3 position;
-	glm::quat rotation;
-	glm::vec3 scale;
-	TransformComponent* parent = nullptr;
+	glm::vec3 m_position;
+	glm::quat m_rotation;
+	glm::vec3 m_scale;
+	TransformComponent* m_parent = nullptr;
 
-	std::vector<TransformComponent*> children;
+	std::vector<TransformComponent*> m_children;
 
 	friend class TransformSystem;
 	friend class UiLayer;

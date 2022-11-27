@@ -12,11 +12,18 @@
 #include "Renderer.h"
 #include "ModelLibrary.h"
 #include "Components/MeshComponent.h"
+#include "Components/LightComponent.h"
 #include "Model.h"
 #include "TransformSystem.h"
 Scene::Scene()
 {
-	
+	Entity* dirLight = CreateEntity("Directional Light");
+	dirLight->AddComponent<DirLightComponent>(glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.5f, 0.5f, 0.5f), 
+		glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(-0.2f, -0.6f, -0.3f));
+
+	Entity* pointLight = CreateEntity("Point Light");
+	pointLight->AddComponent<PointLightComponent>(glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.4f, 0.4f, 0.4f), 1.0f, 0.09f, 0.032f);
+
 	Entity* ent = CreateEntity("quad");
 
 	std::vector<Vertex> vertices;
@@ -80,11 +87,9 @@ Entity* Scene::CreateEntity(std::string entityName)
 	{
 		m_SceneEntity = new Entity("Scene", this);
 		m_SceneEntity->AddComponent<TransformComponent>();
-		m_SceneEntity->GetComponent<TransformComponent>()->m_Name = "Scene";
 	}
 	Entity* entity  = new Entity(entityName, this);
 	entity->AddComponent<TransformComponent>();
-	entity->GetComponent<TransformComponent>()->m_Name = entityName;
 	TransformSystem::SetParent(m_SceneEntity, entity);
 
 	return entity;
@@ -92,6 +97,16 @@ Entity* Scene::CreateEntity(std::string entityName)
 
 void Scene::Update()
 {
+	//update light values. I will figure out something smarter for this later lmao
+	unsigned int shaderID = ModelLibrary::GetInstance().GetShader("default");
+	auto pointLightView = m_registry.view<TransformComponent, PointLightComponent>();
+	for (auto [entity, transform, light] : pointLightView.each())
+		Renderer::SetPointLightValues(shaderID, transform, light);
+
+	auto dirLightView = m_registry.view<TransformComponent, DirLightComponent>();
+	for (auto [entity, transform, light] : dirLightView.each())
+		Renderer::SetDirLightValues(shaderID, transform, light);
+
 	//draw objects
 	auto regView = m_registry.view<TransformComponent, MeshComponent>();
 	for (auto [entity, transform, mesh] : regView.each())
@@ -99,4 +114,3 @@ void Scene::Update()
 		Renderer::DrawMesh(mesh, transform);
 	}
 }
-

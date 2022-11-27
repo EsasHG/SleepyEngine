@@ -7,7 +7,6 @@ uniform sampler2D diffuse2;
 uniform sampler2D specular1;
 uniform sampler2D specular2;
 
-
 struct DirLight
 {
     vec3 direction;
@@ -48,7 +47,7 @@ vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
     vec3 halfwayDir = normalize(lightDir + viewDir);
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0),2);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0),32);
 
     vec3 ambient = light.ambient * vec3(texture(diffuse1,fs_in.TexCoords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(diffuse1, fs_in.TexCoords));
@@ -89,6 +88,4 @@ void main()
     result += CalculateDirLight(dirLight, norm, viewDir);
     result += CalculatePointLight(pointLight, norm, fs_in.FragPos, viewDir);
 	FragColor = vec4(result, 1.0);
-	//FragColor = texture(diffuse1, fs_in.TexCoords);
-
 }
