@@ -353,6 +353,9 @@ void UiLayer::SetupObjectWindow()
 		Entity* entity = selectedEntities[0];
 
 		ImGui::Text(entity->m_Name.c_str());
+		ImGui::Spacing();
+		ImGui::Separator();
+
 		//static char strName[128];
 		//ImGui::InputText("Object Name", strName, IM_ARRAYSIZE(strName),0,0,(void*)entity->m_Name.c_str());
 		//entity->m_Name = strName;
@@ -361,7 +364,6 @@ void UiLayer::SetupObjectWindow()
 		if (transform)
 		{
 			ShowTransformComp(transform);
-			ImGui::Separator();
 		}
 		DirLightComponent* dirLight = entity->GetComponent<DirLightComponent>();
 		if (dirLight)
@@ -385,25 +387,15 @@ void UiLayer::SetupObjectWindow()
 		ImGui::ColorEdit3("Clear Color", (float*)&clearColor);
 		ImGui::ColorEdit3("Quad Color", (float*)&quadColor);
 	}
-	if (pointLightSelected)
-	{
-		ImGui::SliderFloat3("Point Light Position", (float*)&pointLightPos, -10.0f, 10.0f);
-		ImGui::ColorEdit3("Point Light Diffuse", (float*)&pointLightDiffuse);
-	}
-	if (dirLightSelected)
-	{
-		ImGui::InputFloat3("Dir Light Direction", (float*)&dirLightDir);
-		ImGui::ColorEdit3("Dir Light Diffuse", (float*)&dirLightDiffuse);
-	}
 	ImGui::End();
-
-
 }
 
 void UiLayer::ShowTransformComp(TransformComponent* transform)
 {
 	//transform component
-
+	ImGui::Spacing();
+	ImGui::Text("Transform Component");
+	ImGui::Spacing();
 	glm::vec3 pos = TransformSystem::GetPosition(transform);
 	glm::vec3 rot = TransformSystem::GetRotation(transform);
 	glm::vec3 scale = TransformSystem::GetScale(transform);
@@ -429,11 +421,16 @@ void UiLayer::ShowTransformComp(TransformComponent* transform)
 			TransformSystem::Unparent(transform->m_Entity);
 		}
 	}
+	ImGui::Spacing();
+	ImGui::Separator();
 
 }
 
 void UiLayer::ShowDirLightComp(DirLightComponent* dirLight)
 {
+	ImGui::Spacing();
+	ImGui::Text("Directional Light Component");
+	ImGui::Spacing();
 	glm::vec3 m_ambient;
 	glm::vec3 m_diffuse;
 	glm::vec3 m_specular;
@@ -445,6 +442,9 @@ void UiLayer::ShowDirLightComp(DirLightComponent* dirLight)
 
 void UiLayer::ShowPointLightComp(PointLightComponent* pointLight)
 {
+	ImGui::Spacing();
+	ImGui::Text("Point Light Component");
+	ImGui::Spacing();
 	ImGui::ColorEdit3("Ambient", (float*)&pointLight->m_ambient);
 	ImGui::ColorEdit3("Diffuse", (float*)&pointLight->m_diffuse);
 	ImGui::ColorEdit3("Specular", (float*)&pointLight->m_specular);

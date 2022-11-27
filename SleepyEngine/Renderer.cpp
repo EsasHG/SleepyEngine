@@ -128,20 +128,13 @@ unsigned int Renderer::Draw(double deltaTime)
 	glm::mat4 view = m_camera->GetViewMatrix();
 	Renderer::SetShaderUniformMat4(m_ShaderId, "view", view);
 
-	glm::vec3 pointLightPos = glm::vec3(0.4f, 0.4f, 0.4f);
-	glm::vec3 pointLightDiffuse = glm::vec3(0.5f, 0.5f, 0.5f);
-	glm::vec3 dirLightDir = glm::vec3(-0.2f, -0.6f, -0.3f);
 	glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
-	glm::vec3 dirLightDiffuse = glm::vec3(0.5f, 0.5f, 0.5f);
 	Renderer::SetShaderUniformVec3(m_ShaderId, "color", quadColor);
 
 	glm::mat4 model = glm::mat4(1.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "model", model);
 
-
 	glUseProgram(m_TextureShaderId);
-	//lighting
-
 
 	Renderer::SetShaderUniformVec3(m_TextureShaderId, "viewPos", m_camera->GetPosition());
 
