@@ -15,6 +15,7 @@
 #include "Components/LightComponent.h"
 #include "Model.h"
 #include "TransformSystem.h"
+
 Scene::Scene()
 {
 	Entity* dirLight = CreateEntity("Directional Light");
@@ -25,7 +26,7 @@ Scene::Scene()
 	pointLight->AddComponent<PointLightComponent>(glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.4f, 0.4f, 0.4f), 1.0f, 0.09f, 0.032f);
 
 	Entity* ent = CreateEntity("quad");
-
+	
 	std::vector<Vertex> vertices;
 	vertices.push_back(Vertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)));
 	vertices.push_back(Vertex(glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)));
@@ -33,49 +34,63 @@ Scene::Scene()
 	vertices.push_back(Vertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)));
 	vertices.push_back(Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
 	vertices.push_back(Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
-
+	
 	ModelLibrary::GetInstance().AddMesh("quad", vertices);
 	ent->AddComponent<MeshComponent>("quad","default", "color");
-
-	TransformSystem::SetPosition(ent, glm::vec3(-1.0f, 0.0f, 0.0f));
+	
+	TransformSystem::SetPosition(ent, glm::vec3(0.5f, -0.5f, 0.0f));
+	TransformSystem::SetRotation(ent, glm::vec3(45.0f, 0.0f, 0.0f));
 	TransformSystem::SetScale(ent, glm::vec3(0.8f, 0.8f, 0.8f));
 
 	//Entity* guitarBackpack = CreateEntity();
 	//guitarBackpack->AddComponent<MeshComponent>("Assets/backpack/backpack.obj", "default", "texture");
 
 	//guitar = new Model("Assets/backpack/backpack.obj");
-	std::vector<std::string> planetMeshes = ModelLibrary::GetInstance().AddMesh("Assets/planet/planet.obj");
-	std::vector<Entity*> planetEntities;
-	for (std::string mesh : planetMeshes)
-	{
-		Entity* e = CreateEntity(mesh);
-		e->AddComponent<MeshComponent>(mesh);
-		planetEntities.push_back(e);
-		TransformSystem::SetPosition(e, glm::vec3(-4.0f, 6.0f, 0.0f));
-	}
+	//std::vector<std::string> planetMeshes = ModelLibrary::GetInstance().AddMesh("Assets/planet/planet.obj");
+	//std::vector<Entity*> planetEntities;
+	//for (std::string mesh : planetMeshes)
+	//{
+	//	Entity* e = CreateEntity(mesh);
+	//	e->AddComponent<MeshComponent>(mesh);
+	//	planetEntities.push_back(e);
+	//	TransformSystem::SetPosition(e, glm::vec3(-4.0f, 6.0f, 0.0f));
+	//}
 
-	std::vector<std::string> guitarMeshes = ModelLibrary::GetInstance().AddMesh("Assets/backpack/backpack.obj");
-	std::vector<Entity*> guitarEntities;
-	for (std::string mesh : guitarMeshes)
-	{
-		Entity* e = CreateEntity(mesh);
-		e->AddComponent<MeshComponent>(mesh);
-		if (guitarEntities.size()>0)
-		{
-			TransformSystem::SetParent(guitarEntities[0], e);
-		}
-		guitarEntities.push_back(e);
 
-//		TransformSystem::SetScale(e, glm::vec3(0.5f, 0.5f, 0.5f));
-//		TransformSystem::SetRotation(e, 90.0f, 0.0f, -45.0f);
-//		TransformSystem::SetPosition(e, glm::vec3(2.0f, 0.0f, 0.0f));
+	MeshGroup* planetGroup = ModelLibrary::GetInstance().AddMesh("Assets/planet/planet.obj");
+	MeshGroup* guitarGroup = ModelLibrary::GetInstance().AddMesh("Assets/backpack/backpack.obj");
+
+
+	//something about the order here matters... dont know why
+
+	if(guitarGroup)
+		Entity* guitarEntity = LoadMeshGroup(guitarGroup, m_SceneEntity,"Backpack");
+
+	if (planetGroup)
+	{
+		Entity* planetEntity = LoadMeshGroup(planetGroup, m_SceneEntity, "Planet");
+		TransformSystem::SetPosition(planetEntity, glm::vec3(-4.0f, 6.0f, 0.0f));
 	}
-	TransformSystem::SetPosition(ent, glm::vec3(0.5f, -0.5f, 0.0f));
-	TransformSystem::SetRotation(ent, glm::vec3(45.0f, 0.0f, 0.0f));
+	
+	//for (std::string mesh : guitarMeshes)
+	//{
+	//	Entity* e = CreateEntity(mesh);
+	//	e->AddComponent<MeshComponent>(mesh);
+	//	if (guitarEntities.size()>0)
+	//	{
+	//		TransformSystem::SetParent(guitarEntities[0], e);
+	//	}
+	//	guitarEntities.push_back(e);
+	//
+//	//	TransformSystem::SetScale(e, glm::vec3(0.5f, 0.5f, 0.5f));
+//	//	TransformSystem::SetRotation(e, 90.0f, 0.0f, -45.0f);
+//	//	TransformSystem::SetPosition(e, glm::vec3(2.0f, 0.0f, 0.0f));
+	//}
+
 
 	//TransformSystem::SetPosition(guitarEntities[1], glm::vec3(1.0f));
 	//TransformSystem::SetScale(guitarEntities[1], glm::vec3(1.3f));
-	TransformSystem::Unparent(guitarEntities[1]);
+	//TransformSystem::Unparent(guitarEntities[1]);
 	//planet = new Model("Assets/planet/planet.obj");
 	//rock = new Model("Assets/rock/rock.obj");
 	//boat = new Model("Assets/boat.fbx");
@@ -87,12 +102,52 @@ Entity* Scene::CreateEntity(std::string entityName)
 	{
 		m_SceneEntity = new Entity("Scene", this);
 		m_SceneEntity->AddComponent<TransformComponent>();
+		//Children c = m_SceneEntity->AddComponent<Children>();
+
+		//c.first.GetComponent<Hierarchy>();
+
 	}
 	Entity* entity  = new Entity(entityName, this);
 	entity->AddComponent<TransformComponent>();
 	TransformSystem::SetParent(m_SceneEntity, entity);
 
 	return entity;
+}
+
+//have not been able to test this with groups that have multiple children
+Entity* Scene::LoadMeshGroup(MeshGroup* meshGroup, Entity* parent, std::string groupName)
+{
+	Entity* ent = nullptr; 
+	MeshRef* currentChild = meshGroup->firstChild;
+	if (currentChild && !currentChild->nextChildMesh) // if only one child mesh, use this entity
+	{
+		ent = CreateEntity(currentChild->meshName);
+		TransformSystem::SetParent(parent, ent);
+		ent->AddComponent<MeshComponent>(currentChild->meshName);
+	}
+	else
+	{
+		ent = CreateEntity(groupName);
+		TransformSystem::SetParent(parent, ent);
+		while (currentChild)
+		{
+			Entity* meshEnt = CreateEntity(currentChild->meshName);
+			meshEnt->AddComponent<MeshComponent>(currentChild->meshName);
+			TransformSystem::SetParent(ent, meshEnt);
+			currentChild = currentChild->nextChildMesh;
+		}
+	}
+
+	MeshGroup* currentChildGroup = meshGroup->firstChildGroup;
+	int i = 0;
+	while (currentChildGroup)
+	{
+		Entity* entity = LoadMeshGroup(currentChildGroup, ent, groupName+"_"+std::to_string(i));
+		currentChildGroup = currentChildGroup->nextGroup;
+		i++;
+	}
+
+	return ent;
 }
 
 void Scene::Update()

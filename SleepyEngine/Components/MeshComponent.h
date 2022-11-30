@@ -23,7 +23,7 @@ public:
 		}
 
 		m_shaderID = shader;
-		m_materialID;
+		m_materialID = material;
 	}
 
 	std::string m_shaderID;

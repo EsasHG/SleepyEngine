@@ -6,6 +6,7 @@ struct aiNode;
 struct aiMesh;
 struct aiScene;
 struct aiMaterial;
+struct MeshGroup;
 
 class Scene
 {
@@ -17,7 +18,7 @@ public:
 	Entity* m_SceneEntity;
 private:
 	Entity* CreateEntity(std::string entityName);
-
+	Entity* LoadMeshGroup(MeshGroup* meshGroup, Entity* parent, std::string groupName);
 
 	entt::registry m_registry;
 

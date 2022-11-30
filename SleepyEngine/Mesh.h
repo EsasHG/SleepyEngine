@@ -3,6 +3,25 @@
 #include <vector>
 #include <string>
 
+struct MeshGroup
+{
+	struct MeshRef* firstChild = nullptr;
+
+	MeshGroup* parentGroup = nullptr;
+	MeshGroup* firstChildGroup = nullptr;
+
+	MeshGroup* prevGroup = nullptr;
+	MeshGroup* nextGroup = nullptr;
+};
+
+struct MeshRef 
+{
+	std::string meshName;
+	MeshGroup* parentGroup = nullptr;
+	MeshRef* prevChildMesh = nullptr;
+	MeshRef* nextChildMesh = nullptr;
+};
+
 struct Vertex
 {
 	Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 uv) : m_position(position), m_normal(normal), m_uv(uv)
@@ -32,10 +51,13 @@ private:
 	void SetupMesh();
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
+	//TODO: move away from mesh?
 	std::vector<Tex> m_textures;
 	unsigned int m_VAO;
 	unsigned int m_VBO;
 	unsigned int m_EBO;
 	bool bIndiced;
+
+	friend class ModelLibrary;
 };
 

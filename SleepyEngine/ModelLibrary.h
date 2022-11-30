@@ -30,7 +30,8 @@ public:
 	{
 		return m_meshes.contains(name);
 	}
-	std::vector<std::string> AddMesh(std::string filepath);
+	//std::vector<std::string> AddMesh(std::string filepath);
+	MeshGroup* AddMesh(std::string filepath);
 
 	bool AddMesh(std::string name, std::vector<Vertex> vertices);
 
@@ -45,11 +46,47 @@ public:
 
 	void AddShader(std::string name, unsigned int ShaderID);
 
+	std::vector<std::string> GetMeshList()
+	{
+		std::vector<std::string> v; 
+
+		for (auto pair : m_meshes)
+			v.push_back(pair.first);
+
+		return v;
+	}
+
+	std::vector<std::string> GetMaterialList()
+	{
+		std::vector<std::string> v;
+
+		//for (auto pair : m_materials)
+		//	v.push_back(pair.first);
+
+		return v;
+	}
+
+
+	std::vector<std::string> GetShaderList()
+	{
+		std::vector<std::string> v;
+
+		for (auto pair : m_shaders)
+			v.push_back(pair.first);
+
+		return v;
+	}
+
 private:
 	ModelLibrary();
 
-	std::vector<std::string> LoadModel(std::string path);
+	//std::vector<std::string> LoadModel(std::string path);
+	MeshGroup* LoadModel(std::string path);
+
+
 	std::vector<std::string> ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory);
+	//Mesh* ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory, Mesh* CurrentMesh);
+	MeshGroup* ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory, MeshGroup* currentGroup);
 	Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string directory, std::string currentMeshName);
 	std::vector<Tex> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::string directory);
 	unsigned int LoadTexture(const char* path, std::string dir);

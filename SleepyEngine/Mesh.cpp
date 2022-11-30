@@ -74,6 +74,7 @@ void Mesh::Draw(unsigned int shaderID)
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
+		glActiveTexture(GL_TEXTURE0);
 	}
 
 }

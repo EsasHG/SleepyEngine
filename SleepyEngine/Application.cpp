@@ -30,8 +30,6 @@
 
 Application::~Application()
 {
-
-
 	delete window;
 	delete ui;
 	delete renderer;
@@ -69,10 +67,12 @@ int Application::Run()
 
 		InputManager::GetInstance().RunEvents();
 		camera->Run(deltaTime);
-		scene.Update();
-		ui->sceneTexture = renderer->Draw(deltaTime);
+		if (ui->RenderWindowOpen())
+			scene.Update();
 
-		entt::basic_view<entt::entity, entt::get_t<TransformComponent>, entt::exclude_t<>, void> regView = scene.m_registry.view<TransformComponent>();
+		if(ui->RenderWindowOpen())
+			ui->sceneTexture = renderer->Draw(deltaTime);
+
 		ui->Run(deltaTime, scene.m_SceneEntity);
 		EndFrame();
 	}

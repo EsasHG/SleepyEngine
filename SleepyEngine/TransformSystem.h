@@ -46,7 +46,5 @@ private:
 	static glm::mat4 GetLocalModelMatrix(const Entity* e);
 	static glm::mat4 GetLocalModelMatrix(const TransformComponent* transformComp);
 
-
-
 };
 

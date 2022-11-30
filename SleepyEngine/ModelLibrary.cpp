@@ -22,7 +22,7 @@ ModelLibrary::ModelLibrary()
 /// </summary>
 /// <param name="filepath"></param>
 /// <returns>Names of all the meshes and submeshes loaded in</returns>
-std::vector<std::string> ModelLibrary::AddMesh(std::string filepath)
+MeshGroup* ModelLibrary::AddMesh(std::string filepath)
 {
 	return LoadModel(filepath);
 }
@@ -62,22 +62,23 @@ void ModelLibrary::AddShader(std::string name, unsigned int ShaderID)
 }
 
 
-std::vector<std::string> ModelLibrary::LoadModel(std::string path)
-{
-	std::vector<std::string> meshNames;
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
-
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-	{
-		std::cout << "ERROR::ASSIMP:" << importer.GetErrorString() << std::endl;
-		return meshNames;
-	}
-	std::string directory = path.substr(0, path.find_last_of("/"));
-	std::string meshName = path.substr(path.find_last_of("/")+1, path.length());
-	meshNames = ProcessModelNode(scene->mRootNode, scene, meshName, directory);
-	return meshNames;
-}
+//std::vector<std::string> ModelLibrary::LoadModel(std::string path)
+//{
+//	std::vector<std::string> meshNames;
+//	Assimp::Importer importer;
+//
+//	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+//
+//	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+//	{
+//		std::cout << "ERROR::ASSIMP:" << importer.GetErrorString() << std::endl;
+//		return meshNames;
+//	}
+//	std::string directory = path.substr(0, path.find_last_of("/"));
+//	std::string meshName = path.substr(path.find_last_of("/")+1, path.length());
+//	meshNames = ProcessModelNode(scene->mRootNode, scene, meshName, directory);
+//	return meshNames;
+//}
 
 std::vector<std::string> ModelLibrary::ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory)
 {
@@ -95,6 +96,107 @@ std::vector<std::string> ModelLibrary::ProcessModelNode(aiNode* node, const aiSc
 		meshNames.insert(meshNames.end(), childMeshNames.begin(), childMeshNames.end());
 	}
 	return meshNames;
+}
+
+MeshGroup* ModelLibrary::LoadModel(std::string path)
+{
+	MeshGroup* rootGroup = new MeshGroup;
+	Assimp::Importer importer;
+
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+	{
+		std::cout << "ERROR::ASSIMP:" << importer.GetErrorString() << std::endl;
+		return nullptr;
+	}
+	std::string directory = path.substr(0, path.find_last_of("/"));
+	std::string meshName = path.substr(path.find_last_of("/") + 1, path.length());	//remove path
+	meshName = meshName.substr(0, meshName.find_last_of("."));						//remove extention
+	
+	//adds all meshes into library beforehand, and use the name to get them later. Otherwise they might be added more than once
+	for (int i = 0; i < scene->mNumMeshes; i++)
+	{
+		ProcessMesh(scene->mMeshes[i], scene, directory, meshName + "_" + std::to_string(i));
+	}
+
+	MeshGroup* group = ProcessModelNode(scene->mRootNode, scene, meshName, directory, rootGroup);
+
+	if (group == rootGroup)
+	{
+		if (group->firstChildGroup)
+			return group;
+	}
+	else
+	{
+		rootGroup->firstChildGroup = group;
+		return rootGroup;
+	}
+		
+	return nullptr;
+}
+
+MeshGroup* ModelLibrary::ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory, MeshGroup* targetGroup)
+{
+	MeshGroup* group;
+
+	if (node->mNumMeshes > 0)
+	{
+		group = new MeshGroup();
+		group->parentGroup = targetGroup;
+
+		MeshRef* currentChildMesh = nullptr;
+		for (unsigned int i = 0; i < node->mNumMeshes; i++)
+		{
+			std::string currentMeshName = meshName +"_"+ std::to_string(node->mMeshes[i]);
+			//the way this is set up some meshes are probably duplicated here?
+			//Mesh* m = ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene, directory, currentMeshName);
+			MeshRef* mRef = new MeshRef();
+			mRef->meshName = currentMeshName;
+
+			if (!group->firstChild)
+			{
+				group->firstChild = mRef;
+			}
+			else if (currentChildMesh)
+			{
+				mRef->prevChildMesh = currentChildMesh;
+				currentChildMesh->nextChildMesh = mRef;
+			}
+			else
+			{
+				assert("This should not be possible!");
+			}
+			currentChildMesh = mRef;
+			currentChildMesh->parentGroup = group;
+		}
+	}
+	else
+	{
+		group = targetGroup;
+	}
+
+	MeshGroup* currentChildGroup = nullptr;
+	for (unsigned int i = 0; i < node->mNumChildren; i++)
+	{
+		MeshGroup* childGroup = ProcessModelNode(node->mChildren[i], scene, meshName, directory, group);
+
+		if (childGroup != group) //might happen if children have no meshes?
+		{
+			if (!group->firstChildGroup)
+			{
+				group->firstChildGroup = childGroup;
+			}
+			else if (currentChildGroup)
+			{
+				childGroup->prevGroup = currentChildGroup;
+				currentChildGroup->nextGroup = childGroup;
+			}
+
+			currentChildGroup = childGroup;
+		}
+	}
+	return group;
 }
 
 
@@ -123,7 +225,7 @@ Mesh* ModelLibrary::ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string 
 		{
 			norm = glm::vec3(0.0f);
 		}
-		if (mesh->mTextureCoords[0])
+		if (mesh->mTextureCoords[0]) // mesh->HasTextureCoords()?
 		{
 			uv = glm::vec2(
 				mesh->mTextureCoords[0][i].x,

@@ -4,10 +4,25 @@
 #include "Scene.h"
 #include "Components/TransformComponent.h"
 
+//struct Hierarchy {
+//	Entity& parent;
+//	Entity& nextChild;
+//	Entity& prevChild;
+//};
+//
+//struct Children
+//{
+//	Entity& first;
+//};
+
+
 class Entity
 {
 public:
-	Entity(std::string entityName, Scene* scene);
+	Entity(std::string entityName, Scene* scene) : m_Name(entityName), m_scene(scene)
+	{
+		m_entityHandle = m_scene->m_registry.create();
+	}
 
 	template<typename T, typename ... Args>
 	T& AddComponent(Args&&... args)

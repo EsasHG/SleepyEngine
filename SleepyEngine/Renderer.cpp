@@ -50,22 +50,10 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	//quadMesh = new Mesh(m_ShaderId, vertices);
 	
 	glGenFramebuffers(1, &FBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
 	glGenTextures(1, &renderedTexture);
-	glBindTexture(GL_TEXTURE_2D, renderedTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_WindowSize.x, m_WindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
-
 	glGenRenderbuffers(1, &RBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_WindowSize.x, m_WindowSize.y);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Incomplete framebuffer!" << std::endl;
+	RecreateFramebuffer();
 
 	glUseProgram(m_ShaderId);
 
@@ -87,8 +75,7 @@ void Renderer::BeginFrame(glm::vec2 windowSize)
 	if (windowSize.y != 0)
 		m_WindowSize = windowSize;
 	else
-		m_WindowSize = glm::vec2(windowSize.x, 1);
-	
+		m_WindowSize = glm::vec2(1920, 1080);
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
@@ -116,12 +103,14 @@ void Renderer::SetCamera(class Camera* camera)
 	m_camera = camera;
 }
 
-//TODO: Remove? seems to not be needed if we call DrawMesh from Scene. Need to make lights use ECS first
+//TODO: Remove? seems to not be needed if we call DrawMesh from Scene.
 unsigned int Renderer::Draw(double deltaTime)
 {
+	
 	glUseProgram(m_ShaderId);
 	//game window draw stuff
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
 
 	glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 100.0f);
 	Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
@@ -141,13 +130,10 @@ unsigned int Renderer::Draw(double deltaTime)
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "view", view);
 
-
-
 	glDisable(GL_DEPTH_TEST);
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return renderedTexture;
-
-	//CheckGLError("End of Draw");
 }
 
 void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
@@ -193,11 +179,18 @@ void Renderer::SetDirLightValues(unsigned int shaderID, TransformComponent& tran
 
 void Renderer::EndFrame()
 {
+	//Got some weird results without this :/
 	RecreateFramebuffer();
 }
 
 void Renderer::ResizeViewport(int x, int y)
 {
+
+	//We don't set window height/width here? We set it each frame so we might not have to... 
+
+	m_WindowSize.x = x;
+	m_WindowSize.y = y;
+
 	glViewport(0, 0, x, y);
 	RecreateFramebuffer();
 }
@@ -235,8 +228,14 @@ void Renderer::CheckGLError(std::string placeMessage)
 		case GL_OUT_OF_MEMORY:
 			errorstring = "Out of memory";
 			break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			errorstring = "Invalid Framebuffer Operation";
+			break;
+		case GL_CONTEXT_LOST:
+			errorstring = "Context Lost";
+			break;
 		default:
-			errorstring = "Unknown error";
+			errorstring = "Unknown Error";
 			break;
 		}
 
@@ -501,6 +500,41 @@ void Renderer::RecreateFramebuffer()
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_WindowSize.x, m_WindowSize.y);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Incomplete framebuffer!" << std::endl;
+	GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	std::string errorstring;
+	switch (framebufferStatus)
+	{
+	case GL_FRAMEBUFFER_COMPLETE:
+		return;
+	case GL_FRAMEBUFFER_UNDEFINED:
+		errorstring = "Undefined framebuffer!";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		errorstring = "Incomplete Attachment!";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		errorstring = "Imcomplete Missing Attachment!";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		errorstring = "Incomplete Draw Buffer!";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+		errorstring = "Incomplete Read Buffer!";
+		break;
+	case GL_FRAMEBUFFER_UNSUPPORTED:
+		errorstring = "Unsupported Framebuffer!";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+		errorstring = "Incomplete Multisample!";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+		errorstring = "Incomplete Layer Targets!";
+		break;
+	default:
+		errorstring = "Unknown Error";
+		break;
+	}
+
+	std::cout << "ERROR::FRAMEBUFFER: " << errorstring << std::endl;
 }

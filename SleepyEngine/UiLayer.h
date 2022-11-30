@@ -15,6 +15,8 @@ public:
 	void Run(double deltaTime, Entity* sceneEntity);
 
 	void EndFrame();
+	
+	bool RenderWindowOpen() { return renderWindowOpen; };
 	glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
 	glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
 
@@ -22,6 +24,8 @@ public:
 	glm::vec2 contentRegionSize;
 
 	int id;
+
+
 private:
 	//object tree window
 	void SetupObjectTree(Entity* sceneEntity);
@@ -31,15 +35,21 @@ private:
 	//object window
 	void SetupObjectWindow();
 	void ShowTransformComp(TransformComponent* transform);
+	void ShowMeshComp(class MeshComponent* mesh);
 	void ShowDirLightComp(class DirLightComponent* dirLight);
 	void ShowPointLightComp(class PointLightComponent* pointLight);
+	//assets window
+	void SetupAssetsWindow();
 
-
+	//window bools
 	bool showObjectWindow = true;
 	bool showObjectTreeWindow = true;
 	bool showRenderWindow = true;
 	bool showTestWindow3 = true;
+	bool showAssetsWindow = true;
 	bool sceneSelected = false;
+
+	bool renderWindowOpen;
 
 	Entity* entityToSelect = nullptr;
 	std::vector<Entity*> selectedEntities;

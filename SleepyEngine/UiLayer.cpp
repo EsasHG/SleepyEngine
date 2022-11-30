@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <GLFW/glfw3.h>
+#include <filesystem>
 
 #include "Window.h"
 #include "Entity.h"
@@ -9,7 +10,11 @@
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 #include "Components/LightComponent.h"
+#include "Components/MeshComponent.h"
 #include "TransformSystem.h"
+#include "ModelLibrary.h"
+
+#define PROJECTDIR
 
 UiLayer::UiLayer()
 {
@@ -19,7 +24,6 @@ UiLayer::UiLayer()
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
 	ImGui::StyleColorsDark();
 
 	ImGuiStyle& style = ImGui::GetStyle();
@@ -45,18 +49,28 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 {
 	bool windowFocused = false;
 
+
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("Windows"))
+		{
+			//ImGui::Button("Play", ImVec2(25, 25));
+			if (ImGui::MenuItem("Render Window", "", &showRenderWindow)) {}
+			if (ImGui::MenuItem("Object Tree Window", "", &showObjectTreeWindow)) {}
+			if (ImGui::MenuItem("Object Details Window", "", &showObjectWindow)) {}
+			if (ImGui::MenuItem("Performance Window", "", &showTestWindow3)) {}
+
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
 	if (showRenderWindow)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("Game Window", &showRenderWindow, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);// | ImGuiWindowFlags_MenuBar);
-		//if (ImGui::BeginMainMenuBar())
-		//{
-		//	ImGui::BeginMenu("Test");
-		//	//ImGui::Button("Play", ImVec2(25, 25));
-		//	ImGui::MenuItem("Test2", "CTRL+P");
-		//	ImGui::EndMenu();
-		//	ImGui::EndMainMenuBar();
-		//}
+		renderWindowOpen = ImGui::Begin("Game Window", &showRenderWindow, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);// | ImGuiWindowFlags_MenuBar);
+		
+
 		ImGui::BeginChild("GameRender",ImVec2(0,0), false, ImGuiWindowFlags_NoNavInputs);
 		ImVec2 crSize = ImGui::GetContentRegionAvail();
 		ImGui::Image((ImTextureID)sceneTexture, crSize, ImVec2(0, 1), ImVec2(1, 0));
@@ -102,10 +116,11 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 	
 
 	if (showObjectWindow) //Needs to be after Object tree window for parent button to work
-	{
 		SetupObjectWindow();
-		
-	}
+	
+
+	if (showAssetsWindow)
+		SetupAssetsWindow();
 
 	//update selection for next frame
 	if (entityToSelect != nullptr)
@@ -215,8 +230,6 @@ void UiLayer::SetupObjectTree(Entity* sceneEntity)
 	//ImGui::PopStyleColor();
 	ImGui::PopStyleVar();
 	ImGui::End();
-
-
 }
 
 void UiLayer::ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* entity)
@@ -346,13 +359,16 @@ void UiLayer::SetupObjectWindow()
 	ImGui::Begin("Object Details", &showObjectWindow);
 	if (selectedEntities.size() == 0)
 	{
+		ImGui::Spacing();
 		ImGui::Text("No objects selected!");
 	}
 	else if (selectedEntities.size() == 1)
 	{
 		Entity* entity = selectedEntities[0];
-
+		
+		ImGui::Spacing();
 		ImGui::Text(entity->m_Name.c_str());
+		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Separator();
 
@@ -362,23 +378,24 @@ void UiLayer::SetupObjectWindow()
 
 		TransformComponent* transform = entity->GetComponent<TransformComponent>();
 		if (transform)
-		{
 			ShowTransformComp(transform);
-		}
+		
 		DirLightComponent* dirLight = entity->GetComponent<DirLightComponent>();
 		if (dirLight)
-		{
 			ShowDirLightComp(dirLight);
-		}
+		
 		PointLightComponent* pointLight = entity->GetComponent<PointLightComponent>();
 		if (pointLight)
-		{
 			ShowPointLightComp(pointLight);
-		}
+		
+		MeshComponent* mesh = entity->GetComponent<MeshComponent>();
+		if (mesh)
+			ShowMeshComp(mesh);
 
 	}
 	else
 	{
+		ImGui::Spacing();
 		ImGui::Text("Multiple objects selected!");
 	}
 
@@ -422,8 +439,66 @@ void UiLayer::ShowTransformComp(TransformComponent* transform)
 		}
 	}
 	ImGui::Spacing();
+	ImGui::Spacing();
 	ImGui::Separator();
 
+}
+
+void UiLayer::ShowMeshComp(MeshComponent* mesh)
+{
+	ImGui::Spacing();
+	ImGui::Text("Mesh Component");
+	ImGui::Spacing();
+
+	auto meshIDs = ModelLibrary::GetInstance().GetMeshList();
+	if (meshIDs.empty())
+		return;
+	std::sort(meshIDs.begin(), meshIDs.end());
+	
+	if (ImGui::BeginCombo("Mesh", mesh->m_meshID.c_str()))
+	{
+		for (std::string meshID : meshIDs)
+		{
+			bool selected = (mesh->m_meshID == meshID);
+			if (ImGui::Selectable(meshID.c_str(), selected))
+				mesh->m_meshID = meshID;
+			if (selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+
+	auto materialIDs = ModelLibrary::GetInstance().GetMaterialList();
+	if (ImGui::BeginCombo("Material (Not working)", mesh->m_materialID.c_str()))
+	{
+		for (std::string matID : materialIDs)
+		{
+			bool selected = (mesh->m_materialID == matID);
+			if (ImGui::Selectable(matID.c_str(), selected))
+				mesh->m_materialID = matID;
+			if (selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+	
+	auto shaderIDs = ModelLibrary::GetInstance().GetShaderList();
+	if (ImGui::BeginCombo("Shader", mesh->m_shaderID.c_str()))
+	{
+		for (std::string shaderID : shaderIDs)
+		{
+			bool selected = (mesh->m_shaderID == shaderID);
+			if (ImGui::Selectable(shaderID.c_str(), selected))
+				mesh->m_shaderID = shaderID;
+			if (selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+
+	ImGui::Spacing();
+	ImGui::Spacing();
+	ImGui::Separator();
 }
 
 void UiLayer::ShowDirLightComp(DirLightComponent* dirLight)
@@ -431,13 +506,15 @@ void UiLayer::ShowDirLightComp(DirLightComponent* dirLight)
 	ImGui::Spacing();
 	ImGui::Text("Directional Light Component");
 	ImGui::Spacing();
-	glm::vec3 m_ambient;
-	glm::vec3 m_diffuse;
-	glm::vec3 m_specular;
+
 	ImGui::DragFloat3("Direction", (float*)&dirLight->m_direction, 0.01f,-1.0f, 1.0f);
 	ImGui::ColorEdit3("Ambient", (float*)&dirLight->m_ambient);
 	ImGui::ColorEdit3("Diffuse", (float*)&dirLight->m_diffuse);
-	ImGui::ColorEdit3("Specular", (float*)&dirLight->m_specular);
+	ImGui::ColorEdit3("Specular", (float*)&dirLight->m_specular);	
+	
+	ImGui::Spacing();
+	ImGui::Spacing();
+	ImGui::Separator();
 }
 
 void UiLayer::ShowPointLightComp(PointLightComponent* pointLight)
@@ -445,12 +522,33 @@ void UiLayer::ShowPointLightComp(PointLightComponent* pointLight)
 	ImGui::Spacing();
 	ImGui::Text("Point Light Component");
 	ImGui::Spacing();
+
 	ImGui::ColorEdit3("Ambient", (float*)&pointLight->m_ambient);
 	ImGui::ColorEdit3("Diffuse", (float*)&pointLight->m_diffuse);
 	ImGui::ColorEdit3("Specular", (float*)&pointLight->m_specular);
 	ImGui::DragFloat("Constant", &pointLight->m_constant, 0.005f, 0.0f, 2.0f);
 	ImGui::DragFloat("Linear", &pointLight->m_linear, 0.005f, 0.0f,2.0f);
 	ImGui::DragFloat("Quadratic", &pointLight->m_quadratic, 0.005f,0.0f,2.0f);
+
+	ImGui::Spacing();
+	ImGui::Spacing();
+	ImGui::Separator();
+
+}
+
+void UiLayer::SetupAssetsWindow()
+{
+	ImGui::Begin("Assets", &showObjectWindow);
+	std::string folder = _SOLUTIONDIR;
+	std::string path = "SleepyEngine\\Assets";
+	path = folder + path;
+
+	for (const auto& entry : std::filesystem::directory_iterator(path))
+	{
+		std::string fileName = entry.path().string().substr(entry.path().string().find_last_of("\\")+1, entry.path().string().size());
+		ImGui::Selectable(fileName.c_str());
+	}
+	ImGui::End();
 
 }
 
