@@ -67,6 +67,7 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 
 	if (showRenderWindow)
 	{
+		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		renderWindowOpen = ImGui::Begin("Game Window", &showRenderWindow, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);// | ImGuiWindowFlags_MenuBar);
 		
@@ -418,7 +419,7 @@ void UiLayer::ShowTransformComp(TransformComponent* transform)
 	glm::vec3 scale = TransformSystem::GetScale(transform);
 
 	ImGui::DragFloat3("Position", (float*)&pos, 0.01f, -100, 100);
-	ImGui::DragFloat3("Rotation", (float*)&rot, 0.01f, -180, 180);
+	ImGui::DragFloat3("Rotation", (float*)&rot, 0.1f, -180, 180);
 	ImGui::DragFloat3("Scale", (float*)&scale, 0.01f, -100, 100);
 
 	TransformSystem::SetPosition(transform->m_Entity, pos);
@@ -539,14 +540,19 @@ void UiLayer::ShowPointLightComp(PointLightComponent* pointLight)
 void UiLayer::SetupAssetsWindow()
 {
 	ImGui::Begin("Assets", &showObjectWindow);
-	std::string folder = _SOLUTIONDIR;
 	std::string path = "SleepyEngine\\Assets";
-	path = folder + path;
+	path = _SOLUTIONDIR + path;
 
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
 		std::string fileName = entry.path().string().substr(entry.path().string().find_last_of("\\")+1, entry.path().string().size());
-		ImGui::Selectable(fileName.c_str());
+		if (ImGui::Selectable(fileName.c_str()))
+		{
+			if (fileName.find(".") != std::string::npos)
+			{
+				ModelLibrary::GetInstance().AddMesh(entry.path().string());
+			}
+		}
 	}
 	ImGui::End();
 
@@ -564,5 +570,4 @@ void UiLayer::EndFrame()
 		ImGui::RenderPlatformWindowsDefault();
 		glfwMakeContextCurrent(backupCurrentContext);
 	}
-
 }

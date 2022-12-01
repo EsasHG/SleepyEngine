@@ -24,11 +24,16 @@ ModelLibrary::ModelLibrary()
 /// <returns>Names of all the meshes and submeshes loaded in</returns>
 MeshGroup* ModelLibrary::AddMesh(std::string filepath)
 {
-	return LoadModel(filepath);
+	if (ModelExists(filepath))
+		return m_models[filepath];
+	else
+		return LoadModel(filepath);
 }
 
 bool ModelLibrary::AddMesh(std::string name, std::vector<Vertex> vertices)
 {
+	if (MeshExists(name))
+		return false;
 	Mesh* m = new Mesh(vertices);
 	std::pair<std::string, Mesh*> pair(name, m);
 	m_meshes.insert(pair);
@@ -37,6 +42,9 @@ bool ModelLibrary::AddMesh(std::string name, std::vector<Vertex> vertices)
 
 bool ModelLibrary::AddMesh(std::string name, Mesh* mesh)
 {
+
+	if (MeshExists(name))
+		return false;
 	std::pair<std::string, Mesh*> pair(name, mesh);
 	m_meshes.insert(pair);
 	return true;
@@ -110,8 +118,8 @@ MeshGroup* ModelLibrary::LoadModel(std::string path)
 		std::cout << "ERROR::ASSIMP:" << importer.GetErrorString() << std::endl;
 		return nullptr;
 	}
-	std::string directory = path.substr(0, path.find_last_of("/"));
-	std::string meshName = path.substr(path.find_last_of("/") + 1, path.length());	//remove path
+	std::string directory = path.substr(0, path.find_last_of("\\"));
+	std::string meshName = path.substr(path.find_last_of("\\") + 1, path.length());	//remove path
 	meshName = meshName.substr(0, meshName.find_last_of("."));						//remove extention
 	
 	//adds all meshes into library beforehand, and use the name to get them later. Otherwise they might be added more than once
@@ -122,14 +130,23 @@ MeshGroup* ModelLibrary::LoadModel(std::string path)
 
 	MeshGroup* group = ProcessModelNode(scene->mRootNode, scene, meshName, directory, rootGroup);
 
+
+	
 	if (group == rootGroup)
 	{
 		if (group->firstChildGroup)
+		{
+
+			std::pair<std::string, MeshGroup*> pair(path, group);
+			m_models.insert(pair);
 			return group;
+		}
 	}
 	else
 	{
 		rootGroup->firstChildGroup = group;
+		std::pair<std::string, MeshGroup*> pair(path, rootGroup);
+		m_models.insert(pair);
 		return rootGroup;
 	}
 		
@@ -139,7 +156,7 @@ MeshGroup* ModelLibrary::LoadModel(std::string path)
 MeshGroup* ModelLibrary::ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory, MeshGroup* targetGroup)
 {
 	MeshGroup* group;
-
+	//meshes 
 	if (node->mNumMeshes > 0)
 	{
 		group = new MeshGroup();
@@ -176,6 +193,8 @@ MeshGroup* ModelLibrary::ProcessModelNode(aiNode* node, const aiScene* scene, st
 		group = targetGroup;
 	}
 
+
+	//child nodes
 	MeshGroup* currentChildGroup = nullptr;
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
@@ -305,7 +324,7 @@ unsigned int ModelLibrary::LoadTexture(const char* path, std::string dir)
 {
 
 	std::string fileName = std::string(path);
-	fileName = dir + "/" + fileName;
+	fileName = dir + "\\" + fileName;
 
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -343,6 +362,7 @@ unsigned int ModelLibrary::LoadTexture(const char* path, std::string dir)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 	}
 	else

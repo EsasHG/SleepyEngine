@@ -67,6 +67,7 @@ void Mesh::Draw(unsigned int shaderID)
 		glDrawArrays(GL_TRIANGLES, 0, m_vertices.size());
 
 	glBindVertexArray(0);
+	//unbinds textures
 	if (!m_textures.empty())
 	{
 		for (unsigned int i = 0; i < m_textures.size(); i++)

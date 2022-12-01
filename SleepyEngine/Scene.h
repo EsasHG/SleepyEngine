@@ -8,6 +8,8 @@ struct aiScene;
 struct aiMaterial;
 struct MeshGroup;
 
+
+
 class Scene
 {
 public:

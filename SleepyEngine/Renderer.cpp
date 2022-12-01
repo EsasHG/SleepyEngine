@@ -27,35 +27,14 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 
 	m_ShaderId = Renderer::CreateShader("Shaders/SingleColor.vert", "Shaders/SingleColor.frag");
 	ModelLibrary::GetInstance().AddShader("color", m_ShaderId);
-	m_QuadShaderId = Renderer::CreateShader("Shaders/QuadShader.vert", "Shaders/QuadShader.frag");
 	m_TextureShaderId = Renderer::CreateShader("Shaders/TextureShader.vert", "Shaders/TextureShader.frag");
 	ModelLibrary::GetInstance().AddShader("default", m_TextureShaderId);
-
-
-	glUseProgram(m_QuadShaderId);
-	Renderer::SetShaderUniformInt(m_QuadShaderId, "sceneTexture", 0);
-
-	std::vector<Vertex> vertices;
-	vertices.push_back(Vertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(Vertex(glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)));
-	vertices.push_back(Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(Vertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
-
 	 
-	//auto quadEntity = registry.create();
-	//registry.emplace<TransformComponent>(quadEntity);
-	//registry.emplace<Mesh>(quadEntity, vertices);
-	//quadMesh = new Mesh(m_ShaderId, vertices);
-	
 	glGenFramebuffers(1, &FBO);
 	glGenTextures(1, &renderedTexture);
 	glGenRenderbuffers(1, &RBO);
 
 	RecreateFramebuffer();
-
-	glUseProgram(m_ShaderId);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -86,27 +65,16 @@ void Renderer::BeginFrame(glm::vec2 windowSize)
 	glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(m_ShaderId);
-
-	glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 100.0f);
-	Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
-	glm::mat4 view = m_camera->GetViewMatrix();
-	Renderer::SetShaderUniformMat4(m_ShaderId, "view", view);
-
-	glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
-	Renderer::SetShaderUniformVec3(m_ShaderId, "color", quadColor);
 	CheckGLError("End of BeginFrame");
-
 }
 void Renderer::SetCamera(class Camera* camera) 
 { 
 	m_camera = camera;
 }
 
-//TODO: Remove? seems to not be needed if we call DrawMesh from Scene.
+//TODO: Sets all values that only needs to be set once per shader per frame. Should be done in another way?
 unsigned int Renderer::Draw(double deltaTime)
 {
-	
 	glUseProgram(m_ShaderId);
 	//game window draw stuff
 	glEnable(GL_CULL_FACE);
@@ -132,7 +100,9 @@ unsigned int Renderer::Draw(double deltaTime)
 
 	glDisable(GL_DEPTH_TEST);
 	
+	glUseProgram(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	return renderedTexture;
 }
 
@@ -153,6 +123,7 @@ void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 	Mesh* m = ModelLibrary::GetInstance().GetMesh(mesh.m_meshID);
 	m->Draw(shaderID);
 	CheckGLError("End of DrawMesh");
+	glUseProgram(0);
 
 }
 
@@ -488,8 +459,10 @@ void Renderer::SetShaderUniformMat4(const char* name, glm::mat4 matrix)
 
 void Renderer::RecreateFramebuffer()
 {
+
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, renderedTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_WindowSize.x, m_WindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -499,6 +472,8 @@ void Renderer::RecreateFramebuffer()
 	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_WindowSize.x, m_WindowSize.y);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -537,4 +512,5 @@ void Renderer::RecreateFramebuffer()
 	}
 
 	std::cout << "ERROR::FRAMEBUFFER: " << errorstring << std::endl;
+
 }

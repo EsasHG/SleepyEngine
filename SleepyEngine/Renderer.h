@@ -45,7 +45,6 @@ private:
 	glm::vec2 m_WindowSize;
 
 	unsigned int m_ShaderId;
-	unsigned int m_QuadShaderId;
 	unsigned int m_TextureShaderId;
 	unsigned int VAO, VBO;
 	unsigned int FBO;

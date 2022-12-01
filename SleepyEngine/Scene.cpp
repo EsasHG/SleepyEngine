@@ -57,8 +57,8 @@ Scene::Scene()
 	//}
 
 
-	MeshGroup* planetGroup = ModelLibrary::GetInstance().AddMesh("Assets/planet/planet.obj");
-	MeshGroup* guitarGroup = ModelLibrary::GetInstance().AddMesh("Assets/backpack/backpack.obj");
+	MeshGroup* guitarGroup = ModelLibrary::GetInstance().AddMesh("Assets\\backpack\\backpack.obj");
+	MeshGroup* planetGroup = ModelLibrary::GetInstance().AddMesh("Assets\\planet\\planet.obj");
 
 
 	//something about the order here matters... dont know why
@@ -119,16 +119,19 @@ Entity* Scene::LoadMeshGroup(MeshGroup* meshGroup, Entity* parent, std::string g
 {
 	Entity* ent = nullptr; 
 	MeshRef* currentChild = meshGroup->firstChild;
-	if (currentChild && !currentChild->nextChildMesh) // if only one child mesh, use this entity
+	MeshGroup* currentChildGroup = meshGroup->firstChildGroup;
+
+	if (currentChild && !currentChild->nextChildMesh) // if only one child mesh, add mesh to this entity
 	{
 		ent = CreateEntity(currentChild->meshName);
 		TransformSystem::SetParent(parent, ent);
 		ent->AddComponent<MeshComponent>(currentChild->meshName);
 	}
-	else
+	else if(currentChild)
 	{
 		ent = CreateEntity(groupName);
 		TransformSystem::SetParent(parent, ent);
+
 		while (currentChild)
 		{
 			Entity* meshEnt = CreateEntity(currentChild->meshName);
@@ -137,11 +140,21 @@ Entity* Scene::LoadMeshGroup(MeshGroup* meshGroup, Entity* parent, std::string g
 			currentChild = currentChild->nextChildMesh;
 		}
 	}
+	else
+	{
+		if (currentChildGroup && !currentChildGroup->nextGroup)
+		{
+			ent = LoadMeshGroup(currentChildGroup, parent, groupName + "_" + std::to_string(0));
+			return ent;
+		}
+		else
+			ent = CreateEntity(groupName);
+	}
 
-	MeshGroup* currentChildGroup = meshGroup->firstChildGroup;
 	int i = 0;
 	while (currentChildGroup)
 	{
+
 		Entity* entity = LoadMeshGroup(currentChildGroup, ent, groupName+"_"+std::to_string(i));
 		currentChildGroup = currentChildGroup->nextGroup;
 		i++;
