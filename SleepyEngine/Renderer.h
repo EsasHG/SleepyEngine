@@ -12,12 +12,12 @@ public:
 	Renderer(glm::vec2 windowSize);
 	~Renderer();
 	void BeginFrame(glm::vec2 windowSize);
-	unsigned int Draw(double deltaTime);
+	void PrepDraw(double deltaTime);
 	static void DrawMesh(MeshComponent mesh, TransformComponent transform);
 
 	static void SetPointLightValues(unsigned int shaderID, TransformComponent& transform, class PointLightComponent& pointLight);
 	static void SetDirLightValues(unsigned int shaderID, TransformComponent& transform, class DirLightComponent& pointLight);
-	void EndFrame();
+	unsigned int EndFrame();
 	static void CheckGLError(std::string placeMessage);
 	static unsigned int CreateShader(const char* vertShaderPath, const char* fragShaderPath);
 	static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);

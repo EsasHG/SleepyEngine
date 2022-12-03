@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <entt/entt.hpp>
+//#include <queue>
 #include <vector>
 #include "Components/TransformComponent.h"
 class Window;
@@ -50,13 +51,14 @@ private:
 	bool sceneSelected = false;
 
 	bool renderWindowOpen;
+	//std::queue<float> frametimes;
 
 	Entity* entityToSelect = nullptr;
 	std::vector<Entity*> selectedEntities;
 
 	Entity* entityToMove;
 	Entity* newParentEntity;
-
+	//static float frames[140];
 	int newIndex =-1;
 };
 	static char inputText[128];

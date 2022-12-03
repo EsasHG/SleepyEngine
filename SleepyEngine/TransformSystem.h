@@ -27,14 +27,14 @@ public:
 	static glm::vec3 GetRotation(const Entity* e);
 	static glm::vec3 GetRotation(const TransformComponent* transformComp);
 
-	static glm::vec3 GetGlobalPosition(const Entity* e);
-	static glm::vec3 GetGlobalPosition(const TransformComponent* transformComp);
-						
-	static glm::vec3 GetGlobalScale(const Entity* e);
-	static glm::vec3 GetGlobalScale(const TransformComponent* transformComp);
-						
-	static glm::vec3 GetGlobalRotation(const Entity* e);
-	static glm::vec3 GetGlobalRotation(const TransformComponent* transformComp);
+	//static glm::vec3 GetLocalPosition(const Entity* e);
+	//static glm::vec3 GetLocalPosition(const TransformComponent* transformComp);
+	//
+	//static glm::vec3 GetLocalScale(const Entity* e);
+	//static glm::vec3 GetLocalScale(const TransformComponent* transformComp);
+	//
+	//static glm::vec3 GetLocalRotation(const Entity* e);
+	//static glm::vec3 GetLocalRotation(const TransformComponent* transformComp);
 
 	static void SetParent(Entity* parent, Entity* child);
 	static void Unparent(Entity* e);
@@ -42,9 +42,12 @@ public:
 	static glm::mat4 GetModelMatrix(const Entity* e);
 	static glm::mat4 GetModelMatrix(const TransformComponent* transformComp);
 
-private:
-	static glm::mat4 GetLocalModelMatrix(const Entity* e);
 	static glm::mat4 GetLocalModelMatrix(const TransformComponent* transformComp);
+	static void RecalculateModelMatrices(TransformComponent* transformComp);
+
+private:
+	//static glm::mat4 GetLocalModelMatrix(const Entity* e);
+	//static glm::mat4 GetLocalModelMatrix(const TransformComponent* transformComp);
 
 };
 

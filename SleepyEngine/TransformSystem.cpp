@@ -1,7 +1,7 @@
 #include "TransformSystem.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <glm/gtx/matrix_decompose.hpp>
 #include "Entity.h"
 
 
@@ -9,6 +9,8 @@ void TransformSystem::SetPosition(Entity* e, glm::vec3 pos)
 {
 	auto* tComp = e->GetComponent<TransformComponent>();
 	tComp->m_position = pos;
+
+	RecalculateModelMatrices(tComp);
 }
 
 void TransformSystem::SetPosition(Entity* e, float posX, float posY, float posZ)
@@ -20,7 +22,9 @@ void TransformSystem::SetPosition(Entity* e, float posX, float posY, float posZ)
 void TransformSystem::SetScale(Entity* e, glm::vec3 scale)
 {
 	auto* tComp = e->GetComponent<TransformComponent>();
+	//tComp->m_scale = scale;
 	tComp->m_scale = scale;
+	RecalculateModelMatrices(tComp);
 }
 
 
@@ -38,7 +42,11 @@ void TransformSystem::SetRotation(Entity* e, glm::vec3 eulerRotDeg)
 	eulerRotDeg.y = glm::radians(eulerRotDeg.y);
 	eulerRotDeg.z = glm::radians(eulerRotDeg.z);
 
+
 	tComp->m_rotation = glm::quat(eulerRotDeg);
+
+	RecalculateModelMatrices(tComp);
+
 }
 
 void TransformSystem::SetRotation(Entity* e, float yaw, float pitch, float roll)
@@ -85,50 +93,72 @@ glm::vec3 TransformSystem::GetRotation(const TransformComponent* transformComp)
 	rot.y = glm::degrees(rot.y);
 	rot.z = glm::degrees(rot.z);
 	return rot;
+	
+	//glm::vec3 scale;
+	//glm::vec3 pos;
+	//glm::quat rot;
+	//glm::vec3 skew;
+	//glm::vec4 persp;
+	//glm::decompose(transformComp->m_modelMatrix, scale, rot, pos, skew, persp);
+	//
+	//return glm::eulerAngles(rot);
 }
-
-
-glm::vec3 TransformSystem::GetGlobalPosition(const Entity* e)
+/*
+glm::vec3 TransformSystem::GetLocalPosition(const Entity* e)
 {
 	auto* tComp = e->GetComponent<TransformComponent>();
-	return GetGlobalPosition(tComp);
+	return GetLocalPosition(tComp);
 }
 
-glm::vec3 TransformSystem::GetGlobalPosition(const TransformComponent* transformComp)
+glm::vec3 TransformSystem::GetLocalPosition(const TransformComponent* transformComp)
 {
 	if (transformComp->m_parent)
-		return GetPosition(transformComp) + GetGlobalPosition(transformComp->m_parent);
+	{
+		glm::mat4 invParent = glm::inverse(transformComp->m_parent->m_modelMatrix);
+
+
+		glm::vec3 scale;
+		glm::vec3 pos;
+		glm::quat rot;
+		glm::vec3 skew;
+		glm::vec4 persp;
+		glm::decompose(invParent * transformComp->m_modelMatrix, scale, rot, pos, skew, persp);
+
+
+		return pos;
+	}
 	else
 		return GetPosition(transformComp);
 }
 
-glm::vec3 TransformSystem::GetGlobalScale(const Entity* e)
+glm::vec3 TransformSystem::GetLocalScale(const Entity* e)
 {
 	auto* tComp = e->GetComponent<TransformComponent>();
-	return GetGlobalScale(tComp);
+	return GetLocalScale(tComp);
 }
 
-glm::vec3 TransformSystem::GetGlobalScale(const TransformComponent* transformComp)
+glm::vec3 TransformSystem::GetLocalScale(const TransformComponent* transformComp)
 {
 	if (transformComp->m_parent)
-		return GetScale(transformComp) * GetGlobalScale(transformComp->m_parent);
+		return GetScale(transformComp) * GetScale(transformComp->m_parent);
 	else
 		return GetScale(transformComp);
 }
 
-glm::vec3 TransformSystem::GetGlobalRotation(const Entity* e)
+glm::vec3 TransformSystem::GetLocalRotation(const Entity* e)
 {
 	auto* tComp = e->GetComponent<TransformComponent>();
-	return GetGlobalScale(tComp);
+	return GetLocalRotation(tComp);
 }
 
-glm::vec3 TransformSystem::GetGlobalRotation(const TransformComponent* transformComp)
+glm::vec3 TransformSystem::GetLocalRotation(const TransformComponent* transformComp)
 {
 	if (transformComp->m_parent)
-		return GetRotation(transformComp) + GetGlobalRotation(transformComp->m_parent);
+		return GetRotation(transformComp) + GetRotation(transformComp->m_parent);
 	else
 		return GetRotation(transformComp);
 }
+*/
 
 
 // ********** Parenting **********
@@ -140,11 +170,11 @@ void TransformSystem::SetParent(Entity* parent, Entity* child)
 	auto* tParent = parent->GetComponent<TransformComponent>();
 	auto* tChild = child->GetComponent<TransformComponent>();
 
-	//finds positions
-	glm::vec3 globalPos, globalRot, globalScale;
-	globalPos = GetGlobalPosition(tChild);
-	globalRot = GetGlobalRotation(tChild);
-	globalScale = GetGlobalScale(tChild);
+	////finds positions
+	//glm::vec3 globalPos, globalRot, globalScale;
+	//globalPos = GetGlobalPosition(tChild);
+	//globalRot = GetGlobalRotation(tChild);
+	//globalScale = GetGlobalScale(tChild);
 
 	if (tChild->m_parent)
 	{
@@ -157,13 +187,30 @@ void TransformSystem::SetParent(Entity* parent, Entity* child)
 	}
 	tParent->m_children.push_back(tChild);
 	tChild->m_parent = tParent;
-	glm::mat4 invParentMat = glm::inverse(GetModelMatrix(tParent));
 
-	glm::mat4 newMat = invParentMat * GetModelMatrix(tChild);
+
+
+	tChild->m_modelMatrix = glm::inverse(tParent->m_modelMatrix) * tChild->m_modelMatrix;
+
+
+	glm::vec3 scale;
+	glm::vec3 pos;
+	glm::quat rot;
+	glm::vec3 skew;
+	glm::vec4 persp;
+
+	glm::decompose(tChild->m_modelMatrix, scale, rot, pos, skew, persp);
+
+	tChild->m_position = pos;
+	tChild->m_rotation = rot;
+	tChild->m_scale = scale;
+
+	RecalculateModelMatrices(tChild);
+
 	//glm::vec3 pos = glm::vec3(newMat[0][0], newMat[1][0], newMat[2][0]);
 	//Sets positions
-	SetPosition(child, globalPos - GetGlobalPosition(tParent));
-	SetRotation(child, globalRot - GetGlobalRotation(tParent));
+	//SetPosition(child, globalPos - GetGlobalPosition(tParent));
+	//SetRotation(child, globalRot - GetGlobalRotation(tParent));
 
 	//SetPosition(child, pos);
 	//SetScale(child, globalScale - GetGlobalScale(tParent));
@@ -177,9 +224,9 @@ void TransformSystem::Unparent(Entity* e)
 	{
 		//finds positions
 		glm::vec3 globalPos, globalRot, globalScale;
-		globalPos = GetGlobalPosition(transform);
-		globalRot = GetGlobalRotation(transform);
-		globalScale = GetGlobalScale(transform);
+		//globalPos = GetGlobalPosition(transform);
+		//globalRot = GetGlobalRotation(transform);
+		//globalScale = GetGlobalScale(transform);
 
 		//removes from children
 		auto* parent = transform->m_parent;                
@@ -192,10 +239,25 @@ void TransformSystem::Unparent(Entity* e)
 		sceneTransform->m_children.push_back(transform);
 		transform->m_parent = sceneTransform;
 		
-		//Sets positions
-		SetPosition(e, globalPos);
-		SetRotation(e, globalRot);
-		SetScale(e, globalScale);
+
+		transform->m_modelMatrix = glm::inverse(sceneTransform->m_modelMatrix) * transform->m_modelMatrix;
+
+
+		glm::vec3 scale;
+		glm::vec3 pos;
+		glm::quat rot;
+		glm::vec3 skew;
+		glm::vec4 persp;
+
+		glm::decompose(transform->m_modelMatrix, scale, rot, pos, skew, persp);
+
+		transform->m_position = pos;
+		transform->m_rotation = rot;
+		transform->m_scale = scale;
+
+
+		transform->m_modelMatrix = sceneTransform->m_modelMatrix * GetLocalModelMatrix(transform);
+		RecalculateModelMatrices(transform);
 	}
 }
 
@@ -210,27 +272,43 @@ glm::mat4 TransformSystem::GetModelMatrix(const Entity* e)
 
 glm::mat4 TransformSystem::GetModelMatrix(const TransformComponent* transformComp)
 {
-	if (transformComp->m_parent)
-	{
-		return GetModelMatrix(transformComp->m_parent) * GetLocalModelMatrix(transformComp);
-	}
-	else
-		return GetLocalModelMatrix(transformComp);
-}
-
-
-glm::mat4 TransformSystem::GetLocalModelMatrix(const Entity* e)
-{
-	auto* tComp = e->GetComponent<TransformComponent>();
-	return GetLocalModelMatrix(tComp);
+	return transformComp->m_modelMatrix;
 }
 
 glm::mat4 TransformSystem::GetLocalModelMatrix(const TransformComponent* transformComp)
-{
-	glm::mat4 modelMat = glm::mat4(1.0f);
-	modelMat = glm::translate(modelMat, transformComp->m_position);
-	modelMat = modelMat * glm::toMat4(transformComp->m_rotation);
-	modelMat = glm::scale(modelMat, transformComp->m_scale);
-
-	return modelMat;
+{ 
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, transformComp->m_position);
+	model = model * glm::toMat4(transformComp->m_rotation);
+	model = glm::scale(model, transformComp->m_scale);
+	return model;
 }
+
+void TransformSystem::RecalculateModelMatrices(TransformComponent* transformComp)
+{
+	if (transformComp->m_parent)
+	{
+		transformComp->m_modelMatrix = transformComp->m_parent->m_modelMatrix * GetLocalModelMatrix(transformComp);
+	}
+
+	for (auto tChild : transformComp->m_children)
+	{
+		tChild->m_modelMatrix = transformComp->m_modelMatrix * GetLocalModelMatrix(tChild);
+		RecalculateModelMatrices(tChild);
+	}
+}
+
+//
+//glm::mat4 TransformSystem::GetLocalModelMatrix(const Entity* e)
+//{
+//	auto* tComp = e->GetComponent<TransformComponent>();
+//	return GetLocalModelMatrix(tComp);
+//}
+//
+//glm::mat4 TransformSystem::GetLocalModelMatrix(const TransformComponent* transformComp)
+//{
+//	if (transformComp->m_parent)
+//		return GetModelMatrix(transformComp->m_parent) * GetModelMatrix(transformComp);
+//	else
+//		return GetModelMatrix(transformComp);
+//}

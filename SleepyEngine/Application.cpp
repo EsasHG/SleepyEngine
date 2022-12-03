@@ -40,9 +40,7 @@ double Application::BeginFrame()
 	double time = glfwGetTime();
 	double deltaTime = time - prevFrameTime;
 	prevFrameTime = time;
-	ui->BeginFrame();
 
-	renderer->BeginFrame(ui->contentRegionSize);
 
 	return deltaTime;
 }
@@ -63,17 +61,27 @@ int Application::Run()
 	{
 		double deltaTime = BeginFrame();
 		
+		ui->BeginFrame();
+		ui->Run(deltaTime, scene.m_SceneEntity);
+
+		renderer->BeginFrame(ui->contentRegionSize);
+
 		glfwPollEvents();
 
 		InputManager::GetInstance().RunEvents();
 		camera->Run(deltaTime);
+
+		if (ui->RenderWindowOpen())
+			renderer->PrepDraw(deltaTime);
+
 		if (ui->RenderWindowOpen())
 			scene.Update();
 
-		if(ui->RenderWindowOpen())
-			ui->sceneTexture = renderer->Draw(deltaTime);
 
-		ui->Run(deltaTime, scene.m_SceneEntity);
+		if (ui->RenderWindowOpen())
+		ui->sceneTexture = renderer->EndFrame();
+
+		ui->EndFrame();
 		EndFrame();
 	}
 	return 0;
@@ -81,13 +89,12 @@ int Application::Run()
 
 void Application::EndFrame()
 {
-	ui->EndFrame();
-	renderer->EndFrame();
+
 	window->SwapBuffers();
 }
 
 
 void Application::FramebufferResizeCallback(int x, int y)
 {
-	renderer->ResizeViewport(ui->contentRegionSize.x, ui->contentRegionSize.y);
+	//renderer->ResizeViewport(ui->contentRegionSize.x, ui->contentRegionSize.y);
 }

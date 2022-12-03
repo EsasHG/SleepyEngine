@@ -51,12 +51,19 @@ void Renderer::BeginFrame(glm::vec2 windowSize)
 
 	//if 0 we might get a divide by 0 error below. This should really be handled some other way
 	//was not like this earlier. No idea why it started happening
-	if (windowSize.y != 0)
+	//if (windowSize.y != 0)
+	//	m_WindowSize = windowSize;
+	//else
+	//	m_WindowSize = glm::vec2(1920, 1080);
+
+	if (m_WindowSize != windowSize)
+	{
 		m_WindowSize = windowSize;
-	else
-		m_WindowSize = glm::vec2(1920, 1080);
-	
+		RecreateFramebuffer();
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
 	glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
 	glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
@@ -73,7 +80,7 @@ void Renderer::SetCamera(class Camera* camera)
 }
 
 //TODO: Sets all values that only needs to be set once per shader per frame. Should be done in another way?
-unsigned int Renderer::Draw(double deltaTime)
+void Renderer::PrepDraw(double deltaTime)
 {
 	glUseProgram(m_ShaderId);
 	//game window draw stuff
@@ -98,12 +105,10 @@ unsigned int Renderer::Draw(double deltaTime)
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "view", view);
 
-	glDisable(GL_DEPTH_TEST);
+
 	
 	glUseProgram(0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	return renderedTexture;
 }
 
 void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
@@ -130,7 +135,7 @@ void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 void Renderer::SetPointLightValues(unsigned int shaderID, TransformComponent& transform, PointLightComponent& pointLight)
 {
 	glUseProgram(shaderID);
-	Renderer::SetShaderUniformVec3(shaderID, "pointLight.position", TransformSystem::GetGlobalPosition(&transform));
+	Renderer::SetShaderUniformVec3(shaderID, "pointLight.position", TransformSystem::GetPosition(&transform));
 	Renderer::SetShaderUniformVec3(shaderID, "pointLight.ambient", pointLight.m_ambient);
 	Renderer::SetShaderUniformVec3(shaderID, "pointLight.diffuse", pointLight.m_diffuse);
 	Renderer::SetShaderUniformVec3(shaderID, "pointLight.specular", pointLight.m_specular);
@@ -148,10 +153,13 @@ void Renderer::SetDirLightValues(unsigned int shaderID, TransformComponent& tran
 	Renderer::SetShaderUniformVec3(shaderID, "dirLight.specular", dirLight.m_specular);
 }
 
-void Renderer::EndFrame()
+unsigned int Renderer::EndFrame()
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDisable(GL_DEPTH_TEST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return renderedTexture;
 	//Got some weird results without this :/
-	RecreateFramebuffer();
 }
 
 void Renderer::ResizeViewport(int x, int y)

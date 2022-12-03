@@ -3,7 +3,6 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 #include <filesystem>
-
 #include "Window.h"
 #include "Entity.h"
 #include "ImGui/imgui.h"
@@ -49,7 +48,6 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 {
 	bool windowFocused = false;
 
-
 	if (ImGui::BeginMainMenuBar())
 	{
 		if (ImGui::BeginMenu("Windows"))
@@ -92,7 +90,12 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		ImGui::Begin("Info", &showTestWindow3);
 		ImGui::Text("Framerate: %.2f", 1 / deltaTime);
 		ImGui::Text("Time Per Frame: %.3fms", deltaTime* 1000);
-
+		//frametimes.push(deltaTime);
+		////if (frametimes.size() > 100)
+		//	//frametimes.pop();
+		//char overlay[32];
+		//sprintf_s(overlay, "Framerate: %.2f", 1 / deltaTime);
+		//ImGui::PlotLines("Frames", &frametimes.front(), frametimes.size(),0,overlay,0.0f,1.0f);
 		if(ImGui::GetIO().WantCaptureKeyboard)
 			ImGui::Text("WantCaptureKeyboard: True");
 		else
@@ -402,6 +405,7 @@ void UiLayer::SetupObjectWindow()
 
 	if (sceneSelected)
 	{
+
 		ImGui::ColorEdit3("Clear Color", (float*)&clearColor);
 		ImGui::ColorEdit3("Quad Color", (float*)&quadColor);
 	}
@@ -419,7 +423,7 @@ void UiLayer::ShowTransformComp(TransformComponent* transform)
 	glm::vec3 scale = TransformSystem::GetScale(transform);
 
 	ImGui::DragFloat3("Position", (float*)&pos, 0.01f, -100, 100);
-	ImGui::DragFloat3("Rotation", (float*)&rot, 0.1f, -180, 180);
+	ImGui::DragFloat3("Rotation", (float*)&rot, 0.1f, -179, 180);
 	ImGui::DragFloat3("Scale", (float*)&scale, 0.01f, -100, 100);
 
 	TransformSystem::SetPosition(transform->m_Entity, pos);
