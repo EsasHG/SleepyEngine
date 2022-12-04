@@ -40,18 +40,34 @@ bool ModelLibrary::AddMesh(std::string name, std::vector<Vertex> vertices)
 	return true;
 }
 
+/// <summary>
+/// Tries to load texture if texture.path is set.
+/// This probably doesn't work properly.
+/// </summary>
+/// <param name="name"></param>
+/// <param name="vertices"></param>
+/// <param name="texture"></param>
+/// <returns></returns>
 bool ModelLibrary::AddMesh(std::string name, std::vector<Vertex> vertices, Tex texture)
 {
 	if (MeshExists(name))
 		return false;
-	Mesh* m = new Mesh(vertices);
+	std::vector<Tex> textures;
+	textures.push_back(texture);
+	Mesh* m = new Mesh(vertices, textures);
 	std::pair<std::string, Mesh*> pair(name, m);
 	m_meshes.insert(pair);
-	if (texture.path != "")			//TODO: Finish
+	if (texture.path != "")
 	{
-		m_loadedTextures.push_back(texture);
-	//	LoadTexture(texture.path,);
-
+		auto it = std::find(m_loadedTextures.begin(), m_loadedTextures.end(), texture);
+		if (it == m_loadedTextures.end())
+		{
+			texture.path.substr(0, texture.path.find_last_of("\\"));
+			std::string directory = texture.path.substr(0, texture.path.find_last_of("\\"));
+			std::string name = texture.path.substr(texture.path.find_last_of("\\") + 1, texture.path.length());	//remove path
+			LoadTexture(name.c_str(), directory);
+			m_loadedTextures.push_back(texture);
+		}
 	}
 	m->m_textures.push_back(texture);
 	return true;

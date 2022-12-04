@@ -43,7 +43,6 @@ double Application::BeginFrame()
 	double deltaTime = time - prevFrameTime;
 	prevFrameTime = time;
 
-
 	return deltaTime;
 }
 
@@ -51,7 +50,6 @@ int Application::Run()
 {
 	window = new Window(1920, 1080, "Sleepy Engine");
 #ifdef _SHOWUI
-
 
 	ui = new UiLayer();
 	window->EnableImGui();

@@ -37,6 +37,11 @@ struct Tex
 	unsigned int id;
 	std::string type;
 	std::string path;
+
+	bool operator == (const Tex& a)
+	{
+		return id == a.id;
+	}
 };
 
 class Mesh

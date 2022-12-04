@@ -50,8 +50,7 @@ private:
 	bool showAssetsWindow = true;
 
 	bool styleEditorOpen = false;
-	bool styleSelectorOpen = false;
-	bool fontSelectorOpen = false;
+	bool engineSettingsOpen = false;
 	bool userGuideOpen = false;
 	bool metricsWindowOpen = false;
 	bool debugLogWindowOpen = false;

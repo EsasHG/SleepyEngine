@@ -67,12 +67,11 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 			if (ImGui::MenuItem("Object Tree", "", &showObjectTreeWindow)) {}
 			if (ImGui::MenuItem("Object Details", "", &showObjectWindow)) {}
 			if (ImGui::MenuItem("Performance", "", &showPerformanceWindow)) {}
+			if (ImGui::MenuItem("Engine Settings", "", &engineSettingsOpen)) {}
 			if (ImGui::MenuItem("Style Editor", "", &styleEditorOpen)) {}
-			if (ImGui::MenuItem("Style Selector", "", &styleSelectorOpen)) {}
 			if (ImGui::MenuItem("Metrics", "", &metricsWindowOpen)) {}
 			if (ImGui::MenuItem("Debug Log ", "", &debugLogWindowOpen)) {}
 			if (ImGui::MenuItem("Stack Tool", "", &stackToolWindowOpen)) { }
-			if (ImGui::MenuItem("Fonts", "", &fontSelectorOpen)) {}
 			if (ImGui::MenuItem("ImGui User Guide", "", &userGuideOpen)) {}
 
 			ImGui::EndMenu();
@@ -80,17 +79,19 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		ImGui::EndMainMenuBar();
 	}
 
-
+	if (engineSettingsOpen)
+	{
+		ImGui::Begin("Engine Settings", &engineSettingsOpen);
+		ImGui::ShowStyleSelector("Style Selector");
+		ImGui::ShowFontSelector("Font Selector");
+		ImGui::End();
+	}
 	if (styleEditorOpen)
 	{
 		ImGui::Begin("Style Editor", &styleEditorOpen);
 		ImGui::ShowStyleEditor();
 		ImGui::End();
 	}
-	if (styleSelectorOpen)
-		ImGui::ShowStyleSelector("Style Selector");
-	if(fontSelectorOpen)
-		ImGui::ShowFontSelector("Font Selector");
 	if (metricsWindowOpen)
 		ImGui::ShowMetricsWindow(&metricsWindowOpen);
 	if(debugLogWindowOpen)
@@ -249,7 +250,7 @@ void UiLayer::SetupObjectTree(Entity* sceneEntity)
 		{
 			//drag target above first child
 			ImGui::PushID(++id);
-			ImGui::InvisibleButton("dragTarget", ImVec2(ImGui::GetContentRegionAvail().x, 5));
+			ImGui::InvisibleButton("dragTarget", ImVec2(ImGui::GetContentRegionAvail().x, 5)); //TODO: Find dynamic value instead of 5
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITYPOINTER"))
