@@ -42,9 +42,10 @@ struct Tex
 class Mesh
 {
 public:
-	//TODO remove shaderID from constructors
+
 	Mesh(std::vector<Vertex> vertices);
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Tex> textures);
+	Mesh(std::vector<Vertex> vertices, std::vector<Tex> textures);
 	void Draw(unsigned int shaderID);
 private:
 

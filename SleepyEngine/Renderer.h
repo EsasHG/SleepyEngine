@@ -4,7 +4,6 @@
 #include <entt/entt.hpp>
 #include <map>
 
-class MeshComponent;
 class TransformComponent;
 class Renderer
 {
@@ -13,7 +12,9 @@ public:
 	~Renderer();
 	void BeginFrame(glm::vec2 windowSize);
 	void PrepDraw(double deltaTime);
-	static void DrawMesh(MeshComponent mesh, TransformComponent transform);
+	static void DrawMesh(class MeshComponent mesh, TransformComponent transform);
+
+	void DrawSceneTextureOnScreen(int texture);
 
 	static void SetPointLightValues(unsigned int shaderID, TransformComponent& transform, class PointLightComponent& pointLight);
 	static void SetDirLightValues(unsigned int shaderID, TransformComponent& transform, class DirLightComponent& pointLight);
@@ -41,7 +42,7 @@ public:
 
 private:
 
-
+	class Mesh* screenQuadMesh = nullptr;
 	glm::vec2 m_WindowSize;
 
 	unsigned int m_ShaderId;

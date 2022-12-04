@@ -17,6 +17,7 @@ public:
 
 	void Update();
 
+	void Draw();
 	Entity* m_SceneEntity;
 private:
 	Entity* CreateEntity(std::string entityName);

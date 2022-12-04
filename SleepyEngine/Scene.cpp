@@ -37,7 +37,7 @@ Scene::Scene()
 	
 	ModelLibrary::GetInstance().AddMesh("quad", vertices);
 	ent->AddComponent<MeshComponent>("quad","default", "color");
-	
+
 	TransformSystem::SetPosition(ent, glm::vec3(0.5f, -0.5f, 0.0f));
 	TransformSystem::SetRotation(ent, glm::vec3(45.0f, 0.0f, 0.0f));
 	TransformSystem::SetScale(ent, glm::vec3(0.8f, 0.8f, 0.8f));
@@ -165,6 +165,11 @@ Entity* Scene::LoadMeshGroup(MeshGroup* meshGroup, Entity* parent, std::string g
 
 void Scene::Update()
 {
+
+}
+
+void Scene::Draw()
+{
 	//update light values. I will figure out something smarter for this later lmao
 	unsigned int shaderID = ModelLibrary::GetInstance().GetShader("default");
 	auto pointLightView = m_registry.view<TransformComponent, PointLightComponent>();
@@ -181,4 +186,5 @@ void Scene::Update()
 	{
 		Renderer::DrawMesh(mesh, transform);
 	}
+
 }

@@ -31,7 +31,9 @@
 Application::~Application()
 {
 	delete window;
+#ifdef _SHOWUI
 	delete ui;
+#endif // _SHOWUI
 	delete renderer;
 }
 
@@ -48,11 +50,15 @@ double Application::BeginFrame()
 int Application::Run() 
 {
 	window = new Window(1920, 1080, "Sleepy Engine");
+#ifdef _SHOWUI
+
+
 	ui = new UiLayer();
+	window->EnableImGui();
+#endif // _SHOWUI
 	InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Application::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
 
 	renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
-	window->EnableImGui();
 	
 	Camera* camera = new Camera();
 	renderer->SetCamera(camera);
@@ -60,28 +66,36 @@ int Application::Run()
 	while (!window->ShouldClose())
 	{
 		double deltaTime = BeginFrame();
-		
+#ifdef _SHOWUI;
+
 		ui->BeginFrame();
 		ui->Run(deltaTime, scene.m_SceneEntity);
-
 		renderer->BeginFrame(ui->contentRegionSize);
+#else
+		renderer->BeginFrame(glm::vec2(window->GetWidth(),window->GetHeight()));
+
+#endif // _SHOWUI;
 
 		glfwPollEvents();
 
 		InputManager::GetInstance().RunEvents();
 		camera->Run(deltaTime);
+		scene.Update();
 
+#ifdef _SHOWUI;
 		if (ui->RenderWindowOpen())
+		{
 			renderer->PrepDraw(deltaTime);
-
-		if (ui->RenderWindowOpen())
-			scene.Update();
-
-
-		if (ui->RenderWindowOpen())
-		ui->sceneTexture = renderer->EndFrame();
-
+			scene.Draw();
+			ui->sceneTexture = renderer->EndFrame();
+		}
 		ui->EndFrame();
+#else
+		renderer->PrepDraw(deltaTime);
+		scene.Draw();
+		renderer->DrawSceneTextureOnScreen(renderer->EndFrame());
+#endif // _SHOWUI;
+
 		EndFrame();
 	}
 	return 0;

@@ -46,11 +46,20 @@ private:
 	bool showObjectWindow = true;
 	bool showObjectTreeWindow = true;
 	bool showRenderWindow = true;
-	bool showTestWindow3 = true;
+	bool showPerformanceWindow = true;
 	bool showAssetsWindow = true;
+
+	bool styleEditorOpen = false;
+	bool styleSelectorOpen = false;
+	bool fontSelectorOpen = false;
+	bool userGuideOpen = false;
+	bool metricsWindowOpen = false;
+	bool debugLogWindowOpen = false;
+	bool stackToolWindowOpen = false;
+	bool renderWindowOpen;
+
 	bool sceneSelected = false;
 
-	bool renderWindowOpen;
 	//std::queue<float> frametimes;
 
 	Entity* entityToSelect = nullptr;

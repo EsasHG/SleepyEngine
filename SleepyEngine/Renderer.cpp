@@ -18,6 +18,7 @@
 #include "Camera.h"
 
 
+
 Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 {
 	if (!gladLoadGL())
@@ -29,7 +30,8 @@ Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 	ModelLibrary::GetInstance().AddShader("color", m_ShaderId);
 	m_TextureShaderId = Renderer::CreateShader("Shaders/TextureShader.vert", "Shaders/TextureShader.frag");
 	ModelLibrary::GetInstance().AddShader("default", m_TextureShaderId);
-	 
+	ModelLibrary::GetInstance().AddShader("quadShader", Renderer::CreateShader("Shaders\\QuadShader.vert", "Shaders\\QuadShader.frag"));
+
 	glGenFramebuffers(1, &FBO);
 	glGenTextures(1, &renderedTexture);
 	glGenRenderbuffers(1, &RBO);
@@ -105,10 +107,7 @@ void Renderer::PrepDraw(double deltaTime)
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
 	Renderer::SetShaderUniformMat4(m_TextureShaderId, "view", view);
 
-
-	
 	glUseProgram(0);
-
 }
 
 void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
@@ -132,6 +131,32 @@ void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 
 }
 
+void Renderer::DrawSceneTextureOnScreen(int texture)
+{
+	
+	if (!screenQuadMesh)
+	{
+		Tex tex;
+		tex.id = texture;
+		tex.type = "diffuse";
+		std::vector<Vertex> vertices;
+		vertices.push_back(Vertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)));
+		vertices.push_back(Vertex(glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)));
+		vertices.push_back(Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
+		vertices.push_back(Vertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)));
+		vertices.push_back(Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
+		vertices.push_back(Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
+		std::vector<Tex> textureVec;
+		textureVec.push_back(tex);
+		screenQuadMesh = new Mesh(vertices, textureVec);
+	}
+	unsigned int shaderID = ModelLibrary::GetInstance().GetShader("quadShader");
+	glUseProgram(shaderID);
+	screenQuadMesh->Draw(shaderID);
+	glUseProgram(0);
+
+}
+
 void Renderer::SetPointLightValues(unsigned int shaderID, TransformComponent& transform, PointLightComponent& pointLight)
 {
 	glUseProgram(shaderID);
@@ -142,6 +167,7 @@ void Renderer::SetPointLightValues(unsigned int shaderID, TransformComponent& tr
 	Renderer::SetShaderUniformFloat(shaderID, "pointLight.constant", pointLight.m_constant);
 	Renderer::SetShaderUniformFloat(shaderID, "pointLight.linear", pointLight.m_linear);
 	Renderer::SetShaderUniformFloat(shaderID, "pointLight.quadratic",pointLight.m_quadratic);
+	glUseProgram(0);
 }
 
 void Renderer::SetDirLightValues(unsigned int shaderID, TransformComponent& transform, DirLightComponent& dirLight)
@@ -151,13 +177,13 @@ void Renderer::SetDirLightValues(unsigned int shaderID, TransformComponent& tran
 	Renderer::SetShaderUniformVec3(shaderID, "dirLight.ambient", dirLight.m_ambient);
 	Renderer::SetShaderUniformVec3(shaderID, "dirLight.diffuse", dirLight.m_diffuse);
 	Renderer::SetShaderUniformVec3(shaderID, "dirLight.specular", dirLight.m_specular);
+	glUseProgram(0);
 }
 
 unsigned int Renderer::EndFrame()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDisable(GL_DEPTH_TEST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return renderedTexture;
 	//Got some weird results without this :/
 }

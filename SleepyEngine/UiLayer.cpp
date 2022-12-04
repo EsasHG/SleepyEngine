@@ -12,6 +12,7 @@
 #include "Components/MeshComponent.h"
 #include "TransformSystem.h"
 #include "ModelLibrary.h"
+#include "Fonts/IconsFontAwesome6.h"
 
 #define PROJECTDIR
 
@@ -19,19 +20,28 @@ UiLayer::UiLayer()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO* io = &ImGui::GetIO(); (void)io;
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::StyleColorsDark();
 
 	ImGuiStyle& style = ImGui::GetStyle();
-	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		style.WindowRounding = 0.0f;
 		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		style.WindowBorderSize = 0.0f;
 	}
+	std::string font = "SleepyEngine\\Fonts\\fa-regular-400.ttf";
+	font = _SOLUTIONDIR + font;
+	io.Fonts->AddFontDefault();
+
+	ImFontConfig config;
+	config.MergeMode = true;
+	static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+
+	io.Fonts->AddFontFromFileTTF(font.c_str(),13.0f, &config, icon_ranges);
 }
 
 void UiLayer::BeginFrame()
@@ -53,16 +63,46 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		if (ImGui::BeginMenu("Windows"))
 		{
 			//ImGui::Button("Play", ImVec2(25, 25));
-			if (ImGui::MenuItem("Render Window", "", &showRenderWindow)) {}
-			if (ImGui::MenuItem("Object Tree Window", "", &showObjectTreeWindow)) {}
-			if (ImGui::MenuItem("Object Details Window", "", &showObjectWindow)) {}
-			if (ImGui::MenuItem("Performance Window", "", &showTestWindow3)) {}
+			if (ImGui::MenuItem("Main", "", &showRenderWindow)) {}
+			if (ImGui::MenuItem("Object Tree", "", &showObjectTreeWindow)) {}
+			if (ImGui::MenuItem("Object Details", "", &showObjectWindow)) {}
+			if (ImGui::MenuItem("Performance", "", &showPerformanceWindow)) {}
+			if (ImGui::MenuItem("Style Editor", "", &styleEditorOpen)) {}
+			if (ImGui::MenuItem("Style Selector", "", &styleSelectorOpen)) {}
+			if (ImGui::MenuItem("Metrics", "", &metricsWindowOpen)) {}
+			if (ImGui::MenuItem("Debug Log ", "", &debugLogWindowOpen)) {}
+			if (ImGui::MenuItem("Stack Tool", "", &stackToolWindowOpen)) { }
+			if (ImGui::MenuItem("Fonts", "", &fontSelectorOpen)) {}
+			if (ImGui::MenuItem("ImGui User Guide", "", &userGuideOpen)) {}
 
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
 	}
 
+
+	if (styleEditorOpen)
+	{
+		ImGui::Begin("Style Editor", &styleEditorOpen);
+		ImGui::ShowStyleEditor();
+		ImGui::End();
+	}
+	if (styleSelectorOpen)
+		ImGui::ShowStyleSelector("Style Selector");
+	if(fontSelectorOpen)
+		ImGui::ShowFontSelector("Font Selector");
+	if (metricsWindowOpen)
+		ImGui::ShowMetricsWindow(&metricsWindowOpen);
+	if(debugLogWindowOpen)
+		ImGui::ShowDebugLogWindow(&debugLogWindowOpen);
+	if(stackToolWindowOpen)
+		ImGui::ShowStackToolWindow(&stackToolWindowOpen);
+	if (userGuideOpen)
+	{
+		ImGui::Begin("User Guide", &userGuideOpen);
+		ImGui::ShowUserGuide();
+		ImGui::End();
+	}
 	if (showRenderWindow)
 	{
 		
@@ -85,9 +125,9 @@ void UiLayer::Run(double deltaTime, Entity* sceneEntity)
 		ImGui::PopStyleVar();
 	}
 
-	if (showTestWindow3)
+	if (showPerformanceWindow)
 	{
-		ImGui::Begin("Info", &showTestWindow3);
+		ImGui::Begin("Info", &showPerformanceWindow);
 		ImGui::Text("Framerate: %.2f", 1 / deltaTime);
 		ImGui::Text("Time Per Frame: %.3fms", deltaTime* 1000);
 		//frametimes.push(deltaTime);
@@ -550,6 +590,15 @@ void UiLayer::SetupAssetsWindow()
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
 		std::string fileName = entry.path().string().substr(entry.path().string().find_last_of("\\")+1, entry.path().string().size());
+
+		if (entry.is_directory())
+		{
+			fileName = ICON_FA_FOLDER_CLOSED + std::string(" ") + fileName;
+		}
+		else if (entry.is_regular_file())
+		{
+
+		}
 		if (ImGui::Selectable(fileName.c_str()))
 		{
 			if (fileName.find(".") != std::string::npos)

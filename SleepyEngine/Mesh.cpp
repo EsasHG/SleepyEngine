@@ -13,6 +13,12 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 	SetupMesh();
 }
 
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<Tex> textures) : m_vertices(vertices), m_textures(textures)
+{
+	bIndiced = false;
+	SetupMesh();
+}
+
 void Mesh::SetupMesh()
 {
 	glGenVertexArrays(1, &m_VAO);
@@ -41,6 +47,7 @@ void Mesh::SetupMesh()
 //TODO: should the renderer be responsible for this?
 void Mesh::Draw(unsigned int shaderID)
 {
+
 	if (!m_textures.empty())
 	{
 		unsigned int diffuseNr = 1;

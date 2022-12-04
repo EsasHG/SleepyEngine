@@ -16,9 +16,15 @@ void InputManager::Init(GLFWwindow* window)
 
 void InputManager::RunEvents()
 {
+#ifdef _SHOWUI
 	bDispatchKeyboardEvents = !ImGui::GetIO().WantCaptureKeyboard;
 	bDispatchMouseEvents = !ImGui::GetIO().WantCaptureMouse;
-	
+#else
+	bDispatchKeyboardEvents = true;
+	bDispatchMouseEvents = true;
+
+#endif // _SHOWUI
+
 	if (bDispatchKeyboardEvents)
 	{
 		for (Input* i : m_Inputs)

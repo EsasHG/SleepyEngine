@@ -40,6 +40,7 @@ public:
 	MeshGroup* AddMesh(std::string filepath);
 
 	bool AddMesh(std::string name, std::vector<Vertex> vertices);
+	bool AddMesh(std::string name, std::vector<Vertex> vertices, Tex texture); //TODO: Finish 
 
 	bool AddMesh(std::string name, Mesh* mesh);
 

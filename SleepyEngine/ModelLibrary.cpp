@@ -40,6 +40,23 @@ bool ModelLibrary::AddMesh(std::string name, std::vector<Vertex> vertices)
 	return true;
 }
 
+bool ModelLibrary::AddMesh(std::string name, std::vector<Vertex> vertices, Tex texture)
+{
+	if (MeshExists(name))
+		return false;
+	Mesh* m = new Mesh(vertices);
+	std::pair<std::string, Mesh*> pair(name, m);
+	m_meshes.insert(pair);
+	if (texture.path != "")			//TODO: Finish
+	{
+		m_loadedTextures.push_back(texture);
+	//	LoadTexture(texture.path,);
+
+	}
+	m->m_textures.push_back(texture);
+	return true;
+}
+
 bool ModelLibrary::AddMesh(std::string name, Mesh* mesh)
 {
 
