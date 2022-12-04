@@ -26,6 +26,10 @@ public:
 	/// </summary>
 	void CleanupRegistry();
 	static void MarkForDeletion(Entity* entity);
+	
+	template<typename T>
+	void MarkRemoveComponent(Entity* entity);
+
 	Entity* m_SceneEntity;
 private:
 	Entity* CreateEntity(std::string entityName);
@@ -36,4 +40,5 @@ private:
 	friend class Entity;
 	friend class Application;
 };
+
 

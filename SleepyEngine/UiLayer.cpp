@@ -440,6 +440,8 @@ void UiLayer::SetupObjectWindow()
 		if (pointLight)
 			ShowPointLightComp(pointLight);
 		
+
+
 		MeshComponent* mesh = entity->GetComponent<MeshComponent>();
 		if (mesh)
 			ShowMeshComp(mesh);
@@ -549,6 +551,11 @@ void UiLayer::ShowMeshComp(MeshComponent* mesh)
 		ImGui::EndCombo();
 	}
 
+	if (ImGui::Button("Remove"))
+	{
+		mesh->m_Entity->RemoveComponent<MeshComponent>();
+	}
+
 	ImGui::Spacing();
 	ImGui::Spacing();
 	ImGui::Separator();
@@ -565,6 +572,11 @@ void UiLayer::ShowDirLightComp(DirLightComponent* dirLight)
 	ImGui::ColorEdit3("Diffuse", (float*)&dirLight->m_diffuse);
 	ImGui::ColorEdit3("Specular", (float*)&dirLight->m_specular);	
 	
+	if (ImGui::Button("Remove"))
+	{
+		dirLight->m_Entity->RemoveComponent<DirLightComponent>();
+	}
+
 	ImGui::Spacing();
 	ImGui::Spacing();
 	ImGui::Separator();
@@ -582,6 +594,12 @@ void UiLayer::ShowPointLightComp(PointLightComponent* pointLight)
 	ImGui::DragFloat("Constant", &pointLight->m_constant, 0.005f, 0.0f, 2.0f);
 	ImGui::DragFloat("Linear", &pointLight->m_linear, 0.005f, 0.0f,2.0f);
 	ImGui::DragFloat("Quadratic", &pointLight->m_quadratic, 0.005f,0.0f,2.0f);
+
+
+	if (ImGui::Button("Remove"))
+	{
+		pointLight->m_Entity->RemoveComponent<PointLightComponent>();
+	}
 
 	ImGui::Spacing();
 	ImGui::Spacing();

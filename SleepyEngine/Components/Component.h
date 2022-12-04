@@ -1,7 +1,7 @@
 #pragma once
 
 
-enum COMPONENT_TYPES
+enum COMPONENT_TYPE
 {
 	TRANSFORM,
 	MESH, 
@@ -17,12 +17,11 @@ public:
 
 	bool operator == (Component const& comp) 
     {
-
 		return (m_Entity == comp.m_Entity && m_componentType == comp.m_componentType);
     }
+public:
 
-protected:
 	class Entity* m_Entity;
-	COMPONENT_TYPES m_componentType;
+	COMPONENT_TYPE m_componentType;
 };
 

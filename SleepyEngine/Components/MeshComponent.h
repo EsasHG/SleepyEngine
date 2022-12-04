@@ -7,7 +7,7 @@
 #include "ModelLibrary.h"
 
 
-class MeshComponent : Component
+class MeshComponent : public Component
 {
 public:
 	MeshComponent(Entity* entity, std::string mesh, std::string material = "default", std::string shader = "default")

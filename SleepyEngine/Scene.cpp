@@ -26,6 +26,7 @@ public:
 		m_componentType = DELETION;
 
 	}
+	COMPONENT_TYPE typeToRemove;
 	friend class Scene;
 };
 
@@ -260,7 +261,11 @@ void Scene::DeleteAllComponents(Entity* entity)
 		}
 	}
 	//m_registry.remove<TransformComponent>(entity->m_entityHandle);
-
-
 }
 
+template<typename T>
+void Scene::MarkRemoveComponent(Entity* entity)
+{
+	m_registry.remove<T>(entity->m_entityHandle);
+
+}

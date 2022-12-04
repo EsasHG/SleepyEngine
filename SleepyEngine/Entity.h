@@ -48,6 +48,13 @@ public:
 		return m_scene->m_registry.all_of<T>(m_entityHandle);
 	}
 
+	template<typename T>
+	void RemoveComponent() 
+	{
+		//return m_scene->MarkRemoveComponent<T>(this);
+		m_scene->m_registry.remove<T>(m_entityHandle);
+	}
+
 	std::string m_Name;
 private:
 	Scene* m_scene;

@@ -37,8 +37,7 @@ public:
     PointLightComponent(Entity* entity, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 position = glm::vec3(0.0f), float constant = 1.0f, float linear = 0.09f, float quadratic = 0.032f) :
         LightComponent(entity, ambient, diffuse, specular), m_position(position), m_constant(constant), m_linear(linear), m_quadratic(quadratic)
     {
-        m_componentType = COMPONENT_TYPES::POINT_LIGHT;
-
+        m_componentType = COMPONENT_TYPE::POINT_LIGHT;
     };
 
     glm::vec3 m_position;
