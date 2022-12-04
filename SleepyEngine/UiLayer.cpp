@@ -413,6 +413,13 @@ void UiLayer::SetupObjectWindow()
 		
 		ImGui::Spacing();
 		ImGui::Text(entity->m_Name.c_str());
+		if (ImGui::Button("Delete"))
+		{
+			Scene::MarkForDeletion(entity);
+			selectedEntities.pop_back();
+			ImGui::End();
+			return;
+		}
 		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Separator();

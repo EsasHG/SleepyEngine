@@ -18,6 +18,7 @@ public:
 		m_modelMatrix = glm::scale(m_modelMatrix, scale);
 
 		m_Entity = entity;
+		m_componentType = TRANSFORM;
 	};
 
 private:
@@ -29,7 +30,8 @@ private:
 
 	std::vector<TransformComponent*> m_children;
 
-	friend class TransformSystem;
+	friend class TransformSystem;	
+	friend class Scene;				//For deleting children when parent is being deleted.
 	friend class UiLayer;
 };
 

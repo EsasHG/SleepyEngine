@@ -41,11 +41,19 @@ public:
 	{
 		return m_scene->m_registry.try_get<T>(m_entityHandle);
 	}
+
+	template<typename T>
+	const bool Has() const
+	{
+		return m_scene->m_registry.all_of<T>(m_entityHandle);
+	}
+
 	std::string m_Name;
 private:
 	Scene* m_scene;
 	entt::entity m_entityHandle;
 
-	friend class TransformSystem; //so transformsystem can find m_scene and set that as parent when unparenting
+	friend class TransformSystem;	//so transformsystem can find m_scene and set that as parent when unparenting
+	friend class Scene;				//So we can get the m_entityHandle to delete entity
 };
 

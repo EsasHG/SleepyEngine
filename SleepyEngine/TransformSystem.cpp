@@ -188,10 +188,7 @@ void TransformSystem::SetParent(Entity* parent, Entity* child)
 	tParent->m_children.push_back(tChild);
 	tChild->m_parent = tParent;
 
-
-
 	tChild->m_modelMatrix = glm::inverse(tParent->m_modelMatrix) * tChild->m_modelMatrix;
-
 
 	glm::vec3 scale;
 	glm::vec3 pos;
@@ -222,12 +219,6 @@ void TransformSystem::Unparent(Entity* e)
 	auto* transform = e->GetComponent<TransformComponent>();
 	if (transform->m_parent)
 	{
-		//finds positions
-		glm::vec3 globalPos, globalRot, globalScale;
-		//globalPos = GetGlobalPosition(transform);
-		//globalRot = GetGlobalRotation(transform);
-		//globalScale = GetGlobalScale(transform);
-
 		//removes from children
 		auto* parent = transform->m_parent;                
 		auto it = std::find(parent->m_children.begin(), parent->m_children.end(), transform);

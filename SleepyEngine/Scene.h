@@ -1,6 +1,7 @@
 #pragma once
 #include <entt/entt.hpp>
 #include <string>
+#include <unordered_map>
 class Entity;
 struct aiNode;
 struct aiMesh;
@@ -16,8 +17,15 @@ public:
 	Scene();
 
 	void Update();
-
+	void DeleteEntity(Entity* entity);
+	void DeleteAllComponents(Entity* entity);
 	void Draw();
+
+	/// <summary>
+	/// Deletes all entities marked for deletion
+	/// </summary>
+	void CleanupRegistry();
+	static void MarkForDeletion(Entity* entity);
 	Entity* m_SceneEntity;
 private:
 	Entity* CreateEntity(std::string entityName);
@@ -27,11 +35,5 @@ private:
 
 	friend class Entity;
 	friend class Application;
-
-	//temp
-	class Model* guitar;
-	class Model* planet;
-	class Model* rock;
-	class Model* boat;
 };
 

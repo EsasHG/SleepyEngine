@@ -63,6 +63,9 @@ int Application::Run()
 	Scene scene;
 	while (!window->ShouldClose())
 	{
+		scene.CleanupRegistry();
+
+
 		double deltaTime = BeginFrame();
 #ifdef _SHOWUI;
 
