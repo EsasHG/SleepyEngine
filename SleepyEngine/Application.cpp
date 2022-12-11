@@ -67,10 +67,10 @@ int Application::Run()
 
 
 		double deltaTime = BeginFrame();
-#ifdef _SHOWUI;
+#ifdef _SHOWUI
 
 		ui->BeginFrame();
-		ui->Run(deltaTime, scene.m_SceneEntity);
+		ui->Run(deltaTime, *scene.m_SceneEntity);
 		renderer->BeginFrame(ui->contentRegionSize);
 #else
 		renderer->BeginFrame(glm::vec2(window->GetWidth(),window->GetHeight()));
@@ -83,7 +83,7 @@ int Application::Run()
 		camera->Run(deltaTime);
 		scene.Update();
 
-#ifdef _SHOWUI;
+#ifdef _SHOWUI
 		if (ui->RenderWindowOpen())
 		{
 			renderer->PrepDraw(deltaTime);

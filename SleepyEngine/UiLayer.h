@@ -13,7 +13,7 @@ class UiLayer
 public:
 	UiLayer();
 	void BeginFrame();
-	void Run(double deltaTime, Entity* sceneEntity);
+	void Run(double deltaTime, Entity& sceneEntity);
 
 	void EndFrame();
 	
@@ -26,19 +26,18 @@ public:
 
 	int id;
 
-
 private:
 	//object tree window
-	void SetupObjectTree(Entity* sceneEntity);
-	void ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity* entity);
-	void ReorderObjectTree(Entity* newParent, int newIndex, Entity* entityToMove);
+	void SetupObjectTree(Entity& sceneEntity);
+	void ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity& entity);
+	void ReorderObjectTree(Entity& newParent, int newIndex, Entity& entityToMove);
 
 	//object window
 	void SetupObjectWindow();
-	void ShowTransformComp(TransformComponent* transform);
-	void ShowMeshComp(class MeshComponent* mesh);
-	void ShowDirLightComp(class DirLightComponent* dirLight);
-	void ShowPointLightComp(class PointLightComponent* pointLight);
+	void ShowTransformComp(Entity& entity);
+	void ShowMeshComp(Entity& entity);
+	void ShowDirLightComp(Entity& entity);
+	void ShowPointLightComp(Entity& entity);
 	//assets window
 	void SetupAssetsWindow();
 
@@ -67,7 +66,8 @@ private:
 	Entity* entityToMove;
 	Entity* newParentEntity;
 	//static float frames[140];
-	int newIndex =-1;
+	int newIndex = -1;
+	int oldIndex = -1;
 };
 	static char inputText[128];
 

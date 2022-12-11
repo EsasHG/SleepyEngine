@@ -17,8 +17,6 @@
 //should this be here? 
 #include "Camera.h"
 
-
-
 Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
 {
 	if (!gladLoadGL())
@@ -50,13 +48,6 @@ void Renderer::BeginFrame(glm::vec2 windowSize)
 	CheckGLError("Start of BeginFrame");
 
 	glUseProgram(m_ShaderId);
-
-	//if 0 we might get a divide by 0 error below. This should really be handled some other way
-	//was not like this earlier. No idea why it started happening
-	//if (windowSize.y != 0)
-	//	m_WindowSize = windowSize;
-	//else
-	//	m_WindowSize = glm::vec2(1920, 1080);
 
 	if (m_WindowSize != windowSize)
 	{
@@ -117,7 +108,7 @@ void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 	unsigned int shaderID = ModelLibrary::GetInstance().GetShader(mesh.m_shaderID);
 	glUseProgram(shaderID);
 
-	glm::mat4 model = TransformSystem::GetModelMatrix(&transform);
+	glm::mat4 model = TransformSystem::GetModelMatrix(transform);
 	//model = glm::translate(model, transform.position);
 	////model = glm::rotate(model, glm::radians(90.0f), transform.rotation);
 	//model = glm::scale(model, transform.scale);
@@ -160,7 +151,7 @@ void Renderer::DrawSceneTextureOnScreen(int texture)
 void Renderer::SetPointLightValues(unsigned int shaderID, TransformComponent& transform, PointLightComponent& pointLight)
 {
 	glUseProgram(shaderID);
-	Renderer::SetShaderUniformVec3(shaderID, "pointLight.position", TransformSystem::GetPosition(&transform));
+	Renderer::SetShaderUniformVec3(shaderID, "pointLight.position", TransformSystem::GetPosition(transform));
 	Renderer::SetShaderUniformVec3(shaderID, "pointLight.ambient", pointLight.m_ambient);
 	Renderer::SetShaderUniformVec3(shaderID, "pointLight.diffuse", pointLight.m_diffuse);
 	Renderer::SetShaderUniformVec3(shaderID, "pointLight.specular", pointLight.m_specular);

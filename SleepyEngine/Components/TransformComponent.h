@@ -26,9 +26,9 @@ private:
 	glm::quat m_rotation;
 	glm::vec3 m_scale;
 	glm::mat4 m_modelMatrix;
-	TransformComponent* m_parent = nullptr;
+	//TransformComponent* m_parent = nullptr;
 
-	std::vector<TransformComponent*> m_children;
+	//std::vector<TransformComponent*> m_children;
 
 	friend class TransformSystem;	
 	friend class Scene;				//For deleting children when parent is being deleted.
