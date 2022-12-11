@@ -14,13 +14,9 @@ public:
 	{
 		m_Entity = entity;
 		if(ModelLibrary::GetInstance().MeshExists(mesh))
-		{
 			m_meshID = mesh;
-		}
 		else
-		{
 			ModelLibrary::GetInstance().AddMesh(mesh);
-		}
 
 		m_shaderID = shader;
 		m_materialID = material;

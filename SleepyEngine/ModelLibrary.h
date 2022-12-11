@@ -13,7 +13,6 @@ static class ModelLibrary* s_ModelLibrary;
 
 class ModelLibrary
 {
-
 public:
 	static ModelLibrary& GetInstance() {
 		if (!s_ModelLibrary)
@@ -36,7 +35,6 @@ public:
 		return m_meshes.contains(path);
 	}
 
-	//std::vector<std::string> AddMesh(std::string filepath);
 	MeshGroup* AddMesh(std::string filepath);
 
 	bool AddMesh(std::string name, std::vector<Vertex> vertices);
@@ -53,6 +51,14 @@ public:
 
 	void AddShader(std::string name, unsigned int ShaderID);
 
+	void AddMaterial(std::string name, Material mat);
+
+	Material& GetMaterial(std::string name)
+	{
+		return m_materials[name];
+	}
+
+
 	std::vector<std::string> GetMeshList()
 	{
 		std::vector<std::string> v; 
@@ -67,8 +73,8 @@ public:
 	{
 		std::vector<std::string> v;
 
-		//for (auto pair : m_materials)
-		//	v.push_back(pair.first);
+		for (auto pair : m_materials)
+			v.push_back(pair.first);
 
 		return v;
 	}
@@ -87,9 +93,7 @@ public:
 private:
 	ModelLibrary();
 
-	//std::vector<std::string> LoadModel(std::string path);
 	MeshGroup* LoadModel(std::string path);
-
 
 	std::vector<std::string> ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory);
 	//Mesh* ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory, Mesh* CurrentMesh);
@@ -101,7 +105,7 @@ private:
 	std::unordered_map<std::string, Mesh*> m_meshes;
 	std::unordered_map<std::string, MeshGroup*> m_models;
 	std::unordered_map<std::string, unsigned int> m_shaders;
+	std::unordered_map<std::string, Material> m_materials;
 	std::vector<Tex> m_loadedTextures;
-
 
 };

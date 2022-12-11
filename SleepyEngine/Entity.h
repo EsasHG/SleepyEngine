@@ -1,19 +1,7 @@
 #pragma once
 #include <entt/entt.hpp>
 #include <string>
-#include <memory>
 #include "Scene.h"
-//#include "Components/RelationshipComponent.h"
-//struct Hierarchy {
-//	Entity& parent;
-//	Entity& nextChild;
-//	Entity& prevChild;
-//};
-//
-//struct Children
-//{
-//	Entity& first;
-//};
 
 class Entity
 {
@@ -55,7 +43,6 @@ public:
 	template<typename T>
 	void RemoveComponent() 
 	{
-		//return m_scene->RemoveComponent<T>(this);
 		m_scene->m_registry.remove<T>(m_entityHandle);
 	}
 
@@ -88,7 +75,6 @@ private:
 	Scene* m_scene;
 	entt::entity m_entityHandle;
 
-	friend class TransformSystem;	//so transformsystem can find m_scene and set that as parent when unparenting
 	friend class Scene;				//So we can get the m_entityHandle to delete entity
 	friend class RelationshipComponent;
 };

@@ -17,6 +17,7 @@ struct MeshGroup
 struct MeshRef 
 {
 	std::string meshName;
+	std::string materialName;
 	MeshGroup* parentGroup = nullptr;
 	MeshRef* prevChildMesh = nullptr;
 	MeshRef* nextChildMesh = nullptr;
@@ -44,6 +45,16 @@ struct Tex
 	}
 };
 
+struct Material
+{
+	glm::vec3 ambientColor = glm::vec3(0.5f, 0.5f, 0.5f);
+	glm::vec3 diffuseColor = glm::vec3(0.5f, 0.5f, 0.5f);
+	std::vector<Tex> diffuseTextures;
+	glm::vec3 specularColor = glm::vec3(0.5f,0.5f,0.5f);
+	std::vector<Tex> specularTextures;
+	float shininess = 32.0f;
+};
+
 class Mesh
 {
 public:
@@ -65,5 +76,8 @@ private:
 	bool bIndiced;
 
 	friend class ModelLibrary;
+	friend class Renderer;
 };
+
+
 

@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include <glad/glad.h>
 #include "Renderer.h"
+#include "ModelLibrary.h"
 Mesh::Mesh(std::vector<Vertex> vertices) : m_vertices(vertices)
 {
 	bIndiced = false;
@@ -47,7 +48,6 @@ void Mesh::SetupMesh()
 //TODO: should the renderer be responsible for this?
 void Mesh::Draw(unsigned int shaderID)
 {
-
 	if (!m_textures.empty())
 	{
 		unsigned int diffuseNr = 1;

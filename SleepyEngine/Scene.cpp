@@ -25,7 +25,6 @@ public:
 	{
 		m_Entity = entity;
 		m_componentType = DELETION;
-
 	}
 	COMPONENT_TYPE typeToRemove;
 	friend class Scene;
@@ -33,7 +32,6 @@ public:
 
 Scene::Scene()
 {
-
 	//can one entity have both components?
 	Entity& dirLight = CreateEntity("Directional Light");
 	dirLight.AddComponent<DirLightComponent>(glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.5f, 0.5f, 0.5f), 
@@ -113,7 +111,6 @@ Entity& Scene::CreateEntity(std::string entityName)
 //have not been able to test this with groups that have multiple children
 Entity& Scene::LoadMeshGroup(MeshGroup* meshGroup, Entity& parent, std::string groupName)
 {
-
 	//TODO: use reference instead of pointer
 	Entity* ent = nullptr; 
 	MeshRef* currentChild = meshGroup->firstChild;
@@ -123,7 +120,7 @@ Entity& Scene::LoadMeshGroup(MeshGroup* meshGroup, Entity& parent, std::string g
 	{
 		ent = &CreateEntity(groupName);
 		ent->SetParent(parent);
-		ent->AddComponent<MeshComponent>(currentChild->meshName);
+		ent->AddComponent<MeshComponent>(currentChild->meshName, currentChild->materialName);
 	}
 	else if(currentChild)
 	{
@@ -133,7 +130,7 @@ Entity& Scene::LoadMeshGroup(MeshGroup* meshGroup, Entity& parent, std::string g
 		while (currentChild)
 		{
 			Entity* meshEnt = &CreateEntity(currentChild->meshName);
-			meshEnt->AddComponent<MeshComponent>(currentChild->meshName);
+			meshEnt->AddComponent<MeshComponent>(currentChild->meshName, currentChild->materialName);
 			ent->SetParent(*ent);
 			currentChild = currentChild->nextChildMesh;
 		}
@@ -152,7 +149,6 @@ Entity& Scene::LoadMeshGroup(MeshGroup* meshGroup, Entity& parent, std::string g
 	int i = 0;
 	while (currentChildGroup)
 	{
-
 		Entity* entity = &LoadMeshGroup(currentChildGroup, *ent, groupName+"_"+std::to_string(i));
 		currentChildGroup = currentChildGroup->nextGroup;
 		i++;
@@ -181,9 +177,8 @@ void Scene::Draw()
 	//draw objects
 	auto regView = m_registry.view<TransformComponent, MeshComponent>();
 	for (auto [entity, transform, mesh] : regView.each())
-	{
 		Renderer::DrawMesh(mesh, transform);
-	}
+	
 }
 
 void Scene::CleanupRegistry()

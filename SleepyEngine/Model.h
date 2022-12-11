@@ -23,8 +23,5 @@ private:
 
 	std::vector<Mesh> m_meshes;
 	std::vector<Tex> m_loadedTextures;
-
-	
-
 };
 

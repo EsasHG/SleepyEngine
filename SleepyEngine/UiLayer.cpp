@@ -528,6 +528,10 @@ void UiLayer::ShowMeshComp(Entity& entity)
 		ImGui::EndCombo();
 	}
 	
+	Material& material = ModelLibrary::GetInstance().GetMaterial(mesh.m_materialID);
+	ImGui::DragFloat("Quadratic", &material.shininess, 0.005f, 0.0f, 128.0f);
+
+
 	auto shaderIDs = ModelLibrary::GetInstance().GetShaderList();
 	if (ImGui::BeginCombo("Shader", mesh.m_shaderID.c_str()))
 	{
@@ -629,7 +633,6 @@ void UiLayer::SetupAssetsWindow()
 		}
 	}
 	ImGui::End();
-
 }
 
 void UiLayer::EndFrame()

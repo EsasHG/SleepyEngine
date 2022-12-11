@@ -102,6 +102,11 @@ void ModelLibrary::AddShader(std::string name, unsigned int ShaderID)
 	m_shaders.insert(std::pair<std::string, unsigned int>(name, ShaderID));
 }
 
+void ModelLibrary::AddMaterial(std::string name, Material mat)
+{
+	m_materials.insert(std::pair<std::string, Material>(name, mat));
+}
+
 
 //std::vector<std::string> ModelLibrary::LoadModel(std::string path)
 //{
@@ -163,8 +168,6 @@ MeshGroup* ModelLibrary::LoadModel(std::string path)
 
 	MeshGroup* group = ProcessModelNode(scene->mRootNode, scene, meshName, directory, rootGroup);
 
-
-	
 	if (group == rootGroup)
 	{
 		if (group->firstChildGroup)
@@ -199,10 +202,13 @@ MeshGroup* ModelLibrary::ProcessModelNode(aiNode* node, const aiScene* scene, st
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			std::string currentMeshName = meshName +"_"+ std::to_string(node->mMeshes[i]);
-			//the way this is set up some meshes are probably duplicated here?
-			//Mesh* m = ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene, directory, currentMeshName);
+
+			aiString matName;
+			scene->mMaterials[scene->mMeshes[node->mMeshes[i]]->mMaterialIndex]->Get(AI_MATKEY_NAME, matName);
+
 			MeshRef* mRef = new MeshRef();
 			mRef->meshName = currentMeshName;
+			mRef->materialName = matName.C_Str();
 
 			if (!group->firstChild)
 			{
@@ -225,7 +231,6 @@ MeshGroup* ModelLibrary::ProcessModelNode(aiNode* node, const aiScene* scene, st
 	{
 		group = targetGroup;
 	}
-
 
 	//child nodes
 	MeshGroup* currentChildGroup = nullptr;
@@ -302,14 +307,30 @@ Mesh* ModelLibrary::ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string 
 	if (mesh->mMaterialIndex >= 0)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		std::vector<Tex> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse", directory);
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		aiString matName;
+		material->Get(AI_MATKEY_NAME, matName);
+		if (!m_materials.contains(matName.C_Str()))
+		{
+			Material mat;
+			float shininess = 0.0f;
+			
+			if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS, shininess))
+				mat.shininess = 32.0f;
+			else
+				mat.shininess = shininess;
 
-		std::vector<Tex> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular", directory);
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			mat.diffuseTextures = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse", directory);
+			textures.insert(textures.end(), mat.diffuseTextures.begin(), mat.diffuseTextures.end());
+
+			mat.specularTextures = LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular", directory);
+			textures.insert(textures.end(), mat.specularTextures.begin(), mat.specularTextures.end());
+
+			AddMaterial(matName.C_Str(), mat);
+		}
 	}
 	//CreateEntity, addmeshcomponent, add transform, set parent
 	Mesh* m = new Mesh(vertices, indices, textures);
+	
 	ModelLibrary::GetInstance().AddMesh(currentMeshName, m);
 
 	return m;

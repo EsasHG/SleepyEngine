@@ -7,7 +7,6 @@
 		return *m_scene->m_registry.get<RelationshipComponent>(GetComponent<RelationshipComponent>().m_parent).m_Entity;
 	}
 
-
 	std::vector<Entity*> Entity::GetChildren()
 	{
 		std::vector<Entity*> children;

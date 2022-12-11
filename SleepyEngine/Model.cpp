@@ -26,7 +26,7 @@ void Model::Draw(unsigned int shaderID)
 {
 	for (Mesh m : m_meshes)
 	{
-		m.Draw(shaderID);
+		//m.Draw(shaderID);
 	}
 }
 

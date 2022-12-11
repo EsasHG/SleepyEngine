@@ -109,14 +109,70 @@ void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 	glUseProgram(shaderID);
 
 	glm::mat4 model = TransformSystem::GetModelMatrix(transform);
-	//model = glm::translate(model, transform.position);
-	////model = glm::rotate(model, glm::radians(90.0f), transform.rotation);
-	//model = glm::scale(model, transform.scale);
 
 	Renderer::SetShaderUniformMat4(shaderID, "model", model);
 
 	Mesh* m = ModelLibrary::GetInstance().GetMesh(mesh.m_meshID);
-	m->Draw(shaderID);
+	Material& mat = ModelLibrary::GetInstance().GetMaterial(mesh.m_materialID);
+	//m->Draw(shaderID);
+	
+	int count = 0;
+	if (!mat.diffuseTextures.empty())
+	{
+		unsigned int diffuseNr = 1;
+		for (unsigned int i = 0; i < mat.diffuseTextures.size(); i++)
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			std::string number;
+			std::string type = mat.diffuseTextures[i].type;
+
+			assert(type == "diffuse");
+			number = std::to_string(diffuseNr++);
+			std::string uniformName = "material.";
+			uniformName = uniformName + type + number;
+			Renderer::SetShaderUniformInt(shaderID, uniformName.c_str(), i);
+			glBindTexture(GL_TEXTURE_2D, mat.diffuseTextures[i].id);
+			count++;
+		}
+	}
+
+	if (!mat.specularTextures.empty())
+	{
+		unsigned int specularNr = 1;
+		for (unsigned int i = 0; i < mat.specularTextures.size(); i++)
+		{
+			glActiveTexture(GL_TEXTURE0 + count + i);
+			std::string number;
+			std::string type = mat.specularTextures[i].type;
+
+			assert(type == "specular");
+			number = std::to_string(specularNr++);
+
+			std::string uniformName = "material.";
+			uniformName = uniformName + type + number;
+			Renderer::SetShaderUniformInt(shaderID, uniformName.c_str(), i);
+			glBindTexture(GL_TEXTURE_2D, mat.specularTextures[i].id);
+		}
+	}
+	SetShaderUniformFloat(shaderID, "material.shininess", mat.shininess);
+
+	glBindVertexArray(m->m_VAO);
+
+	if (m->bIndiced)
+		glDrawElements(GL_TRIANGLES, m->m_indices.size(), GL_UNSIGNED_INT, 0);
+	else
+		glDrawArrays(GL_TRIANGLES, 0, m->m_vertices.size());
+
+	glBindVertexArray(0);
+	//unbinds textures
+
+	for (unsigned int i = 0; i < count; i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	glActiveTexture(GL_TEXTURE0);
+	
 	CheckGLError("End of DrawMesh");
 	glUseProgram(0);
 
@@ -143,9 +199,10 @@ void Renderer::DrawSceneTextureOnScreen(int texture)
 	}
 	unsigned int shaderID = ModelLibrary::GetInstance().GetShader("quadShader");
 	glUseProgram(shaderID);
-	screenQuadMesh->Draw(shaderID);
-	glUseProgram(0);
 
+	screenQuadMesh->Draw(shaderID);
+	
+	glUseProgram(0);
 }
 
 void Renderer::SetPointLightValues(unsigned int shaderID, TransformComponent& transform, PointLightComponent& pointLight)
