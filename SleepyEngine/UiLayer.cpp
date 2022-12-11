@@ -408,12 +408,15 @@ void UiLayer::SetupObjectWindow()
 		
 		ImGui::Spacing();
 		ImGui::Text(entity.m_Name.c_str());
-		if (ImGui::Button("Delete"))
+		if (!sceneSelected)
 		{
-			Scene::MarkForDeletion(entity);
-			selectedEntities.pop_back();
-			ImGui::End();
-			return;
+			if (ImGui::Button("Delete"))
+			{
+				Scene::MarkForDeletion(entity);
+				selectedEntities.pop_back();
+				ImGui::End();
+				return;
+			}
 		}
 		ImGui::Spacing();
 		ImGui::Spacing();
@@ -423,7 +426,7 @@ void UiLayer::SetupObjectWindow()
 		//ImGui::InputText("Object Name", strName, IM_ARRAYSIZE(strName),0,0,(void*)entity->m_Name.c_str());
 		//entity->m_Name = strName;
 
-		if (entity.Has<TransformComponent>())
+		if (entity.Has<TransformComponent>() && !sceneSelected)
 			ShowTransformComp(entity);
 		
 		if (entity.Has<DirLightComponent>())
@@ -443,9 +446,8 @@ void UiLayer::SetupObjectWindow()
 
 	if (sceneSelected)
 	{
-
-		ImGui::ColorEdit3("Clear Color", (float*)&clearColor);
-		ImGui::ColorEdit3("Quad Color", (float*)&quadColor);
+		//ImGui::ColorEdit3("Clear Color", (float*)&clearColor);
+		//ImGui::ColorEdit3("Quad Color", (float*)&quadColor);
 	}
 	ImGui::End();
 }
@@ -489,7 +491,6 @@ void UiLayer::ShowTransformComp(Entity& entity)
 void UiLayer::ShowMeshComp(Entity& entity)
 {
 	MeshComponent& mesh = entity.GetComponent<MeshComponent>();
-
 
 	ImGui::Spacing();
 	ImGui::Text("Mesh Component");

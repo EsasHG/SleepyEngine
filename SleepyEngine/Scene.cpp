@@ -97,20 +97,15 @@ Entity& Scene::CreateEntity(std::string entityName)
 	{
 		m_SceneEntity = new Entity(std::string("Scene"), this);
 		//m_SceneEntity = std::make_unique<Entity>(new Entity(std::string("Scene"), this));
-		m_SceneEntity->AddComponent<TransformComponent>();
+		m_SceneEntity->AddComponent<TransformComponent>();				//TODO: make this not neccessary. Still need it for rendering i think
 		m_SceneEntity->AddComponent<RelationshipComponent>(nullptr);
 
-		//Children c = m_SceneEntity->AddComponent<Children>();
-
-		//c.first.GetComponent<Hierarchy>();
 	}
 	Entity* entity = new Entity(entityName, this);
 	entity->AddComponent<TransformComponent>();
 	entity->AddComponent<RelationshipComponent>(m_SceneEntity);
 
-	
 	entities.push_back(entity);
-	//entity->SetParent(*m_SceneEntity);
 
 	return *entity;
 }
