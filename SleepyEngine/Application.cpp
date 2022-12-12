@@ -27,89 +27,100 @@
 #include "Scene.h"
 #include "UiLayer.h"
 
-
-Application::~Application()
+namespace Sleepy
 {
-	delete window;
-#ifdef _SHOWUI
-	delete ui;
-#endif // _SHOWUI
-	delete renderer;
-}
-
-double Application::BeginFrame()
-{
-	double time = glfwGetTime();
-	double deltaTime = time - prevFrameTime;
-	prevFrameTime = time;
-
-	return deltaTime;
-}
-
-int Application::Run() 
-{
-	window = new Window(1920, 1080, "Sleepy Engine");
-#ifdef _SHOWUI
-
-	ui = new UiLayer();
-	window->EnableImGui();
-#endif // _SHOWUI
-	InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Application::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
-
-	renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
-	
-	Camera* camera = new Camera();
-	renderer->SetCamera(camera);
-	Scene scene;
-	while (!window->ShouldClose())
+	Application::Application()
 	{
-		scene.CleanupRegistry();
-
-
-		double deltaTime = BeginFrame();
+		window = new Window(1920, 1080, "Sleepy Engine");
 #ifdef _SHOWUI
 
-		ui->BeginFrame();
-		ui->Run(deltaTime, *scene.m_SceneEntity);
-		renderer->BeginFrame(ui->contentRegionSize);
-#else
-		renderer->BeginFrame(glm::vec2(window->GetWidth(),window->GetHeight()));
+		ui = new UiLayer();
+		window->EnableImGui();
+#endif // _SHOWUI
+		InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Application::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
 
-#endif // _SHOWUI;
+		renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
+		prevFrameTime = glfwGetTime();
+	}
 
-		glfwPollEvents();
+	Application::~Application()
+	{
+		delete window;
+	#ifdef _SHOWUI
+		delete ui;
+	#endif // _SHOWUI
+		delete renderer;
+	}
 
-		InputManager::GetInstance().RunEvents();
-		camera->Run(deltaTime);
-		scene.Update();
+	double Application::BeginFrame()
+	{
+		double time = glfwGetTime();
+		double deltaTime = time - prevFrameTime;
+		prevFrameTime = time;
 
-#ifdef _SHOWUI
-		if (ui->RenderWindowOpen())
+		return deltaTime;
+	}
+
+	int Application::Run() 
+	{
+		Camera* camera = new Camera();
+		renderer->SetCamera(camera);
+
+		//Scene scene;
+		//SetScene(new Scene());
+		while (!window->ShouldClose())
 		{
+			for (Scene* scene : m_scenes)
+				scene->CleanupRegistry();
+
+			double deltaTime = BeginFrame();
+	#ifdef _SHOWUI
+
+			ui->BeginFrame();
+			//ui->Run(deltaTime, nullptr);
+			for (Scene* scene : m_scenes)
+				ui->Run(deltaTime, scene->m_SceneEntity);
+			renderer->BeginFrame(ui->contentRegionSize);
+	#else
+			renderer->BeginFrame(glm::vec2(window->GetWidth(),window->GetHeight()));
+
+	#endif // _SHOWUI;
+
+			glfwPollEvents();
+
+			InputManager::GetInstance().RunEvents();
+			camera->Run(deltaTime);
+			for (Scene* scene : m_scenes)
+				scene->Update();
+
+	#ifdef _SHOWUI
+			if (ui->RenderWindowOpen())
+			{
+				renderer->PrepDraw(deltaTime);
+				for (Scene* scene : m_scenes)
+					scene->Draw();
+				ui->sceneTexture = renderer->EndFrame();
+			}
+			ui->EndFrame();
+	#else
 			renderer->PrepDraw(deltaTime);
 			scene.Draw();
-			ui->sceneTexture = renderer->EndFrame();
+			renderer->DrawSceneTextureOnScreen(renderer->EndFrame());
+	#endif // _SHOWUI;
+
+			EndFrame();
 		}
-		ui->EndFrame();
-#else
-		renderer->PrepDraw(deltaTime);
-		scene.Draw();
-		renderer->DrawSceneTextureOnScreen(renderer->EndFrame());
-#endif // _SHOWUI;
-
-		EndFrame();
+		return 0;
 	}
-	return 0;
-}
 
-void Application::EndFrame()
-{
+	void Application::EndFrame()
+	{
+		window->SwapBuffers();
+	}
 
-	window->SwapBuffers();
-}
+	void Application::FramebufferResizeCallback(int x, int y)
+	{
+		//renderer->ResizeViewport(ui->contentRegionSize.x, ui->contentRegionSize.y);
+	}
 
-
-void Application::FramebufferResizeCallback(int x, int y)
-{
-	//renderer->ResizeViewport(ui->contentRegionSize.x, ui->contentRegionSize.y);
 }

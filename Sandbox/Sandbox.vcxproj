@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{be3566c1-29f8-4140-938e-ae3cc13ee013}</ProjectGuid>
-    <RootNamespace>SleepyEngine</RootNamespace>
+    <ProjectGuid>{980392c6-f541-4d5f-bf23-43ba4f595d19}</ProjectGuid>
+    <RootNamespace>Sandbox</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -40,13 +40,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -71,12 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\SleepyEngine;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\external\lib;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\SleepyEngine;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\external\lib;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(SolutionDir)\SleepyEngine;$(IncludePath);$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -84,6 +79,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Programming\SleepyEngine\external\include;D:\Programming\SleepyEngine\SleepyEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -98,6 +94,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Programming\SleepyEngine\external\include;D:\Programming\SleepyEngine\SleepyEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -110,16 +107,16 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_SHOWUI;_DEBUG;_CONSOLE;_SOLUTIONDIR=R"($(SolutionDir))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\external\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\SleepyEngine\external\include;D:\Programming\SleepyEngine\SleepyEngine;$(SolutionDir)\SleepyEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc142-mtd.lib;opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\Programming\SleepyEngine\external\lib;D:\Programming\SleepyEngine\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc142-mtd.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -128,86 +125,30 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_SOLUTIONDIR=R"($(SolutionDir))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\external\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\SleepyEngine\external\include;D:\Programming\SleepyEngine\SleepyEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc142-mtd.lib;opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Entity.cpp" />
-    <ClCompile Include="entry.cpp" />
-    <ClCompile Include="glad.c" />
-    <ClCompile Include="ImGui\imgui.cpp" />
-    <ClCompile Include="ImGui\imgui_demo.cpp" />
-    <ClCompile Include="ImGui\imgui_draw.cpp" />
-    <ClCompile Include="ImGui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="ImGui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="ImGui\imgui_stdlib.cpp" />
-    <ClCompile Include="ImGui\imgui_tables.cpp" />
-    <ClCompile Include="ImGui\imgui_widgets.cpp" />
-    <ClCompile Include="Input.cpp" />
-    <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="ModelLibrary.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="TransformSystem.cpp" />
-    <ClCompile Include="UiLayer.cpp" />
-    <ClCompile Include="VertexArray.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Sandbox.cpp" />
+    <ClCompile Include="SandboxApp.cpp" />
+    <ClCompile Include="SandboxScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Components\Component.h" />
-    <ClInclude Include="Components\RelationshipComponent.h" />
-    <ClInclude Include="Entity.h" />
-    <ClInclude Include="Fonts\IconsFontAwesome6.h" />
-    <ClInclude Include="ImGui\imconfig.h" />
-    <ClInclude Include="ImGui\imgui.h" />
-    <ClInclude Include="ImGui\imgui_impl_glfw.h" />
-    <ClInclude Include="ImGui\imgui_impl_opengl3.h" />
-    <ClInclude Include="ImGui\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="ImGui\imgui_internal.h" />
-    <ClInclude Include="ImGui\imgui_stdlib.h" />
-    <ClInclude Include="ImGui\imstb_rectpack.h" />
-    <ClInclude Include="ImGui\imstb_textedit.h" />
-    <ClInclude Include="ImGui\imstb_truetype.h" />
-    <ClInclude Include="Input.h" />
-    <ClInclude Include="InputManager.h" />
-    <ClInclude Include="Components\LightComponent.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Components\MeshComponent.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="ModelLibrary.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="Shaders\QuadShader.vert" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="Components\TransformComponent.h" />
-    <ClInclude Include="TransformSystem.h" />
-    <ClInclude Include="UiLayer.h" />
-    <ClInclude Include="VertexArray.h" />
-    <ClInclude Include="Window.h" />
+    <ProjectReference Include="..\SleepyEngine\SleepyEngine.vcxproj">
+      <Project>{be3566c1-29f8-4140-938e-ae3cc13ee013}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\QuadShader.frag" />
-    <None Include="Shaders\SingleColor.frag" />
-    <None Include="Shaders\SingleColor.vert" />
-    <None Include="Shaders\textureShader.frag" />
-    <None Include="Shaders\textureShader.vert" />
+    <ClInclude Include="SandboxApp.h" />
+    <ClInclude Include="SandboxScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

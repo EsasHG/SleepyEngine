@@ -1,23 +1,32 @@
 #pragma once
 
-
-
-class Application
+#include <vector>
+namespace Sleepy
 {
-public:
-	Application() {};
-	~Application();
-	double BeginFrame();
-	int Run();
-	void EndFrame();
+	class Scene;
+	class Application
+	{
+	public:
+		Application();
+		~Application();
+		double BeginFrame();
+		int Run();
+		void EndFrame();
+		void SetScene(Scene* scene)
+		{
+			m_scenes.clear();
+			m_scenes.push_back(scene);
+		}
+		void FramebufferResizeCallback(int x, int y);
+	private:
 
-	void FramebufferResizeCallback(int x, int y);
-private:
+		class UiLayer* ui;
 
-	class UiLayer* ui;
+		std::vector<Scene*> m_scenes;
+		double prevFrameTime = 0;
+		class Window* window;
+		class Renderer* renderer;
+	};
 
-	double prevFrameTime;
-	class Window* window;
-	class Renderer* renderer;
-};
 
+}

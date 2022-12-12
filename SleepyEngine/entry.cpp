@@ -4,7 +4,7 @@
 #include "Application.h"
 int main()
 {
-	Application app;
+	Sleepy::Application app;
 	app.Run();
 
 }

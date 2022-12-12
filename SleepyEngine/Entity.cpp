@@ -2,6 +2,9 @@
 #include "Components/RelationshipComponent.h"
 #include "TransformSystem.h"
 
+namespace Sleepy
+{
+
 	Entity& Entity::GetParent()
 	{
 		return *m_scene->m_registry.get<RelationshipComponent>(GetComponent<RelationshipComponent>().m_parent).m_Entity;
@@ -175,3 +178,4 @@
 			}
 		}
 	}
+}

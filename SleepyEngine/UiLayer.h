@@ -4,70 +4,74 @@
 //#include <queue>
 #include <vector>
 #include "Components/TransformComponent.h"
-class Window;
-class TransformComponent;
-class Entity;
-typedef int ImGuiTreeNodeFlags;
-class UiLayer
+
+namespace Sleepy
 {
-public:
-	UiLayer();
-	void BeginFrame();
-	void Run(double deltaTime, Entity& sceneEntity);
 
-	void EndFrame();
-	
-	bool RenderWindowOpen() { return renderWindowOpen; };
-	glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
-	glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
+	class Window;
+	class TransformComponent;
+	class Entity;
+	typedef int ImGuiTreeNodeFlags;
+	class UiLayer
+	{
+	public:
+		UiLayer();
+		void BeginFrame();
+		void Run(double deltaTime, Entity* sceneEntity);
 
-	unsigned int sceneTexture;
-	glm::vec2 contentRegionSize;
+		void EndFrame();
 
-	int id;
+		bool RenderWindowOpen() { return renderWindowOpen; };
+		glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
+		glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
 
-private:
-	//object tree window
-	void SetupObjectTree(Entity& sceneEntity);
-	void ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity& entity);
-	void ReorderObjectTree(Entity& newParent, int newIndex, Entity& entityToMove);
+		unsigned int sceneTexture;
+		glm::vec2 contentRegionSize;
 
-	//object window
-	void SetupObjectWindow();
-	void ShowTransformComp(Entity& entity);
-	void ShowMeshComp(Entity& entity);
-	void ShowDirLightComp(Entity& entity);
-	void ShowPointLightComp(Entity& entity);
-	//assets window
-	void SetupAssetsWindow();
+		int id;
 
-	//window bools
-	bool showObjectWindow = true;
-	bool showObjectTreeWindow = true;
-	bool showRenderWindow = true;
-	bool showPerformanceWindow = true;
-	bool showAssetsWindow = true;
+	private:
+		//object tree window
+		void SetupObjectTree(Entity& sceneEntity);
+		void ProcessTreeNode(const ImGuiTreeNodeFlags& base_flags, Entity& entity);
+		void ReorderObjectTree(Entity& newParent, int newIndex, Entity& entityToMove);
 
-	bool styleEditorOpen = false;
-	bool engineSettingsOpen = false;
-	bool userGuideOpen = false;
-	bool metricsWindowOpen = false;
-	bool debugLogWindowOpen = false;
-	bool stackToolWindowOpen = false;
-	bool renderWindowOpen;
+		//object window
+		void SetupObjectWindow();
+		void ShowTransformComp(Entity& entity);
+		void ShowMeshComp(Entity& entity);
+		void ShowDirLightComp(Entity& entity);
+		void ShowPointLightComp(Entity& entity);
+		//assets window
+		void SetupAssetsWindow();
 
-	bool sceneSelected = false;
+		//window bools
+		bool showObjectWindow = true;
+		bool showObjectTreeWindow = true;
+		bool showRenderWindow = true;
+		bool showPerformanceWindow = true;
+		bool showAssetsWindow = true;
 
-	//std::queue<float> frametimes;
+		bool styleEditorOpen = false;
+		bool engineSettingsOpen = false;
+		bool userGuideOpen = false;
+		bool metricsWindowOpen = false;
+		bool debugLogWindowOpen = false;
+		bool stackToolWindowOpen = false;
+		bool renderWindowOpen;
 
-	Entity* entityToSelect = nullptr;
-	std::vector<Entity*> selectedEntities;
+		bool sceneSelected = false;
 
-	Entity* entityToMove;
-	Entity* newParentEntity;
-	//static float frames[140];
-	int newIndex = -1;
-	int oldIndex = -1;
-};
+		//std::queue<float> frametimes;
+
+		Entity* entityToSelect = nullptr;
+		std::vector<Entity*> selectedEntities;
+
+		Entity* entityToMove;
+		Entity* newParentEntity;
+		//static float frames[140];
+		int newIndex = -1;
+		int oldIndex = -1;
+	};
 	static char inputText[128];
-
+}

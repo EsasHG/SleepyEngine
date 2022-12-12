@@ -9,103 +9,107 @@ struct aiScene;
 struct aiMaterial;
 enum aiTextureType;
 
-static class ModelLibrary* s_ModelLibrary;
 
-class ModelLibrary
+namespace Sleepy
 {
-public:
-	static ModelLibrary& GetInstance() {
-		if (!s_ModelLibrary)
-			s_ModelLibrary = new ModelLibrary();
-		return *s_ModelLibrary;
-	}
+	static class ModelLibrary* s_ModelLibrary;
 
-	Mesh* GetMesh(std::string name)
+	class ModelLibrary
 	{
-		return m_meshes[name];
-	}
+	public:
+		static ModelLibrary& GetInstance() {
+			if (!s_ModelLibrary)
+				s_ModelLibrary = new ModelLibrary();
+			return *s_ModelLibrary;
+		}
 
-	bool MeshExists(std::string name)
-	{
-		return m_meshes.contains(name);
-	}
+		Mesh* GetMesh(std::string name)
+		{
+			return m_meshes[name];
+		}
 
-	bool ModelExists(std::string path)
-	{
-		return m_meshes.contains(path);
-	}
+		bool MeshExists(std::string name)
+		{
+			return m_meshes.contains(name);
+		}
 
-	MeshGroup* AddMesh(std::string filepath);
+		bool ModelExists(std::string path)
+		{
+			return m_meshes.contains(path);
+		}
 
-	bool AddMesh(std::string name, std::vector<Vertex> vertices);
-	bool AddMesh(std::string name, std::vector<Vertex> vertices, Tex texture); //TODO: Finish 
+		MeshGroup* AddMesh(std::string filepath);
 
-	bool AddMesh(std::string name, Mesh* mesh);
+		bool AddMesh(std::string name, std::vector<Vertex> vertices);
+		bool AddMesh(std::string name, std::vector<Vertex> vertices, Tex texture); //TODO: Finish 
 
-	unsigned int GetShader(std::string name)
-	{
-		return m_shaders[name];
-	}
+		bool AddMesh(std::string name, Mesh* mesh);
 
-	void AddShader(std::string name, std::string vertShaderPath, std::string fragShaderPath, std::string geomShaderPath = "");
+		unsigned int GetShader(std::string name)
+		{
+			return m_shaders[name];
+		}
 
-	void AddShader(std::string name, unsigned int ShaderID);
+		void AddShader(std::string name, std::string vertShaderPath, std::string fragShaderPath, std::string geomShaderPath = "");
 
-	void AddMaterial(std::string name, Material mat);
+		void AddShader(std::string name, unsigned int ShaderID);
 
-	Material& GetMaterial(std::string name)
-	{
-		return m_materials[name];
-	}
+		void AddMaterial(std::string name, Material mat);
 
-
-	std::vector<std::string> GetMeshList()
-	{
-		std::vector<std::string> v; 
-
-		for (auto pair : m_meshes)
-			v.push_back(pair.first);
-
-		return v;
-	}
-
-	std::vector<std::string> GetMaterialList()
-	{
-		std::vector<std::string> v;
-
-		for (auto pair : m_materials)
-			v.push_back(pair.first);
-
-		return v;
-	}
+		Material& GetMaterial(std::string name)
+		{
+			return m_materials[name];
+		}
 
 
-	std::vector<std::string> GetShaderList()
-	{
-		std::vector<std::string> v;
+		std::vector<std::string> GetMeshList()
+		{
+			std::vector<std::string> v;
 
-		for (auto pair : m_shaders)
-			v.push_back(pair.first);
+			for (auto pair : m_meshes)
+				v.push_back(pair.first);
 
-		return v;
-	}
+			return v;
+		}
 
-private:
-	ModelLibrary();
+		std::vector<std::string> GetMaterialList()
+		{
+			std::vector<std::string> v;
 
-	MeshGroup* LoadModel(std::string path);
+			for (auto pair : m_materials)
+				v.push_back(pair.first);
 
-	std::vector<std::string> ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory);
-	//Mesh* ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory, Mesh* CurrentMesh);
-	MeshGroup* ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory, MeshGroup* currentGroup);
-	Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string directory, std::string currentMeshName);
-	std::vector<Tex> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::string directory);
-	unsigned int LoadTexture(const char* path, std::string dir);
+			return v;
+		}
 
-	std::unordered_map<std::string, Mesh*> m_meshes;
-	std::unordered_map<std::string, MeshGroup*> m_models;
-	std::unordered_map<std::string, unsigned int> m_shaders;
-	std::unordered_map<std::string, Material> m_materials;
-	std::vector<Tex> m_loadedTextures;
 
-};
+		std::vector<std::string> GetShaderList()
+		{
+			std::vector<std::string> v;
+
+			for (auto pair : m_shaders)
+				v.push_back(pair.first);
+
+			return v;
+		}
+
+	private:
+		ModelLibrary();
+
+		MeshGroup* LoadModel(std::string path);
+
+		std::vector<std::string> ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory);
+		//Mesh* ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory, Mesh* CurrentMesh);
+		MeshGroup* ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory, MeshGroup* currentGroup);
+		Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string directory, std::string currentMeshName);
+		std::vector<Tex> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::string directory);
+		unsigned int LoadTexture(const char* path, std::string dir);
+
+		std::unordered_map<std::string, Mesh*> m_meshes;
+		std::unordered_map<std::string, MeshGroup*> m_models;
+		std::unordered_map<std::string, unsigned int> m_shaders;
+		std::unordered_map<std::string, Material> m_materials;
+		std::vector<Tex> m_loadedTextures;
+
+	};
+}

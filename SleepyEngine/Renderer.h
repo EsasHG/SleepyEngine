@@ -3,58 +3,62 @@
 #include <glm/glm.hpp>
 #include <entt/entt.hpp>
 #include <map>
-
-class TransformComponent;
-class Renderer
+namespace Sleepy
 {
-public:
-	Renderer(glm::vec2 windowSize);
-	~Renderer();
-	void BeginFrame(glm::vec2 windowSize);
-	void PrepDraw(double deltaTime);
-	static void DrawMesh(class MeshComponent mesh, TransformComponent transform);
 
-	void DrawSceneTextureOnScreen(int texture);
 
-	static void SetPointLightValues(unsigned int shaderID, TransformComponent& transform, class PointLightComponent& pointLight);
-	static void SetDirLightValues(unsigned int shaderID, TransformComponent& transform, class DirLightComponent& pointLight);
-	unsigned int EndFrame();
-	static void CheckGLError(std::string placeMessage);
-	static unsigned int CreateShader(const char* vertShaderPath, const char* fragShaderPath);
-	static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);
+	class TransformComponent;
+	class Renderer
+	{
+	public:
+		Renderer(glm::vec2 windowSize);
+		~Renderer();
+		void BeginFrame(glm::vec2 windowSize);
+		void PrepDraw(double deltaTime);
+		static void DrawMesh(class MeshComponent mesh, TransformComponent transform);
 
-	static void SetShaderUniformFloat(unsigned int m_ShaderId, const char* name, float f);
+		void DrawSceneTextureOnScreen(int texture);
 
-	static void SetShaderUniformInt(unsigned int m_ShaderId, const char* name, int i);
+		static void SetPointLightValues(unsigned int shaderID, TransformComponent& transform, class PointLightComponent& pointLight);
+		static void SetDirLightValues(unsigned int shaderID, TransformComponent& transform, class DirLightComponent& pointLight);
+		unsigned int EndFrame();
+		static void CheckGLError(std::string placeMessage);
+		static unsigned int CreateShader(const char* vertShaderPath, const char* fragShaderPath);
+		static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);
 
-	static void SetShaderUniformMat4(unsigned int m_ShaderId, const char* name, glm::mat4 matrix);
-	void SetShaderUniformMat4( const char* name, glm::mat4 matrix);
+		static void SetShaderUniformFloat(unsigned int m_ShaderId, const char* name, float f);
 
-	void RecreateFramebuffer();
+		static void SetShaderUniformInt(unsigned int m_ShaderId, const char* name, int i);
 
-	static void SetShaderUniformVec3(unsigned int m_ShaderId, const char* name, glm::vec3 vector);
+		static void SetShaderUniformMat4(unsigned int m_ShaderId, const char* name, glm::mat4 matrix);
+		void SetShaderUniformMat4(const char* name, glm::mat4 matrix);
 
-	static void SetShaderUniformVec2(unsigned int m_ShaderId, const char* name, glm::vec2 vector);
+		void RecreateFramebuffer();
 
-	//TODO: Should not be here
-	void SetCamera(class Camera* camera);
-	void ResizeViewport(int x, int y);
+		static void SetShaderUniformVec3(unsigned int m_ShaderId, const char* name, glm::vec3 vector);
 
-private:
+		static void SetShaderUniformVec2(unsigned int m_ShaderId, const char* name, glm::vec2 vector);
 
-	class Mesh* screenQuadMesh = nullptr;
-	glm::vec2 m_WindowSize;
+		//TODO: Should not be here
+		void SetCamera(class Camera* camera);
+		void ResizeViewport(int x, int y);
 
-	unsigned int m_ShaderId;
-	unsigned int m_TextureShaderId;
-	unsigned int VAO, VBO;
-	unsigned int FBO;
-	unsigned int RBO;
+	private:
 
-	unsigned int renderedTexture;
+		class Mesh* screenQuadMesh = nullptr;
+		glm::vec2 m_WindowSize;
 
-	//TODO: Should not be here
-	class Camera* m_camera;
+		unsigned int m_ShaderId;
+		unsigned int m_TextureShaderId;
+		unsigned int VAO, VBO;
+		unsigned int FBO;
+		unsigned int RBO;
 
-};
+		unsigned int renderedTexture;
 
+		//TODO: Should not be here
+		class Camera* m_camera;
+
+	};
+}
+	
