@@ -27,7 +27,7 @@ SandboxScene::SandboxScene()
 	vertices.push_back(Sleepy::Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
 
 	Sleepy::ModelLibrary::GetInstance().AddMesh("quad", vertices);
-	ent.AddComponent<Sleepy::MeshComponent>("quad", "default", "color");
+	ent.AddComponent<Sleepy::MeshComponent>("quad", "color", "color");
 
 	Sleepy::TransformSystem::SetPosition(ent, glm::vec3(0.5f, -0.5f, 0.0f));
 	Sleepy::TransformSystem::SetRotation(ent, glm::vec3(45.0f, 0.0f, 0.0f));

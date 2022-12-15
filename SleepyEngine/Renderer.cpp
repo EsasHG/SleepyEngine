@@ -120,7 +120,11 @@ namespace Sleepy
 		//m->Draw(shaderID);
 
 		int count = 0;
-		if (!mat.diffuseTextures.empty())
+		if (mat.diffuseTextures.empty())
+		{
+			Renderer::SetShaderUniformVec3(shaderID, "color", mat.diffuseColor);
+		}
+		else
 		{
 			unsigned int diffuseNr = 1;
 			for (unsigned int i = 0; i < mat.diffuseTextures.size(); i++)
@@ -139,7 +143,11 @@ namespace Sleepy
 			}
 		}
 
-		if (!mat.specularTextures.empty())
+		if (mat.specularTextures.empty())
+		{
+			Renderer::SetShaderUniformVec3(shaderID, "specColor", mat.specularColor);
+		}
+		else
 		{
 			unsigned int specularNr = 1;
 			for (unsigned int i = 0; i < mat.specularTextures.size(); i++)

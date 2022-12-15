@@ -515,7 +515,7 @@ namespace Sleepy
 		}
 
 		auto materialIDs = ModelLibrary::GetInstance().GetMaterialList();
-		if (ImGui::BeginCombo("Material (Not working)", mesh.m_materialID.c_str()))
+		if (ImGui::BeginCombo("Material", mesh.m_materialID.c_str()))
 		{
 			for (std::string matID : materialIDs)
 			{
@@ -527,10 +527,6 @@ namespace Sleepy
 			}
 			ImGui::EndCombo();
 		}
-
-		Material& material = ModelLibrary::GetInstance().GetMaterial(mesh.m_materialID);
-		ImGui::DragFloat("Quadratic", &material.shininess, 0.005f, 0.0f, 128.0f);
-
 
 		auto shaderIDs = ModelLibrary::GetInstance().GetShaderList();
 		if (ImGui::BeginCombo("Shader", mesh.m_shaderID.c_str()))
@@ -544,6 +540,33 @@ namespace Sleepy
 					ImGui::SetItemDefaultFocus();
 			}
 			ImGui::EndCombo();
+		}
+
+		Material& material = ModelLibrary::GetInstance().GetMaterial(mesh.m_materialID);
+		ImGui::DragFloat("Shininess", &material.shininess, 0.005f, 0.0f, 128.0f);
+		if (material.diffuseTextures.empty())
+		{
+			ImGui::ColorPicker3("Color", (float*)&material.diffuseColor);
+		}
+		else
+		{
+			for (Tex& t : material.diffuseTextures)
+			{
+				ImGui::PushID(t.id);
+				ImGui::Text(t.type.c_str());
+				ImGui::Image((void*)t.id, ImVec2(128, 128));
+				ImGui::PopID();
+			}
+		}
+		if (!material.specularTextures.empty())
+		{
+			for (Tex& t : material.specularTextures)
+			{
+				ImGui::PushID(t.id);
+				ImGui::Text(t.type.c_str());
+				ImGui::Image((void*)t.id, ImVec2(128, 128));
+				ImGui::PopID();
+			}
 		}
 
 		if (ImGui::Button("Remove"))
