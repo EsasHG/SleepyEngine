@@ -1,49 +1,49 @@
 #pragma once
-#include <entt/entt.hpp>
-#include <string>
-#include <unordered_map>
-#include <memory>
+
+#include "SceneBase.h"
+#include "Components/TransformComponent.h"
+#include "Components/RelationshipComponent.h"
+#include "Entity.h"
 
 namespace Sleepy
 {
+	struct UpdateComponent 
+	{
+		UpdateComponent(Entity* entity, int i = 0)
+		{
+			m_Entity = entity;
+		}
+		Entity* m_Entity;
+	};
 
-	class Entity;
-	struct aiNode;
-	struct aiMesh;
-	struct aiScene;
-	struct aiMaterial;
-	struct MeshGroup;
-
-	class Scene
+	class Scene : public SceneBase
 	{
 	public:
-		Scene();
-		~Scene();
-		virtual void Init() = 0;
-		virtual void Update() = 0;
-		void DeleteEntity(Entity& entity);
-		void DeleteAllComponents(Entity& entity);
-		void Draw();
+		Scene() : SceneBase() {}
 
-		/// <summary>
-		/// Deletes all entities marked for deletion
-		/// </summary>
-		void CleanupRegistry();
-		static void MarkForDeletion(Entity& entity);
+		virtual void Update(double deltaTime) override;
 
-		template<typename T>
-		void RemoveComponent(Entity* entity);
+		template<typename T, typename ... Args>
+		T& CreateGameObject(std::string entityName, Args&&... args)
+		{
+			bool convertible = std::is_nothrow_convertible<T*, Entity*>::value;
+			assert(convertible);
 
-		Entity* m_SceneEntity;
-	protected:
-		Entity& CreateEntity(std::string entityName);
-		Entity& LoadMeshGroup(MeshGroup* meshGroup, Entity& parent, std::string groupName);
-	private:
+			if (!m_SceneEntity)
+			{
+				CreateSceneEntity();
+			}
 
-		entt::registry m_registry;
-		std::vector<Entity*> entities;
+			T* entity = new T(entityName, this, std::forward<Args>(args)...);
+			entity->AddComponent<TransformComponent>();
+			entity->AddComponent<RelationshipComponent>(m_SceneEntity);
+			if (entity->enableUpdate)
+				entity->AddComponent<UpdateComponent>(0);
 
-		friend class Entity;
-		friend class Application;
+			entities.push_back(entity);
+
+			return *entity;
+
+		}
 	};
 }

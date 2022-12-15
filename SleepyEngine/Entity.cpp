@@ -4,7 +4,15 @@
 
 namespace Sleepy
 {
+	Entity::Entity(std::string entityName, SceneBase* scene) : m_Name(entityName), m_scene(scene)
+	{
+		m_entityHandle = m_scene->m_registry.create();
+	}
 
+	Entity:: ~Entity()
+	{
+		RemoveAsChild();
+	}
 	Entity& Entity::GetParent()
 	{
 		return *m_scene->m_registry.get<RelationshipComponent>(GetComponent<RelationshipComponent>().m_parent).m_Entity;

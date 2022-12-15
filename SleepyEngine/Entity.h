@@ -1,22 +1,18 @@
 #pragma once
 #include <entt/entt.hpp>
 #include <string>
-#include "Scene.h"
+
+#include "SceneBase.h"
 
 namespace Sleepy
 {
+
 	class Entity
 	{
 	public:
-		Entity(std::string entityName, Scene* scene) : m_Name(entityName), m_scene(scene)
-		{
-			m_entityHandle = m_scene->m_registry.create();
-		}
+		Entity(std::string entityName, SceneBase* scene);
 	
-		~Entity()
-		{
-			RemoveAsChild();
-		}
+		~Entity();
 	
 		template<typename T, typename ... Args>
 		T& AddComponent(Args&&... args)
@@ -58,7 +54,8 @@ namespace Sleepy
 			return m_entityHandle == e->m_entityHandle;
 		}
 	
-	
+		virtual void Update(double deltaTime) {};
+
 		Entity& GetParent();
 			
 		std::vector<Entity*> GetChildren();
@@ -71,13 +68,15 @@ namespace Sleepy
 		bool HasChildren();
 	
 		std::string m_Name;
+
+		bool enableUpdate = false;
 	private:
 	
 		void RemoveAsChild();
-		Scene* m_scene;
+		SceneBase* m_scene;
 		entt::entity m_entityHandle;
 	
-		friend class Scene;				//So we can get the m_entityHandle to delete entity
+		friend class SceneBase;				//So we can get the m_entityHandle to delete entity
 		friend class RelationshipComponent;
 	};
 }

@@ -4,11 +4,11 @@
 #include <Components/MeshComponent.h>
 #include <TransformSystem.h>
 #include <Mesh.h>
+#include "Boid.h"
 
 
 SandboxScene::SandboxScene()
 {
-	//can one entity have both components?
 	Sleepy::Entity& dirLight = CreateEntity("Directional Light");
 	dirLight.AddComponent<Sleepy::DirLightComponent>(glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.5f, 0.5f, 0.5f),
 		glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(-0.2f, -0.6f, -0.3f));
@@ -16,7 +16,7 @@ SandboxScene::SandboxScene()
 	Sleepy::Entity& pointLight = CreateEntity("Point Light");
 	pointLight.AddComponent<Sleepy::PointLightComponent>(glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.4f, 0.4f, 0.4f), 1.0f, 0.09f, 0.032f);
 
-	Sleepy::Entity& ent = CreateEntity("quad");
+	Sleepy::Entity& ent = CreateGameObject<Sleepy::Entity>("quad");
 
 	std::vector<Sleepy::Vertex> vertices;
 	vertices.push_back(Sleepy::Vertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)));
@@ -50,12 +50,16 @@ SandboxScene::SandboxScene()
 		Sleepy::Entity& planetEntity2 = LoadMeshGroup(planetGroup, *m_SceneEntity, "Planet2");
 		Sleepy::TransformSystem::SetPosition(planetEntity2, glm::vec3(4.0f, 6.0f, 0.0f));
 	}
+
+	boid = &CreateGameObject<Boid>("boid");
 }
 
 void SandboxScene::Init()
 {
+
 }
 
-void SandboxScene::Update()
+void SandboxScene::Update(double deltaTime)
 {
+	Scene::Update(deltaTime);
 }

@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Boid.cpp" />
     <ClCompile Include="Sandbox.cpp" />
     <ClCompile Include="SandboxApp.cpp" />
     <ClCompile Include="SandboxScene.cpp" />
@@ -147,6 +148,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Boid.h" />
     <ClInclude Include="SandboxApp.h" />
     <ClInclude Include="SandboxScene.h" />
   </ItemGroup>

@@ -91,7 +91,7 @@ namespace Sleepy
 			InputManager::GetInstance().RunEvents();
 			camera->Run(deltaTime);
 			for (Scene* scene : m_scenes)
-				scene->Update();
+				scene->Update(deltaTime);
 
 	#ifdef _SHOWUI
 			if (ui->RenderWindowOpen())

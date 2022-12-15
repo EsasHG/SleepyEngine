@@ -412,7 +412,7 @@ namespace Sleepy
 			{
 				if (ImGui::Button("Delete"))
 				{
-					Scene::MarkForDeletion(entity);
+					SceneBase::MarkForDeletion(entity);
 					selectedEntities.pop_back();
 					ImGui::End();
 					return;

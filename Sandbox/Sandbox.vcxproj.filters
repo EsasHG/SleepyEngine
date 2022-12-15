@@ -24,12 +24,18 @@
     <ClCompile Include="SandboxScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Boid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SandboxApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SandboxScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Boid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
