@@ -17,7 +17,6 @@ namespace Sleepy
 
 	class SceneBase 
 	{
-
 		public:
 			SceneBase();
 			~SceneBase();
@@ -51,7 +50,6 @@ namespace Sleepy
 			friend class Application;
 		private:
 		
-	
 	};
 
 }

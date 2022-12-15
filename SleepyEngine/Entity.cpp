@@ -1,5 +1,6 @@
 #include "Entity.h"
 #include "Components/RelationshipComponent.h"
+#include "Components/TransformComponent.h"
 #include "TransformSystem.h"
 
 namespace Sleepy
@@ -16,6 +17,34 @@ namespace Sleepy
 	Entity& Entity::GetParent()
 	{
 		return *m_scene->m_registry.get<RelationshipComponent>(GetComponent<RelationshipComponent>().m_parent).m_Entity;
+	}
+
+	glm::vec3 Entity::GetPosition()
+	{
+		return TransformSystem::GetPosition(GetComponent<TransformComponent>());
+	}
+
+	glm::vec3 Entity::GetRotation()
+	{
+		return TransformSystem::GetRotation(GetComponent<TransformComponent>());
+	}
+
+	glm::vec3 Entity::GetScale()
+	{
+		return TransformSystem::GetScale(GetComponent<TransformComponent>());
+	}
+
+	void Entity::SetPosition(glm::vec3 pos)
+	{
+		TransformSystem::SetPosition(*this, pos);
+	}
+	void Entity::SetRotation(glm::vec3 rot)
+	{
+		TransformSystem::SetRotation(*this, rot);
+	}
+	void Entity::SetScale(glm::vec3 scale)
+	{
+		TransformSystem::SetScale(*this, scale);
 	}
 
 	std::vector<Entity*> Entity::GetChildren()

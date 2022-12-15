@@ -1,12 +1,11 @@
 #pragma once
 #include <entt/entt.hpp>
 #include <string>
-
+#include <glm/glm.hpp>
 #include "SceneBase.h"
 
 namespace Sleepy
 {
-
 	class Entity
 	{
 	public:
@@ -66,6 +65,14 @@ namespace Sleepy
 		void Unparent();
 		bool HasParent();
 		bool HasChildren();
+
+		glm::vec3 GetPosition();
+		glm::vec3 GetRotation();
+		glm::vec3 GetScale();
+
+		void SetPosition(glm::vec3 pos);
+		void SetRotation(glm::vec3 rot);
+		void SetScale(glm::vec3 scale);
 	
 		std::string m_Name;
 
