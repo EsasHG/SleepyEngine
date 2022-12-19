@@ -2,13 +2,13 @@
 //
 
 #include <iostream>
-#include "SandboxApp.h"
+#include <Application.h>
 #include "SandboxScene.h"
 
 
 int main()
 {
-    SandboxApp app;
+    Sleepy::Application app;
     SandboxScene* scene = new SandboxScene();
     app.SetScene(scene);
     app.Run();

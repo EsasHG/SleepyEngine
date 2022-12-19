@@ -20,7 +20,7 @@ namespace Sleepy
 		public:
 			SceneBase();
 			~SceneBase();
-			virtual void Init() = 0;
+			virtual void BeginPlay() = 0;
 			virtual void Update(double deltaTime) = 0;
 			void DeleteEntity(Entity& entity);
 			void DeleteAllComponents(Entity& entity);
@@ -34,18 +34,19 @@ namespace Sleepy
 	
 			template<typename T>
 			void RemoveComponent(Entity* entity);
-	
+			Entity* GetEntity(entt::entity entityHandle);
+
 			Entity* m_SceneEntity;
 		protected:
 			void CreateSceneEntity();
 	
 			Entity& CreateEntity(std::string entityName);
-	
 			Entity& LoadMeshGroup(MeshGroup* meshGroup, Entity& parent, std::string groupName);
 	
 			entt::registry m_registry;
-			std::vector<Entity*> entities;
-	
+			//TODO: Hate having both of these. At least while entities has everything in gameEntities already
+			std::map<entt::entity, Entity*> entities;
+			std::vector<Entity*> gameEntities;
 			friend class Entity;
 			friend class Application;
 		private:

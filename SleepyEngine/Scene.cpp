@@ -6,6 +6,12 @@ namespace Sleepy
 	//template<typename T, typename ...Args>
 	//T& Scene::CreateEntityT(std::string entityName, Args && ...args)
 	
+	void Scene::BeginPlay()
+	{
+		for (auto it = entities.begin(); it != entities.end(); ++it)
+			it->second->BeginPlay();
+	}
+
 	void Scene::Update(double deltaTime)
 	{
 		auto regView = m_registry.view<UpdateComponent>();

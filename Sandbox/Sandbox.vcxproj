@@ -139,7 +139,6 @@
   <ItemGroup>
     <ClCompile Include="Boid.cpp" />
     <ClCompile Include="Sandbox.cpp" />
-    <ClCompile Include="SandboxApp.cpp" />
     <ClCompile Include="SandboxScene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -149,7 +148,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h" />
-    <ClInclude Include="SandboxApp.h" />
     <ClInclude Include="SandboxScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <string>
+#include <algorithm>
 #include "Mesh.h"
 
 struct aiNode;
@@ -61,13 +62,14 @@ namespace Sleepy
 			return m_materials[name];
 		}
 
-
 		std::vector<std::string> GetMeshList()
 		{
 			std::vector<std::string> v;
 
 			for (auto pair : m_meshes)
 				v.push_back(pair.first);
+
+			std::sort(v.begin(), v.end());
 
 			return v;
 		}
@@ -79,6 +81,8 @@ namespace Sleepy
 			for (auto pair : m_materials)
 				v.push_back(pair.first);
 
+			std::sort(v.begin(), v.end());
+
 			return v;
 		}
 
@@ -89,6 +93,8 @@ namespace Sleepy
 
 			for (auto pair : m_shaders)
 				v.push_back(pair.first);
+
+			std::sort(v.begin(), v.end());
 
 			return v;
 		}

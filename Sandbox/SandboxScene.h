@@ -10,11 +10,11 @@ class SandboxScene :
 public:
     SandboxScene();
 
-    virtual void Init() override;
+    virtual void BeginPlay() override;
     virtual void Update(double deltaTime) override;
 
-	
-	class Boid* boid;
+    std::vector<class Boid*> boids;
 
+    int maxBoids = 10;
 };
 

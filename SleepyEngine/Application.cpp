@@ -29,13 +29,16 @@
 
 namespace Sleepy
 {
+	bool Application::s_Playing = false;
 	Application::Application()
 	{
 		window = new Window(1920, 1080, "Sleepy Engine");
 #ifdef _SHOWUI
-
 		ui = new UiLayer();
 		window->EnableImGui();
+#else
+		s_Playing = true;
+
 #endif // _SHOWUI
 		InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Application::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -79,7 +82,21 @@ namespace Sleepy
 			ui->BeginFrame();
 			//ui->Run(deltaTime, nullptr);
 			for (Scene* scene : m_scenes)
-				ui->Run(deltaTime, scene->m_SceneEntity);
+			{
+				if (ui->Run(deltaTime, scene))
+				{
+					if (s_Playing)
+					{
+						for (Scene* scene : m_scenes)
+						{
+							for(Entity* e : scene->gameEntities)
+								scene->MarkForDeletion(*e);
+						}
+						firstGameFrame = true;
+					}
+					s_Playing = !s_Playing;
+				}
+			}
 			renderer->BeginFrame(ui->contentRegionSize);
 	#else
 			renderer->BeginFrame(glm::vec2(window->GetWidth(),window->GetHeight()));
@@ -90,8 +107,19 @@ namespace Sleepy
 
 			InputManager::GetInstance().RunEvents();
 			camera->Run(deltaTime);
-			for (Scene* scene : m_scenes)
-				scene->Update(deltaTime);
+			
+			if (s_Playing)
+			{
+				if (firstGameFrame)
+				{
+					for (Scene* scene : m_scenes)
+						scene->BeginPlay();
+					firstGameFrame = false;
+				}
+
+				for (Scene* scene : m_scenes)
+					scene->Update(deltaTime);
+			}
 
 	#ifdef _SHOWUI
 			if (ui->RenderWindowOpen())

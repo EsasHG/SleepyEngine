@@ -5,7 +5,7 @@
 #include "Components/LightComponent.h"
 #include "Components/RelationshipComponent.h"
 #include "Components/TransformComponent.h"
-
+#include "Application.h"
 namespace Sleepy
 {
 	class Deletion : Component
@@ -46,10 +46,25 @@ namespace Sleepy
 		Entity* entity = new Entity(entityName, this);
 		entity->AddComponent<TransformComponent>();
 		entity->AddComponent<RelationshipComponent>(m_SceneEntity);
-		
-		entities.push_back(entity);
 
+		entities.insert({ entity->m_entityHandle, entity });
+		//entities.insert(entity->m_entityHandle,entity);
+		if (Application::s_Playing)
+		{
+			entity->BeginPlay();
+			gameEntities.push_back(entity);
+		}
 		return *entity;
+	}
+
+	Entity* SceneBase::GetEntity(entt::entity entityHandle)
+	{
+		auto it = entities.find(entityHandle);
+		if (it != entities.end())
+			return it->second;
+		else
+			return nullptr;
+		// TODO: insert return statement here
 	}
 
 	//have not been able to test this with groups that have multiple children
@@ -129,7 +144,8 @@ namespace Sleepy
 
 	void SceneBase::MarkForDeletion(Entity& entity)
 	{
-		entity.AddComponent<Deletion>(2);
+		if(!entity.Has<Deletion>())
+			entity.AddComponent<Deletion>(2);
 		auto& rComp = entity.GetComponent<RelationshipComponent>();
 
 		for (auto child : entity.GetChildren())
@@ -144,14 +160,19 @@ namespace Sleepy
 
 		m_registry.destroy(entity.m_entityHandle);
 
-		auto it = std::find(entities.begin(), entities.end(), &entity);
+		auto it = entities.find(entity.m_entityHandle);
 		Entity* ent = nullptr;
 		if (it != entities.end())
 		{
-			Entity* ent = *it;
-			entities.erase(it);		////this might not delete if other shared_ptrs exist
+			Entity* ent = it->second;
+			entities.erase(it);		
 		}
 
+		auto it2 = std::find(gameEntities.begin(), gameEntities.end(), &entity);
+		if (it2 != gameEntities.end())
+		{
+			gameEntities.erase(it2);
+		}
 		delete ent;
 	}
 

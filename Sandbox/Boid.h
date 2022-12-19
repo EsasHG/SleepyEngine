@@ -9,7 +9,7 @@ public:
 	{
 		enableUpdate = true;
 	}
-
+	virtual void BeginPlay() override;
 	virtual void Update(double deltaTime) override;
 	Sleepy::MeshComponent& mesh;
 };

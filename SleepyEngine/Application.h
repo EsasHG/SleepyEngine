@@ -3,6 +3,7 @@
 #include <vector>
 namespace Sleepy
 {
+
 	class Scene;
 	class Application
 	{
@@ -18,10 +19,12 @@ namespace Sleepy
 			m_scenes.push_back(scene);
 		}
 		void FramebufferResizeCallback(int x, int y);
+		static bool s_Playing;
+
 	private:
 
 		class UiLayer* ui;
-
+		bool firstGameFrame = true;
 		std::vector<Scene*> m_scenes;
 		double prevFrameTime = 0;
 		class Window* window;

@@ -53,6 +53,7 @@ namespace Sleepy
 			return m_entityHandle == e->m_entityHandle;
 		}
 	
+		virtual void BeginPlay() {};
 		virtual void Update(double deltaTime) {};
 
 		Entity& GetParent();
@@ -73,7 +74,7 @@ namespace Sleepy
 		void SetPosition(glm::vec3 pos);
 		void SetRotation(glm::vec3 rot);
 		void SetScale(glm::vec3 scale);
-	
+		entt::entity GetHandle() { return m_entityHandle; }
 		std::string m_Name;
 
 		bool enableUpdate = false;
@@ -84,6 +85,7 @@ namespace Sleepy
 		entt::entity m_entityHandle;
 	
 		friend class SceneBase;				//So we can get the m_entityHandle to delete entity
+		friend class Scene;					//So we can get the m_entityHandle to add to entities in SceneBase from Scene
 		friend class RelationshipComponent;
 	};
 }

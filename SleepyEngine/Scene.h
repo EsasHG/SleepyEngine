@@ -4,7 +4,7 @@
 #include "Components/TransformComponent.h"
 #include "Components/RelationshipComponent.h"
 #include "Entity.h"
-
+#include "Application.h"
 namespace Sleepy
 {
 	struct UpdateComponent 
@@ -21,6 +21,7 @@ namespace Sleepy
 	public:
 		Scene() : SceneBase() {}
 
+		virtual void BeginPlay() override;
 		virtual void Update(double deltaTime) override;
 
 		template<typename T, typename ... Args>
@@ -40,7 +41,12 @@ namespace Sleepy
 			if (entity->enableUpdate)
 				entity->AddComponent<UpdateComponent>(0);
 
-			entities.push_back(entity);
+			entities.insert({ entity->m_entityHandle, entity });
+			if (Application::s_Playing)
+			{
+				entity->BeginPlay();
+				gameEntities.push_back(entity);
+			}
 
 			return *entity;
 

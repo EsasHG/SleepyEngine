@@ -5,6 +5,7 @@
 #include <filesystem>
 #include "Window.h"
 #include "Entity.h"
+#include "Scene.h"
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
@@ -56,10 +57,11 @@ namespace Sleepy
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 	}
 
-	void UiLayer::Run(double deltaTime, Entity* sceneEntity)
+	bool UiLayer::Run(double deltaTime, Scene* scene)
 	{
+		Entity* sceneEntity = scene->m_SceneEntity;
 		bool windowFocused = false;
-
+		bool bTogglePlay = false;
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("Windows"))
@@ -78,6 +80,23 @@ namespace Sleepy
 
 				ImGui::EndMenu();
 			}
+			if (!playing)
+			{
+				if (ImGui::Button("PLAY",ImVec2(50,20)))
+				{
+					bTogglePlay = true;
+					playing = true;
+				}
+			}
+			else
+			{
+				if (ImGui::Button("STOP", ImVec2(50, 20)))
+				{
+					bTogglePlay = true;
+					playing = false;
+				}
+			}
+
 			ImGui::EndMainMenuBar();
 		}
 
@@ -160,7 +179,7 @@ namespace Sleepy
 			SetupObjectTree(*sceneEntity);
 
 		if (showObjectWindow) //Needs to be after Object tree window for parent button to work
-			SetupObjectWindow();
+			SetupObjectWindow(scene);
 
 		if (showAssetsWindow)
 			SetupAssetsWindow();
@@ -180,12 +199,15 @@ namespace Sleepy
 			if (sceneEntity && entityToSelect == sceneEntity)
 				sceneSelected = true;
 
-			selectedEntities.push_back(entityToSelect);
+			selectedEntities.push_back(entityToSelect->GetHandle());
 		}
 
 		//update parenting
 		if (newIndex != -1 && newParentEntity && entityToMove)
 			ReorderObjectTree(*newParentEntity, newIndex, *entityToMove);
+
+
+		return bTogglePlay;
 	}
 
 	void UiLayer::SetupObjectTree(Entity& sceneEntity)
@@ -212,7 +234,7 @@ namespace Sleepy
 			node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
 
 		//check selection
-		auto it = std::find(selectedEntities.begin(), selectedEntities.end(), sceneEntity);
+		auto it = std::find(selectedEntities.begin(), selectedEntities.end(), sceneEntity.GetHandle());
 		const bool is_selected = (it != selectedEntities.end());
 		if (is_selected)
 			node_flags |= ImGuiTreeNodeFlags_Selected;
@@ -285,7 +307,7 @@ namespace Sleepy
 			node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet; // | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
 		//check selection
-		auto it = std::find(selectedEntities.begin(), selectedEntities.end(), entity);
+		auto it = std::find(selectedEntities.begin(), selectedEntities.end(), entity.GetHandle());
 		const bool is_selected = (it != selectedEntities.end());
 		if (is_selected)
 			node_flags |= ImGuiTreeNodeFlags_Selected;
@@ -394,7 +416,7 @@ namespace Sleepy
 		newParent.MoveChild(entityToMove, newIndex);
 	}
 
-	void UiLayer::SetupObjectWindow()
+	void UiLayer::SetupObjectWindow(Scene* scene)
 	{
 		ImGui::Begin("Object Details", &showObjectWindow);
 		if (selectedEntities.size() == 0)
@@ -404,19 +426,57 @@ namespace Sleepy
 		}
 		else if (selectedEntities.size() == 1)
 		{
-			Entity& entity = *selectedEntities[0];
-
+			
+			Entity* entity = scene->GetEntity(selectedEntities[0]);
+			if (!entity)
+			{
+				selectedEntities.pop_back();
+				ImGui::End();
+				return;
+			}
 			ImGui::Spacing();
-			ImGui::Text(entity.m_Name.c_str());
+			ImGui::Text(entity->m_Name.c_str());
 			if (!sceneSelected)
 			{
 				if (ImGui::Button("Delete"))
 				{
-					SceneBase::MarkForDeletion(entity);
+					SceneBase::MarkForDeletion(*entity);
 					selectedEntities.pop_back();
 					ImGui::End();
 					return;
 				}
+			}
+			if (ImGui::BeginCombo("##label","Add Component"))
+			{
+				std::vector<std::string> v;
+					
+				for (std::string comp : validComponents)
+				{
+					bool selected = false;
+					if (comp == "TransformComponent" && !entity->Has<TransformComponent>())
+					{
+						if (ImGui::Selectable(comp.c_str(), selected))
+							entity->AddComponent<TransformComponent>();
+					}
+					if (comp == "MeshComponent" && !entity->Has<MeshComponent>())
+					{
+						if (ImGui::Selectable(comp.c_str(), selected))
+							entity->AddComponent<MeshComponent>();
+					}
+					if (comp == "DirLightComponent" && !entity->Has<DirLightComponent>() && !entity->Has<PointLightComponent>())
+					{
+						if (ImGui::Selectable(comp.c_str(), selected))
+							entity->AddComponent<DirLightComponent>();
+					}
+					if (comp == "PointLightComponent" && !entity->Has<DirLightComponent>() && !entity->Has<PointLightComponent>())
+					{
+						if (ImGui::Selectable(comp.c_str(), selected))
+							entity->AddComponent<PointLightComponent>();
+					}
+					//if (selected)
+					//	ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
 			}
 			ImGui::Spacing();
 			ImGui::Spacing();
@@ -426,17 +486,17 @@ namespace Sleepy
 			//ImGui::InputText("Object Name", strName, IM_ARRAYSIZE(strName),0,0,(void*)entity->m_Name.c_str());
 			//entity->m_Name = strName;
 
-			if (entity.Has<TransformComponent>() && !sceneSelected)
-				ShowTransformComp(entity);
+			if (entity->Has<TransformComponent>() && !sceneSelected)
+				ShowTransformComp(*entity);
 
-			if (entity.Has<DirLightComponent>())
-				ShowDirLightComp(entity);
+			if (entity->Has<DirLightComponent>())
+				ShowDirLightComp(*entity);
 
-			if (entity.Has<PointLightComponent>())
-				ShowPointLightComp(entity);
+			if (entity->Has<PointLightComponent>())
+				ShowPointLightComp(*entity);
 
-			if (entity.Has<MeshComponent>())
-				ShowMeshComp(entity);
+			if (entity->Has<MeshComponent>())
+				ShowMeshComp(*entity);
 		}
 		else
 		{
@@ -499,7 +559,6 @@ namespace Sleepy
 		auto meshIDs = ModelLibrary::GetInstance().GetMeshList();
 		if (meshIDs.empty())
 			return;
-		std::sort(meshIDs.begin(), meshIDs.end());
 
 		if (ImGui::BeginCombo("Mesh", mesh.m_meshID.c_str()))
 		{
@@ -616,7 +675,6 @@ namespace Sleepy
 		ImGui::DragFloat("Constant", &pointLight.m_constant, 0.005f, 0.0f, 2.0f);
 		ImGui::DragFloat("Linear", &pointLight.m_linear, 0.005f, 0.0f, 2.0f);
 		ImGui::DragFloat("Quadratic", &pointLight.m_quadratic, 0.005f, 0.0f, 2.0f);
-
 
 		if (ImGui::Button("Remove"))
 		{

@@ -12,7 +12,7 @@ namespace Sleepy
 	class MeshComponent : public Component
 	{
 	public:
-		MeshComponent(Entity* entity, std::string mesh, std::string material = "default", std::string shader = "default")
+		MeshComponent(Entity* entity, std::string mesh = "quad", std::string material = "default", std::string shader = "default")
 		{
 			m_Entity = entity;
 			if(ModelLibrary::GetInstance().MeshExists(mesh))

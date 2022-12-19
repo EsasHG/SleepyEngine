@@ -10,14 +10,15 @@ namespace Sleepy
 
 	class Window;
 	class TransformComponent;
-	class Entity;
+	class Entity; 
+	class Scene;
 	typedef int ImGuiTreeNodeFlags;
 	class UiLayer
 	{
 	public:
 		UiLayer();
 		void BeginFrame();
-		void Run(double deltaTime, Entity* sceneEntity);
+		bool Run(double deltaTime, Scene* scene);
 
 		void EndFrame();
 
@@ -37,7 +38,7 @@ namespace Sleepy
 		void ReorderObjectTree(Entity& newParent, int newIndex, Entity& entityToMove);
 
 		//object window
-		void SetupObjectWindow();
+		void SetupObjectWindow(Scene* scene);
 		void ShowTransformComp(Entity& entity);
 		void ShowMeshComp(Entity& entity);
 		void ShowDirLightComp(Entity& entity);
@@ -59,13 +60,13 @@ namespace Sleepy
 		bool debugLogWindowOpen = false;
 		bool stackToolWindowOpen = false;
 		bool renderWindowOpen;
-
+		bool playing;
 		bool sceneSelected = false;
 
 		//std::queue<float> frametimes;
 
 		Entity* entityToSelect = nullptr;
-		std::vector<Entity*> selectedEntities;
+		std::vector<entt::entity> selectedEntities;
 
 		Entity* entityToMove;
 		Entity* newParentEntity;

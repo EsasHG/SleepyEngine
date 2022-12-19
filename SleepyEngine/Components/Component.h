@@ -1,7 +1,9 @@
 #pragma once
-
+#include <vector>
+#include <string>
 namespace Sleepy
 {
+	static std::vector<std::string> validComponents = { "TransformComponent", "MeshComponent", "DirLightComponent", "PointLightComponent" };
 	enum COMPONENT_TYPE
 	{
 		TRANSFORM,
