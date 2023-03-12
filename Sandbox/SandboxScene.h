@@ -3,7 +3,7 @@
 #include <Components/TransformComponent.h>
 #include <Components/RelationshipComponent.h>
 #include <Entity.h>
-
+#include "Boid.h"
 class SandboxScene :
     public Sleepy::Scene
 {
@@ -14,7 +14,7 @@ public:
     virtual void Update(double deltaTime) override;
 
     std::vector<class Boid*> boids;
-
+    struct BoidInfo info;
     int maxBoids = 100;
 };
 
