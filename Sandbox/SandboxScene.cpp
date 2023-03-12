@@ -51,14 +51,16 @@ SandboxScene::SandboxScene()
 void SandboxScene::BeginPlay()
 {
 	Sleepy::Scene::BeginPlay();
-
+	boids.clear();
+	boids.reserve(sizeof(Boid*) * maxBoids);
 	for (int i = 0; i < maxBoids; i++)
 	{
-		Boid& b = CreateGameObject<Boid>("boid");
+		Boid& b = CreateGameObject<Boid>("boid",boids);
 		boids.push_back(&b);
-		b.SetPosition(glm::vec3(((std::rand() % 1000) / 100.0f) - 5, ((std::rand() % 1000) / 100.0f) - 5, -(std::rand() % 1000) / 100.0f));
-		b.SetScale(glm::vec3(0.4f));
+		b.SetPosition(glm::vec3(((std::rand() % 1000) / 100.0f) - 5, ((std::rand() % 1000) / 100.0f) - 5, ((std::rand() % 1000) / 100.0f) - 5));
+		b.SetScale(glm::vec3(0.05f));
 	}
+
 }
 
 void SandboxScene::Update(double deltaTime)

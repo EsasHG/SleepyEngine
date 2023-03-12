@@ -15,6 +15,6 @@ public:
 
     std::vector<class Boid*> boids;
 
-    int maxBoids = 10;
+    int maxBoids = 100;
 };
 
