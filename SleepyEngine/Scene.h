@@ -36,8 +36,8 @@ namespace Sleepy
 			}
 
 			T* entity = new T(entityName, this, std::forward<Args>(args)...);
-			entity->AddComponent<TransformComponent>();
-			entity->AddComponent<RelationshipComponent>(m_SceneEntity);
+			//entity->AddComponent<TransformComponent>();
+			//entity->AddComponent<RelationshipComponent>(m_SceneEntity);
 			if (entity->enableUpdate)
 				entity->AddComponent<UpdateComponent>(0);
 

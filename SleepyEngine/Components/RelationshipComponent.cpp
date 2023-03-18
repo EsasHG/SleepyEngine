@@ -7,7 +7,6 @@ namespace Sleepy
 	{
 		m_Entity = entity;
 		m_componentType = RELATIONSHIP;
-		if (parent)
-			entity->SetParent(*parent);
+
 	}
 }

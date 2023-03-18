@@ -11,10 +11,10 @@ void Boid::Update(double deltaTime)
 {
 	Sleepy::Entity::Update(deltaTime);
 
-	SetPosition(GetPosition() + float(deltaTime) * velocity * 1.0f);
+	SetPosition(GetPosition() + (float(deltaTime) * velocity));
 }
 
-void Boid::CheckOthers(std::vector<Boid*> boids)
+void Boid::CheckOthers(std::vector<Boid*>& boids)
 {
 	glm::vec3 pos = GetPosition();
 

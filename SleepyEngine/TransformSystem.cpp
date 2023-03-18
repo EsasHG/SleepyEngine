@@ -8,82 +8,17 @@ namespace Sleepy
 {
 
 
-	void TransformSystem::SetPosition(Entity& e, glm::vec3 pos)
-	{
-		TransformComponent& tComp = e.GetComponent<TransformComponent>();
-		tComp.m_position = pos;
-		RecalculateModelMatrices(tComp);
-	}
+	// ********** Getting Values **********
 
-	void TransformSystem::SetPosition(Entity& e, float posX, float posY, float posZ)
-	{
-		glm::vec3 pos(posX, posY, posZ);
-		SetPosition(e, pos);
-	}
-
-	void TransformSystem::SetScale(Entity& e, glm::vec3 scale)
-	{
-		auto& tComp = e.GetComponent<TransformComponent>();
-		tComp.m_scale = scale;
-		RecalculateModelMatrices(tComp);
-	}
-
-
-	void TransformSystem::SetScale(Entity& e, float scaleX, float scaleY, float scaleZ)
-	{
-		glm::vec3 scale(scaleX, scaleY, scaleZ);
-		SetScale(e, scale);
-	}
-
-	void TransformSystem::SetRotation(Entity& e, glm::vec3 eulerRotDeg)
-	{
-		auto& tComp = e.GetComponent<TransformComponent>();
-
-		eulerRotDeg.x = glm::radians(eulerRotDeg.x);
-		eulerRotDeg.y = glm::radians(eulerRotDeg.y);
-		eulerRotDeg.z = glm::radians(eulerRotDeg.z);
-
-		tComp.m_rotation = glm::quat(eulerRotDeg);
-
-		RecalculateModelMatrices(tComp);
-
-	}
-
-	void TransformSystem::SetRotation(Entity& e, float yaw, float pitch, float roll)
-	{
-		auto& tComp = e.GetComponent<TransformComponent>();
-
-		glm::vec3 rot(yaw, pitch, roll);
-
-		SetRotation(e, rot);
-	}
-
-	glm::vec3 TransformSystem::GetPosition(const Entity& e)
-	{
-		auto& tComp = e.GetComponent<TransformComponent>();
-		return GetPosition(tComp);
-	}
 
 	glm::vec3 TransformSystem::GetPosition(const TransformComponent& transformComp)
 	{
 		return transformComp.m_position;
 	}
 
-	glm::vec3 TransformSystem::GetScale(const Entity& e)
-	{
-		auto& tComp = e.GetComponent<TransformComponent>();
-		return GetScale(tComp);
-	}
-
 	glm::vec3 TransformSystem::GetScale(const TransformComponent& transformComp)
 	{
 		return transformComp.m_scale;
-	}
-
-	glm::vec3 TransformSystem::GetRotation(const Entity& e)
-	{
-		auto& tComp = e.GetComponent<TransformComponent>();
-		return GetRotation(tComp);
 	}
 
 	glm::vec3 TransformSystem::GetRotation(const TransformComponent& transformComp)
@@ -104,14 +39,53 @@ namespace Sleepy
 		//return glm::eulerAngles(rot);
 	}
 
+
+	// ********** Setting Values **********
+
+
+	void TransformSystem::SetPosition(TransformComponent& transformComp, float posX, float posY, float posZ)
+	{
+		glm::vec3 pos(posX, posY, posZ);
+		SetPosition(transformComp, pos);
+	}
+	void TransformSystem::SetPosition(TransformComponent& transformComp, glm::vec3 pos)
+	{
+		transformComp.m_position = pos;
+		RecalculateModelMatrices(transformComp);
+	}
+
+
+	void TransformSystem::SetScale(TransformComponent& transformComp, float scaleX, float scaleY, float scaleZ)
+	{
+		glm::vec3 scale(scaleX, scaleY, scaleZ);
+		SetScale(transformComp, scale);
+	}
+	void TransformSystem::SetScale(TransformComponent& transformComp, glm::vec3 scale)
+	{
+		transformComp.m_scale = scale;
+		RecalculateModelMatrices(transformComp);
+	}
+
+
+	void TransformSystem::SetRotation(TransformComponent& transformComp, float yaw, float pitch, float roll)
+	{
+		glm::vec3 rot(yaw, pitch, roll);
+		SetRotation(transformComp, rot);
+	}
+	void TransformSystem::SetRotation(TransformComponent& transformComp, glm::vec3 eulerRotDeg)
+	{
+		eulerRotDeg.x = glm::radians(eulerRotDeg.x);
+		eulerRotDeg.y = glm::radians(eulerRotDeg.y);
+		eulerRotDeg.z = glm::radians(eulerRotDeg.z);
+
+		transformComp.m_rotation = glm::quat(eulerRotDeg);
+
+		RecalculateModelMatrices(transformComp);
+	}
+
+
 	// ********** Matrix **********
 
-
-	glm::mat4 TransformSystem::GetModelMatrix(const Entity& e)
-	{
-		auto tComp = e.GetComponent<TransformComponent>();
-		return GetModelMatrix(tComp);
-	}
 
 	glm::mat4 TransformSystem::GetModelMatrix(const TransformComponent& transformComp)
 	{
@@ -131,21 +105,15 @@ namespace Sleepy
 	{
 		if (transformComp.m_Entity->HasParent())
 		{
-			TransformComponent& parentTransform = transformComp.m_Entity->GetParent().GetComponent<TransformComponent>();
-			transformComp.m_modelMatrix = parentTransform.m_modelMatrix * GetLocalModelMatrix(transformComp);
+			TransformComponent* parentTransform = transformComp.m_Entity->GetParent().transformComp;
+			transformComp.m_modelMatrix = parentTransform->m_modelMatrix * GetLocalModelMatrix(transformComp);
 		}
 
 		for (auto child : transformComp.m_Entity->GetChildren())
 		{
-			TransformComponent& tChild = child->GetComponent<TransformComponent>();
-			tChild.m_modelMatrix = transformComp.m_modelMatrix * GetLocalModelMatrix(tChild);
+			TransformComponent& tChild = *child->transformComp;
+			//tChild.m_modelMatrix = transformComp.m_modelMatrix * GetLocalModelMatrix(tChild);		//is this neccessary?
 			RecalculateModelMatrices(tChild);
 		}
-	}
-
-	void TransformSystem::RecalculateModelMatrices(Entity& entity)
-	{
-		TransformComponent& transform = entity.GetComponent<TransformComponent>();
-		RecalculateModelMatrices(transform);
 	}
 }

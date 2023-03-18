@@ -8,6 +8,10 @@ namespace Sleepy
 	Entity::Entity(std::string entityName, SceneBase* scene) : m_Name(entityName), m_scene(scene)
 	{
 		m_entityHandle = m_scene->m_registry.create();
+		transformComp = &AddComponent<TransformComponent>(); //TODO: Should all entities really have a TransformComponent? Scenes as well?
+		relationshipComp = &AddComponent<RelationshipComponent>(m_scene->m_SceneEntity);
+		if (m_scene->m_SceneEntity)		//will not be true when creating scene entity, but should always be true otherwise
+			SetParent(*m_scene->m_SceneEntity);
 	}
 
 	Entity:: ~Entity()
@@ -16,41 +20,45 @@ namespace Sleepy
 	}
 	Entity& Entity::GetParent()
 	{
-		return *m_scene->m_registry.get<RelationshipComponent>(GetComponent<RelationshipComponent>().m_parent).m_Entity;
+		return *m_scene->m_registry.get<RelationshipComponent>(relationshipComp->m_parent).m_Entity;
 	}
 
 	glm::vec3 Entity::GetPosition()
 	{
-		return TransformSystem::GetPosition(GetComponent<TransformComponent>());
+		return transformComp->m_position;
+		//return TransformSystem::GetPosition(GetComponent<TransformComponent>());
 	}
 
 	glm::vec3 Entity::GetRotation()
 	{
-		return TransformSystem::GetRotation(GetComponent<TransformComponent>());
+		return TransformSystem::GetRotation(*transformComp);
+		//return TransformSystem::GetRotation(GetComponent<TransformComponent>());
 	}
 
 	glm::vec3 Entity::GetScale()
 	{
-		return TransformSystem::GetScale(GetComponent<TransformComponent>());
+		return transformComp->m_scale;
+		//return TransformSystem::GetScale(GetComponent<TransformComponent>());
 	}
 
 	void Entity::SetPosition(glm::vec3 pos)
 	{
-		TransformSystem::SetPosition(*this, pos);
+		TransformSystem::SetPosition(*transformComp, pos);
+		//TransformSystem::SetPosition(*this, pos);
 	}
 	void Entity::SetRotation(glm::vec3 rot)
 	{
-		TransformSystem::SetRotation(*this, rot);
+		TransformSystem::SetRotation(*transformComp, rot);
 	}
 	void Entity::SetScale(glm::vec3 scale)
 	{
-		TransformSystem::SetScale(*this, scale);
+		TransformSystem::SetScale(*transformComp, scale);
 	}
 
 	std::vector<Entity*> Entity::GetChildren()
 	{
 		std::vector<Entity*> children;
-		entt::entity current = GetComponent<RelationshipComponent>().m_firstChild;
+		entt::entity current = relationshipComp->m_firstChild;
 
 		while (current != entt::null)
 		{
@@ -64,7 +72,7 @@ namespace Sleepy
 
 	bool Entity::HasParent()
 	{
-		return (GetComponent<RelationshipComponent>().m_parent != entt::null);
+		return (relationshipComp->m_parent != entt::null);
 	}
 
 	/// <summary>
@@ -73,22 +81,22 @@ namespace Sleepy
 	/// <returns>true if entity has at least one child</returns>
 	bool Entity::HasChildren()
 	{
-		return (GetComponent<RelationshipComponent>().m_firstChild != entt::null);
+		return (relationshipComp->m_firstChild != entt::null);
 	}
 
 	void Entity::SetParent(Entity& newParent)
 	{
-		RelationshipComponent& rComp = GetComponent<RelationshipComponent>();
+		
 		RemoveAsChild();
-		rComp.m_parent = newParent.m_entityHandle;
+		relationshipComp->m_parent = newParent.m_entityHandle;
 
 		//add to new parent's children
 		entt::entity next = newParent.GetComponent<RelationshipComponent>().m_firstChild;
 
 		if (next == entt::null) //new parent has no children
 		{
-			newParent.GetComponent<RelationshipComponent>().m_firstChild = m_entityHandle;
-			rComp.m_prev = entt::null;
+			newParent.relationshipComp->m_firstChild = m_entityHandle;
+			relationshipComp->m_prev = entt::null;
 		}
 		else
 		{
@@ -104,11 +112,11 @@ namespace Sleepy
 
 			RelationshipComponent& newPrev = m_scene->m_registry.get<RelationshipComponent>(current);
 			newPrev.m_next = m_entityHandle;
-			rComp.m_prev = newPrev.m_Entity->m_entityHandle;
+			relationshipComp->m_prev = newPrev.m_Entity->m_entityHandle;
 		}
-		rComp.m_next = entt::null;
+		relationshipComp->m_next = entt::null;
 
-		TransformSystem::RecalculateModelMatrices(*this);
+		TransformSystem::RecalculateModelMatrices(*transformComp);
 	}
 
 	void Entity::Unparent()
@@ -139,13 +147,12 @@ namespace Sleepy
 		}
 		assert(oldIndex > 0); //child is not a child of this entity! 
 		child.RemoveAsChild();
-		RelationshipComponent& rComp = GetComponent<RelationshipComponent>();
-		RelationshipComponent& rCompChild = child.GetComponent<RelationshipComponent>();
-		entt::entity current = rComp.m_firstChild;
+		RelationshipComponent& rCompChild = *child.relationshipComp;
+		entt::entity current = relationshipComp->m_firstChild;
 
 		if (current == entt::null)	//parent has no children
 		{
-			rComp.m_firstChild = child.m_entityHandle;
+			relationshipComp->m_firstChild = child.m_entityHandle;
 			rCompChild.m_prev = entt::null;
 			rCompChild.m_next = entt::null;
 		}
@@ -155,7 +162,7 @@ namespace Sleepy
 			assert(newNext.m_prev == entt::null);
 			newNext.m_prev = child.m_entityHandle;
 			rCompChild.m_next = newNext.m_Entity->m_entityHandle;
-			rComp.m_firstChild = child.m_entityHandle;
+			relationshipComp->m_firstChild = child.m_entityHandle;
 			rCompChild.m_prev = entt::null;
 		}
 		else						//Somewhere in the list of children
@@ -192,26 +199,25 @@ namespace Sleepy
 	/// </summary>
 	void Entity::RemoveAsChild()
 	{
-		RelationshipComponent& rComp = GetComponent<RelationshipComponent>();
-		if (rComp.m_parent != entt::null)	//if we have a parent, remove from parent's children
+		if (relationshipComp->m_parent != entt::null)	//if we have a parent, remove from parent's children
 		{
-			if (rComp.m_next != entt::null)	//if we have a next sibling
+			if (relationshipComp->m_next != entt::null)	//if we have a next sibling
 			{
-				RelationshipComponent& rCompNextChild = m_scene->m_registry.get<RelationshipComponent>(rComp.m_next);
+				RelationshipComponent& rCompNextChild = m_scene->m_registry.get<RelationshipComponent>(relationshipComp->m_next);
 				assert(rCompNextChild.m_prev == m_entityHandle);
-				rCompNextChild.m_prev = rComp.m_prev;
+				rCompNextChild.m_prev = relationshipComp->m_prev;
 			}
-			if (rComp.m_prev != entt::null) //if we have a prev sibling
+			if (relationshipComp->m_prev != entt::null) //if we have a prev sibling
 			{
-				RelationshipComponent& rCompPrevChild = m_scene->m_registry.get<RelationshipComponent>(rComp.m_prev);
+				RelationshipComponent& rCompPrevChild = m_scene->m_registry.get<RelationshipComponent>(relationshipComp->m_prev);
 				assert(rCompPrevChild.m_next == m_entityHandle);
-				rCompPrevChild.m_next = rComp.m_next;
+				rCompPrevChild.m_next = relationshipComp->m_next;
 			}
 			else							//if first child
 			{
-				RelationshipComponent& rCompParent = m_scene->m_registry.get<RelationshipComponent>(rComp.m_parent);
+				RelationshipComponent& rCompParent = m_scene->m_registry.get<RelationshipComponent>(relationshipComp->m_parent);
 				assert(rCompParent.m_firstChild == m_entityHandle);
-				rCompParent.m_firstChild = rComp.m_next;	//new first child is next in list
+				rCompParent.m_firstChild = relationshipComp->m_next;	//new first child is next in list
 			}
 		}
 	}

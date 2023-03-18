@@ -39,23 +39,23 @@ SandboxScene::SandboxScene()
 		glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f);
 	pointLight.SetPosition(glm::vec3(0.0f, 0.0f, 0.5f));
 
-	Sleepy::MeshGroup* guitarGroup = Sleepy::ModelLibrary::GetInstance().AddMesh("Assets\\backpack\\backpack.obj");
+	//Sleepy::MeshGroup* guitarGroup = Sleepy::ModelLibrary::GetInstance().AddMesh("Assets\\backpack\\backpack.obj");
 	Sleepy::MeshGroup* planetGroup = Sleepy::ModelLibrary::GetInstance().AddMesh("Assets\\planet\\planet.obj");
 
-	if (guitarGroup)
-	{
-		Sleepy::Entity& guitarEntity = LoadMeshGroup(guitarGroup, *m_SceneEntity, "Backpack");
-		guitarEntity.SetPosition(glm::vec3(-5.0f, 0.0f, 10.0f));
-		Sleepy::Entity& guitarEntity2 = LoadMeshGroup(guitarGroup, *m_SceneEntity, "Backpack2");
-		guitarEntity2.SetPosition(glm::vec3(5.0f, 0.0f, 10.0f));
-	}
+	//if (guitarGroup)
+	//{
+	//	Sleepy::Entity& guitarEntity = LoadMeshGroup(guitarGroup, *m_SceneEntity, "Backpack");
+	//	guitarEntity.SetPosition(glm::vec3(-5.0f, 0.0f, 10.0f));
+	//	Sleepy::Entity& guitarEntity2 = LoadMeshGroup(guitarGroup, *m_SceneEntity, "Backpack2");
+	//	guitarEntity2.SetPosition(glm::vec3(5.0f, 0.0f, 10.0f));
+	//}
 
 	if (planetGroup)
 	{
 		Sleepy::Entity& planetEntity = LoadMeshGroup(planetGroup, *m_SceneEntity, "Planet");
 		planetEntity.SetPosition(glm::vec3(-10.0f, 6.0f, -10.0f));
-		Sleepy::Entity& planetEntity2 = LoadMeshGroup(planetGroup, *m_SceneEntity, "Planet2");
-		planetEntity2.SetPosition(glm::vec3(10.0f, 6.0f, -10.0f));
+		//Sleepy::Entity& planetEntity2 = LoadMeshGroup(planetGroup, *m_SceneEntity, "Planet2");
+		//planetEntity2.SetPosition(glm::vec3(10.0f, 6.0f, -10.0f));
 	}
 }
 
@@ -104,7 +104,7 @@ void SandboxScene::BeginPlay()
 	{
 		Boid& b = CreateGameObject<Boid>("boid", info);
 		boids.push_back(&b);
-		b.SetPosition(glm::vec3(((std::rand() % 2000) / 100.0f) - 10, ((std::rand() % 2000) / 100.0f) - 10, 0));//((std::rand() % 2000) / 100.0f) - 10));
+		b.SetPosition(glm::vec3(((std::rand() % 2000) / 100.0f) - 10, ((std::rand() % 2000) / 100.0f) - 10, ((std::rand() % 2000) / 100.0f) - 10));
 		b.SetScale(glm::vec3(0.05f));
 		if (i < boidsInGroup1)
 			b.inGroup1 = true;
@@ -169,6 +169,8 @@ void SandboxScene::Update(double deltaTime)
 	}
 
 	//check boids using grid
+
+	unsigned long long sizeOfCellVec = sizeof(gridCell*) * 27;
 	for (int x = 0; x < cellCountPerRow; x++)
 	{
 		for (int y = 0; y < cellCountPerRow; y++)
@@ -177,7 +179,12 @@ void SandboxScene::Update(double deltaTime)
 			{
 				int cellIndex = x * cellCountPerRow2 + y * cellCountPerRow + z;
 
+				//std::vector<gridCell*> cellsToCheck;
+				//cellsToCheck.reserve(sizeOfCellVec);
 				std::vector<Boid*> boidsToCheck;
+
+
+				//int numBoids = 0;
 				for (int i : {-1, 0, 1})
 				{
 					int newX = x + i;
@@ -196,17 +203,26 @@ void SandboxScene::Update(double deltaTime)
 							if (newZ < 0 || newZ >= cellCountPerRow)
 								continue;
 
-							int cellToAdd = newX * cellCountPerRow2 + newY * cellCountPerRow + newZ;
+							gridCell& cellToAdd = cellArr[newX * cellCountPerRow2 + newY * cellCountPerRow + newZ];
+							//numBoids += cellToAdd.boidsInCell.size();
+							//cellsToCheck.push_back(&cellToAdd);
 
-							boidsToCheck.insert(boidsToCheck.end(), cellArr[cellToAdd].boidsInCell.begin(), cellArr[cellToAdd].boidsInCell.end());
+							for (auto boidToAdd : cellToAdd.boidsInCell)
+								boidsToCheck.push_back(boidToAdd);
 						}
 					}
 				}
 
-				for (auto b : cellArr[cellIndex].boidsInCell)
-				{
+				//boidsToCheck.reserve(sizeof(Boid*) * numBoids);
 
-					b->CheckOthers(boidsToCheck);
+				//for (auto cell : cellsToCheck)
+				//{
+
+				//}
+
+				for (auto boid : cellArr[cellIndex].boidsInCell)
+				{
+					boid->CheckOthers(boidsToCheck);
 				}
 			}
 		}

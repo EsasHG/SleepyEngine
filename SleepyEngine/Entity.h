@@ -83,9 +83,12 @@ namespace Sleepy
 		void RemoveAsChild();
 		SceneBase* m_scene;
 		entt::entity m_entityHandle;
+		class TransformComponent* transformComp;
+		class RelationshipComponent* relationshipComp;
 	
 		friend class SceneBase;				//So we can get the m_entityHandle to delete entity
 		friend class Scene;					//So we can get the m_entityHandle to add to entities in SceneBase from Scene
 		friend class RelationshipComponent;
+		friend class TransformSystem;
 	};
 }

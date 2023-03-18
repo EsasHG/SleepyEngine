@@ -26,7 +26,7 @@ public:
 	}
 	virtual void BeginPlay() override;
 	virtual void Update(double deltaTime) override;
-	void CheckOthers(std::vector<Boid*> boids);
+	void CheckOthers(std::vector<Boid*>& boids);
 	Sleepy::MeshComponent& mesh;
 
 	bool inGroup1 = false;

@@ -517,17 +517,17 @@ namespace Sleepy
 		ImGui::Spacing();
 		ImGui::Text("Transform Component");
 		ImGui::Spacing();
-		glm::vec3 pos = TransformSystem::GetPosition(entity);
-		glm::vec3 rot = TransformSystem::GetRotation(entity);
-		glm::vec3 scale = TransformSystem::GetScale(entity);
+		glm::vec3 pos = entity.GetPosition();
+		glm::vec3 rot = entity.GetRotation();
+		glm::vec3 scale = entity.GetScale();
 
 		ImGui::DragFloat3("Position", (float*)&pos, 0.01f, -100, 100);
 		ImGui::DragFloat3("Rotation", (float*)&rot, 0.1f, -179, 180);
 		ImGui::DragFloat3("Scale", (float*)&scale, 0.01f, -100, 100);
 
-		TransformSystem::SetPosition(entity, pos);
-		TransformSystem::SetRotation(entity, rot);
-		TransformSystem::SetScale(entity, scale);
+		entity.SetPosition(pos);
+		entity.SetRotation(rot);
+		entity.SetScale(scale);
 
 		if (entity.HasParent())
 		{

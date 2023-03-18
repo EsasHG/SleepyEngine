@@ -32,7 +32,8 @@ namespace Sleepy
 	
 		//std::vector<TransformComponent*> m_children;
 	
-		friend class TransformSystem;	
+		friend class TransformSystem;
+		friend class Entity;
 		friend class Scene;				//For deleting children when parent is being deleted.
 		friend class UiLayer;
 	};

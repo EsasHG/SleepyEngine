@@ -36,7 +36,7 @@ namespace Sleepy
 			void RemoveComponent(Entity* entity);
 			Entity* GetEntity(entt::entity entityHandle);
 
-			Entity* m_SceneEntity;
+			Entity* m_SceneEntity = nullptr;
 		protected:
 			void CreateSceneEntity();
 	

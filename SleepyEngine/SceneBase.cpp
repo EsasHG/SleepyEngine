@@ -33,8 +33,8 @@ namespace Sleepy
 	{
 		m_SceneEntity = new Entity(std::string("Scene"), this);
 		//m_SceneEntity = std::make_unique<Entity>(new Entity(std::string("Scene"), this));
-		m_SceneEntity->AddComponent<TransformComponent>();				//TODO: make this not neccessary. Still need it for rendering i think
-		m_SceneEntity->AddComponent<RelationshipComponent>(nullptr);
+		//m_SceneEntity->AddComponent<TransformComponent>();				
+		//m_SceneEntity->AddComponent<RelationshipComponent>(nullptr);
 	}
 
 	Entity& SceneBase::CreateEntity(std::string entityName)
@@ -44,8 +44,8 @@ namespace Sleepy
 			CreateSceneEntity();
 		}
 		Entity* entity = new Entity(entityName, this);
-		entity->AddComponent<TransformComponent>();
-		entity->AddComponent<RelationshipComponent>(m_SceneEntity);
+		//entity->AddComponent<TransformComponent>();
+		//entity->AddComponent<RelationshipComponent>(m_SceneEntity);
 
 		entities.insert({ entity->m_entityHandle, entity });
 		//entities.insert(entity->m_entityHandle,entity);
