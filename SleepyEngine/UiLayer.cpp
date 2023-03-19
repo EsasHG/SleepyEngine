@@ -560,6 +560,8 @@ namespace Sleepy
 		if (meshIDs.empty())
 			return;
 
+		// ********** Select mesh combo box **********
+
 		if (ImGui::BeginCombo("Mesh", mesh.m_meshID.c_str()))
 		{
 			for (std::string meshID : meshIDs)
@@ -573,6 +575,8 @@ namespace Sleepy
 			ImGui::EndCombo();
 		}
 
+
+		// ********** Select material combo box **********
 		auto materialIDs = ModelLibrary::GetInstance().GetMaterialList();
 		if (ImGui::BeginCombo("Material", mesh.m_materialID.c_str()))
 		{
@@ -587,6 +591,7 @@ namespace Sleepy
 			ImGui::EndCombo();
 		}
 
+		// ********** Select Shader combo box **********
 		auto shaderIDs = ModelLibrary::GetInstance().GetShaderList();
 		if (ImGui::BeginCombo("Shader", mesh.m_shaderID.c_str()))
 		{
@@ -617,7 +622,12 @@ namespace Sleepy
 				ImGui::PopID();
 			}
 		}
-		if (!material.specularTextures.empty())
+		if (material.specularTextures.empty())
+		{
+			ImGui::ColorPicker3("Color", (float*)&material.specularColor);
+
+		}
+		else
 		{
 			for (Tex& t : material.specularTextures)
 			{

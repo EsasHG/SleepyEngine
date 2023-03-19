@@ -27,7 +27,6 @@ namespace Sleepy
 		static glm::mat4 GetLocalModelMatrix(const TransformComponent& transformComp);
 		static void RecalculateModelMatrices(TransformComponent& transformComp);
 
-
 	};
 }
 	

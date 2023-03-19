@@ -39,28 +39,28 @@ SandboxScene::SandboxScene()
 		glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f);
 	pointLight.SetPosition(glm::vec3(0.0f, 0.0f, 0.5f));
 
-	//Sleepy::MeshGroup* guitarGroup = Sleepy::ModelLibrary::GetInstance().AddMesh("Assets\\backpack\\backpack.obj");
+	Sleepy::MeshGroup* guitarGroup = Sleepy::ModelLibrary::GetInstance().AddMesh("Assets\\backpack\\backpack.obj");
 	Sleepy::MeshGroup* planetGroup = Sleepy::ModelLibrary::GetInstance().AddMesh("Assets\\planet\\planet.obj");
 
-	//if (guitarGroup)
-	//{
-	//	Sleepy::Entity& guitarEntity = LoadMeshGroup(guitarGroup, *m_SceneEntity, "Backpack");
-	//	guitarEntity.SetPosition(glm::vec3(-5.0f, 0.0f, 10.0f));
-	//	Sleepy::Entity& guitarEntity2 = LoadMeshGroup(guitarGroup, *m_SceneEntity, "Backpack2");
-	//	guitarEntity2.SetPosition(glm::vec3(5.0f, 0.0f, 10.0f));
-	//}
+	if (guitarGroup)
+	{
+		Sleepy::Entity& guitarEntity = LoadMeshGroup(guitarGroup, *m_SceneEntity, "Backpack");
+		guitarEntity.SetPosition(glm::vec3(-5.0f, 0.0f, 10.0f));
+		Sleepy::Entity& guitarEntity2 = LoadMeshGroup(guitarGroup, *m_SceneEntity, "Backpack2");
+		guitarEntity2.SetPosition(glm::vec3(5.0f, 0.0f, 10.0f));
+	}
 
 	if (planetGroup)
 	{
 		Sleepy::Entity& planetEntity = LoadMeshGroup(planetGroup, *m_SceneEntity, "Planet");
 		planetEntity.SetPosition(glm::vec3(-10.0f, 6.0f, -10.0f));
-		//Sleepy::Entity& planetEntity2 = LoadMeshGroup(planetGroup, *m_SceneEntity, "Planet2");
-		//planetEntity2.SetPosition(glm::vec3(10.0f, 6.0f, -10.0f));
+		Sleepy::Entity& planetEntity2 = LoadMeshGroup(planetGroup, *m_SceneEntity, "Planet2");
+		planetEntity2.SetPosition(glm::vec3(10.0f, 6.0f, -10.0f));
 	}
 }
 
 static const int gridMin = -20, gridMax = 20;
-static const int cellSize = 5;
+static const int cellSize = 4;
 static const int cellEnd = cellSize + gridMin;
 static const int cellCountPerRow = (gridMax - gridMin) / cellSize;
 static const int cellCountPerRow2 = cellCountPerRow * cellCountPerRow;
@@ -70,31 +70,35 @@ void SandboxScene::BeginPlay()
 {
 	Sleepy::Scene::BeginPlay();
 
-	//gridCell cellArr[cellCount];
-	//for (int x = 0; x < cellCountPerRow; x++)
-	//{
-	//	for (int y = 0; y < cellCountPerRow; y++)
-	//	{
-	//		for (int z = 0; z < cellCountPerRow; z++)
-	//		{
-	//			Sleepy::Entity& e = CreateEntity("grid_" +std::to_string(x) + std::to_string(y) + std::to_string(z));
-	//			e.AddComponent<Sleepy::MeshComponent>("quad", "color", "color");
-	//			e.SetPosition(glm::vec3(x*cellSize + gridMin, y * cellSize + gridMin, z * cellSize + gridMin));
-	//			int cellIndex = x * cellCountPerRow2 + y * cellCountPerRow + z;
-	//			cellArr[cellIndex].index = cellIndex;
-	//			cellArr[cellIndex].minX = x * cellEnd;
-	//			cellArr[cellIndex].maxX = (x + 1) * cellEnd;
 
-	//			cellArr[cellIndex].minY = y * cellEnd;
-	//			cellArr[cellIndex].maxY = (y + 1) * cellEnd;
+	//draw quads in grid
+	/*
+	gridCell cellArr[cellCount];
+	for (int x = 0; x < cellCountPerRow; x++)
+	{
+		for (int y = 0; y < cellCountPerRow; y++)
+		{
+			for (int z = 0; z < cellCountPerRow; z++)
+			{
+				Sleepy::Entity& e = CreateEntity("grid_" +std::to_string(x) + std::to_string(y) + std::to_string(z));
+				e.AddComponent<Sleepy::MeshComponent>("quad", "color", "color");
+				e.SetPosition(glm::vec3(x*cellSize + gridMin, y * cellSize + gridMin, z * cellSize + gridMin));
+				int cellIndex = x * cellCountPerRow2 + y * cellCountPerRow + z;
+				cellArr[cellIndex].index = cellIndex;
+				cellArr[cellIndex].minX = x * cellEnd;
+				cellArr[cellIndex].maxX = (x + 1) * cellEnd;
 
-	//			cellArr[cellIndex].minZ = z * cellEnd;
-	//			cellArr[cellIndex].maxZ = (z + 1) * cellEnd;
-	//		}
-	//	}
-	//}
+				cellArr[cellIndex].minY = y * cellEnd;
+				cellArr[cellIndex].maxY = (y + 1) * cellEnd;
 
-		//boid spawn
+				cellArr[cellIndex].minZ = z * cellEnd;
+				cellArr[cellIndex].maxZ = (z + 1) * cellEnd;
+			}
+		}
+	}
+	*/
+
+	//spawn boids
 	boids.clear();
 	boids.reserve(sizeof(Boid*) * maxBoids);
 	int boidsInGroup1 = 3;

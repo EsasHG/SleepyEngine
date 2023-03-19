@@ -20,7 +20,7 @@ class Boid : public Sleepy::Entity
 {
 public:
 	Boid(std::string name, class Sleepy::SceneBase* scene, BoidInfo& info) 
-		: Sleepy::Entity(name, scene), mesh(AddComponent<Sleepy::MeshComponent>("planet_0", "color", "color")), boidInfo(info)
+		: Sleepy::Entity(name, scene), mesh(AddComponent<Sleepy::MeshComponent>("planet_0", "color")), boidInfo(info)
 	{
 		enableUpdate = true;
 	}

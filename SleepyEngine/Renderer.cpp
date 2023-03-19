@@ -122,17 +122,20 @@ namespace Sleepy
 		int count = 0;
 		if (mat.diffuseTextures.empty())
 		{
-			Renderer::SetShaderUniformVec3(shaderID, "color", mat.diffuseColor);
+			Renderer::SetShaderUniformBool(shaderID, "material.useColor", true);
+			Renderer::SetShaderUniformVec3(shaderID, "material.diffuseColor", mat.diffuseColor);
 		}
 		else
 		{
+			Renderer::SetShaderUniformBool(shaderID, "material.useColor", false);
+
 			unsigned int diffuseNr = 1;
 			for (unsigned int i = 0; i < mat.diffuseTextures.size(); i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + i);
 				std::string number;
 				std::string type = mat.diffuseTextures[i].type;
-
+			
 				assert(type == "diffuse");
 				number = std::to_string(diffuseNr++);
 				std::string uniformName = "material.";
@@ -145,7 +148,7 @@ namespace Sleepy
 
 		if (mat.specularTextures.empty())
 		{
-			Renderer::SetShaderUniformVec3(shaderID, "specColor", mat.specularColor);
+			Renderer::SetShaderUniformVec3(shaderID, "specularColor", mat.specularColor);
 		}
 		else
 		{
@@ -161,8 +164,9 @@ namespace Sleepy
 
 				std::string uniformName = "material.";
 				uniformName = uniformName + type + number;
-				Renderer::SetShaderUniformInt(shaderID, uniformName.c_str(), i);
+				Renderer::SetShaderUniformInt(shaderID, uniformName.c_str(), count + i);
 				glBindTexture(GL_TEXTURE_2D, mat.specularTextures[i].id);
+				count++;
 			}
 		}
 		SetShaderUniformFloat(shaderID, "material.shininess", mat.shininess);
@@ -514,33 +518,39 @@ namespace Sleepy
 		return Id;
 	}
 
-	void Renderer::SetShaderUniformFloat(unsigned int m_SshaderId, const char* name, float f)
+	void Renderer::SetShaderUniformFloat(unsigned int m_ShaderId, const char* name, float f)
 	{
-		unsigned int loc = glGetUniformLocation(m_SshaderId, name);
+		unsigned int loc = glGetUniformLocation(m_ShaderId, name);
 		glUniform1f(loc, f);
 	}
 
-	void Renderer::SetShaderUniformInt(unsigned int m_SshaderId, const char* name, int i)
+	void Renderer::SetShaderUniformInt(unsigned int m_ShaderId, const char* name, int i)
 	{
-		unsigned int loc = glGetUniformLocation(m_SshaderId, name);
+		unsigned int loc = glGetUniformLocation(m_ShaderId, name);
 		glUniform1i(loc, i);
 	}
 
-	void Renderer::SetShaderUniformVec2(unsigned int m_SshaderId, const char* name, glm::vec2 vector)
+	void Renderer::SetShaderUniformBool(unsigned int m_ShaderId, const char* name, bool b)
 	{
-		unsigned int loc = glGetUniformLocation(m_SshaderId, name);
+		unsigned int loc = glGetUniformLocation(m_ShaderId, name);
+		glUniform1i(loc, b);
+	}
+
+	void Renderer::SetShaderUniformVec2(unsigned int m_ShaderId, const char* name, glm::vec2 vector)
+	{
+		unsigned int loc = glGetUniformLocation(m_ShaderId, name);
 		glUniform2f(loc, vector.x, vector.y);
 	}
 
-	void Renderer::SetShaderUniformVec3(unsigned int m_SshaderId, const char* name, glm::vec3 vector)
+	void Renderer::SetShaderUniformVec3(unsigned int m_ShaderId, const char* name, glm::vec3 vector)
 	{
-		unsigned int loc = glGetUniformLocation(m_SshaderId, name);
+		unsigned int loc = glGetUniformLocation(m_ShaderId, name);
 		glUniform3f(loc, vector.x, vector.y, vector.z);
 	}
 
-	void Renderer::SetShaderUniformMat4(unsigned int m_SshaderId, const char* name, glm::mat4 matrix)
+	void Renderer::SetShaderUniformMat4(unsigned int m_ShaderId, const char* name, glm::mat4 matrix)
 	{
-		unsigned int loc = glGetUniformLocation(m_SshaderId, name);
+		unsigned int loc = glGetUniformLocation(m_ShaderId, name);
 		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 

@@ -144,6 +144,7 @@ namespace Sleepy
 	void Application::EndFrame()
 	{
 		window->SwapBuffers();
+
 	}
 
 	void Application::FramebufferResizeCallback(int x, int y)

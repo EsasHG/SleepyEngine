@@ -27,8 +27,8 @@ namespace Sleepy
 		static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);
 
 		static void SetShaderUniformFloat(unsigned int m_ShaderId, const char* name, float f);
-
 		static void SetShaderUniformInt(unsigned int m_ShaderId, const char* name, int i);
+		static void SetShaderUniformBool(unsigned int m_ShaderId, const char* name, bool b);
 
 		static void SetShaderUniformMat4(unsigned int m_ShaderId, const char* name, glm::mat4 matrix);
 		void SetShaderUniformMat4(const char* name, glm::mat4 matrix);
