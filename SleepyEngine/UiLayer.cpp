@@ -610,7 +610,7 @@ namespace Sleepy
 		ImGui::DragFloat("Shininess", &material.shininess, 0.005f, 0.0f, 128.0f);
 		if (material.diffuseTextures.empty())
 		{
-			ImGui::ColorPicker3("Color", (float*)&material.diffuseColor);
+			ImGui::ColorPicker3("Diffuse Color", (float*)&material.diffuseColor);
 		}
 		else
 		{
@@ -625,7 +625,6 @@ namespace Sleepy
 		if (material.specularTextures.empty())
 		{
 			ImGui::ColorPicker3("Color", (float*)&material.specularColor);
-
 		}
 		else
 		{

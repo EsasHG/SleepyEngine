@@ -57,8 +57,15 @@ namespace Sleepy
 
 		void AddMaterial(std::string name, Material mat);
 
+		Material& CreateMaterial(std::string name)
+		{
+			assert(!m_materials.contains(name));
+			return m_materials[name];
+		}
+
 		Material& GetMaterial(std::string name)
 		{
+			assert(m_materials.contains(name));
 			return m_materials[name];
 		}
 
@@ -99,6 +106,11 @@ namespace Sleepy
 			return v;
 		}
 
+		const unsigned int GetWhiteTexture() const
+		{
+			return m_whiteTextureID;
+		}
+
 	private:
 		ModelLibrary();
 
@@ -116,6 +128,8 @@ namespace Sleepy
 		std::unordered_map<std::string, unsigned int> m_shaders;
 		std::unordered_map<std::string, Material> m_materials;
 		std::vector<Tex> m_loadedTextures;
-
+		
+		unsigned int m_whiteTextureID;
+		friend class Renderer;
 	};
 }

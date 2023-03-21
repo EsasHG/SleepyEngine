@@ -40,6 +40,22 @@ namespace Sleepy
 		RecreateFramebuffer();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		unsigned int whiteTexture;
+		const char texData[] = { 255, 255, 255, 255 };
+		//create 1 pixel white texture
+		glGenTextures(1, &whiteTexture);
+		glBindTexture(GL_TEXTURE_2D, whiteTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, texData);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		ModelLibrary::GetInstance().m_whiteTextureID = whiteTexture;
 	}
 
 	Renderer::~Renderer()
@@ -120,14 +136,21 @@ namespace Sleepy
 		//m->Draw(shaderID);
 
 		int count = 0;
+
+		Renderer::SetShaderUniformVec3(shaderID, "material.diffuseColor", mat.diffuseColor);
+		Renderer::SetShaderUniformVec3(shaderID, "specularColor", mat.specularColor);
+
 		if (mat.diffuseTextures.empty())
 		{
-			Renderer::SetShaderUniformBool(shaderID, "material.useColor", true);
-			Renderer::SetShaderUniformVec3(shaderID, "material.diffuseColor", mat.diffuseColor);
+			glActiveTexture(GL_TEXTURE0);
+			Renderer::SetShaderUniformInt(shaderID, "material.diffuse1", 0);
+			glBindTexture(GL_TEXTURE_2D, ModelLibrary::GetInstance().GetWhiteTexture());
+			count++;
+			
 		}
 		else
 		{
-			Renderer::SetShaderUniformBool(shaderID, "material.useColor", false);
+
 
 			unsigned int diffuseNr = 1;
 			for (unsigned int i = 0; i < mat.diffuseTextures.size(); i++)
@@ -148,7 +171,10 @@ namespace Sleepy
 
 		if (mat.specularTextures.empty())
 		{
-			Renderer::SetShaderUniformVec3(shaderID, "specularColor", mat.specularColor);
+			glActiveTexture(GL_TEXTURE0 + count);
+			Renderer::SetShaderUniformInt(shaderID, "material.specular1", count);
+			glBindTexture(GL_TEXTURE_2D, ModelLibrary::GetInstance().GetWhiteTexture());
+			count++;
 		}
 		else
 		{

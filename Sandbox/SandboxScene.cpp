@@ -28,6 +28,9 @@ SandboxScene::SandboxScene()
 	vertices.push_back(Sleepy::Vertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)));
 	vertices.push_back(Sleepy::Vertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)));
 
+	Sleepy::Material& mat = Sleepy::ModelLibrary::GetInstance().CreateMaterial("color");
+	mat.shininess = 2.0f;
+
 	Sleepy::ModelLibrary::GetInstance().AddMesh("quad", vertices);
 
 	Sleepy::Entity& dirLight = CreateEntity("Directional Light");
