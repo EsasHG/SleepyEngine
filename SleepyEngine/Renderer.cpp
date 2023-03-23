@@ -30,6 +30,11 @@ namespace Sleepy
 		m_ShaderId = Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders/SingleColor.vert", _SOLUTIONDIR"SleepyEngine/Shaders/SingleColor.frag");
 		ModelLibrary::GetInstance().AddShader("color", m_ShaderId);
 		m_TextureShaderId = Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders/TextureShader.vert", _SOLUTIONDIR"SleepyEngine/Shaders/TextureShader.frag");
+
+		m_SkyboxShaderId = Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders/Skybox.vert", _SOLUTIONDIR"SleepyEngine/Shaders/Skybox.frag");
+
+	
+
 		ModelLibrary::GetInstance().AddShader("default", m_TextureShaderId);
 		ModelLibrary::GetInstance().AddShader("quadShader", Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.vert", _SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.frag"));
 
@@ -56,6 +61,74 @@ namespace Sleepy
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		ModelLibrary::GetInstance().m_whiteTextureID = whiteTexture;
+
+
+		float skyboxVertices[] = {
+			// positions          
+			-1.0f,  1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			 1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			-1.0f,  1.0f, -1.0f,
+			 1.0f,  1.0f, -1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			 1.0f, -1.0f,  1.0f
+		};
+
+		//skybox VAO, VBO
+		glGenVertexArrays(1, &skyboxVAO);
+		glBindVertexArray(skyboxVAO);
+
+		glGenBuffers(1, &skyboxVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		std::vector<std::string> faces
+		{
+			"Assets\\skybox\\right.jpg",
+			"Assets\\skybox\\left.jpg",
+			"Assets\\skybox\\top.jpg",
+			"Assets\\skybox\\bottom.jpg",
+			"Assets\\skybox\\front.jpg",
+			"Assets\\skybox\\back.jpg"
+		};
+		ModelLibrary::GetInstance().m_skyboxTextureID = ModelLibrary::LoadCubemapTexture(faces);
 	}
 
 	Renderer::~Renderer()
@@ -83,8 +156,10 @@ namespace Sleepy
 
 		glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		CheckGLError("End of BeginFrame");
+
 	}
 	void Renderer::SetCamera(class Camera* camera)
 	{
@@ -116,6 +191,11 @@ namespace Sleepy
 
 		Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
 		Renderer::SetShaderUniformMat4(m_TextureShaderId, "view", view);
+
+		glUseProgram(m_SkyboxShaderId);
+
+		Renderer::SetShaderUniformMat4(m_SkyboxShaderId, "projection", projection);
+		Renderer::SetShaderUniformMat4(m_SkyboxShaderId, "view", glm::mat4(glm::mat3(view)));
 
 		glUseProgram(0);
 	}
@@ -150,7 +230,6 @@ namespace Sleepy
 		}
 		else
 		{
-
 
 			unsigned int diffuseNr = 1;
 			for (unsigned int i = 0; i < mat.diffuseTextures.size(); i++)
@@ -219,6 +298,10 @@ namespace Sleepy
 
 	}
 
+	/// <summary>
+	/// Used when running without UI
+	/// </summary>
+	/// <param name="texture"></param>
 	void Renderer::DrawSceneTextureOnScreen(int texture)
 	{
 
@@ -246,6 +329,29 @@ namespace Sleepy
 		glUseProgram(0);
 	}
 
+
+	void Renderer::DrawCubemap()
+	{
+		//Skybox
+		glDepthFunc(GL_LEQUAL);
+		glUseProgram(m_SkyboxShaderId);
+
+		glBindVertexArray(skyboxVAO);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, ModelLibrary::GetInstance().m_skyboxTextureID);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//glDepthMask(GL_TRUE);
+		//glStencilMask(0xFF);
+	}
+
+	unsigned int Renderer::EndFrame()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDisable(GL_DEPTH_TEST);
+
+		return renderedTexture;
+		//Got some weird results without this :/
+	}
+
 	void Renderer::SetPointLightValues(unsigned int shaderID, TransformComponent& transform, PointLightComponent& pointLight)
 	{
 		glUseProgram(shaderID);
@@ -267,14 +373,6 @@ namespace Sleepy
 		Renderer::SetShaderUniformVec3(shaderID, "dirLight.diffuse", dirLight.m_diffuse);
 		Renderer::SetShaderUniformVec3(shaderID, "dirLight.specular", dirLight.m_specular);
 		glUseProgram(0);
-	}
-
-	unsigned int Renderer::EndFrame()
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glDisable(GL_DEPTH_TEST);
-		return renderedTexture;
-		//Got some weird results without this :/
 	}
 
 	void Renderer::ResizeViewport(int x, int y)

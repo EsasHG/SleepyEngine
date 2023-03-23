@@ -203,5 +203,8 @@
     <None Include="Shaders\QuadShader.frag" />
     <None Include="Shaders\textureShader.frag" />
     <None Include="Shaders\textureShader.vert" />
+    <None Include="packages.config" />
+    <None Include="Shaders\Skybox.frag" />
+    <None Include="Shaders\skybox.vert" />
   </ItemGroup>
 </Project>

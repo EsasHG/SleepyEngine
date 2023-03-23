@@ -18,6 +18,8 @@ namespace Sleepy
 	{
 	
 	}
+
+	
 	
 	/// <summary>
 	/// 
@@ -429,6 +431,60 @@ namespace Sleepy
 		stbi_image_free(data);
 	
 		return textureID;
+	}
+
+	unsigned int ModelLibrary::LoadCubemapTexture(std::vector<std::string>& faces)
+	{
+		unsigned int textureID;
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+		int width, height, nrChannels;
+		for (unsigned int i = 0; i < faces.size(); i++)
+		{
+			stbi_set_flip_vertically_on_load(false);
+
+			unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+			if (data)
+			{
+				GLenum format;
+				switch (nrChannels) {
+				case 1:
+					format = GL_RED;
+					break;
+				case 2:
+					format = GL_RG;
+					break;
+				case 3:
+					format = GL_RGB;
+					break;
+				case 4:
+					format = GL_RGBA;
+					break;
+				default:
+					format = GL_RGBA;
+					std::cout << "Model::LoadTexture: Unknown texture format!" << std::endl;
+					break;
+				}
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+				stbi_image_free(data);
+			}
+			else
+			{
+				std::cout << "Cubemap tex failed to load at path " << faces[i] << std::endl;
+				stbi_image_free(data);
+
+			}
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		return textureID;
+
+		return 0;
 	}
 
 }

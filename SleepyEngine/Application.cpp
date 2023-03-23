@@ -127,7 +127,10 @@ namespace Sleepy
 				renderer->PrepDraw(deltaTime);
 				for (Scene* scene : m_scenes)
 					scene->Draw();
+				
+				renderer->DrawCubemap();
 				ui->sceneTexture = renderer->EndFrame();
+
 			}
 			ui->EndFrame();
 	#else

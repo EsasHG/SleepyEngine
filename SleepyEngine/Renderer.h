@@ -16,12 +16,13 @@ namespace Sleepy
 		void BeginFrame(glm::vec2 windowSize);
 		void PrepDraw(double deltaTime);
 		static void DrawMesh(class MeshComponent mesh, TransformComponent transform);
-
+		void DrawCubemap();
+		unsigned int EndFrame();
 		void DrawSceneTextureOnScreen(int texture);
 
 		static void SetPointLightValues(unsigned int shaderID, TransformComponent& transform, class PointLightComponent& pointLight);
 		static void SetDirLightValues(unsigned int shaderID, TransformComponent& transform, class DirLightComponent& pointLight);
-		unsigned int EndFrame();
+
 		static void CheckGLError(std::string placeMessage);
 		static unsigned int CreateShader(const char* vertShaderPath, const char* fragShaderPath);
 		static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);
@@ -50,7 +51,10 @@ namespace Sleepy
 
 		unsigned int m_ShaderId;
 		unsigned int m_TextureShaderId;
+		unsigned int m_SkyboxShaderId;
 		unsigned int VAO, VBO;
+		unsigned int skyboxVAO, skyboxVBO;	//TODO: Remove, should be somewhere else
+
 		unsigned int FBO;
 		unsigned int RBO;
 

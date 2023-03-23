@@ -122,7 +122,7 @@ namespace Sleepy
 		Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string directory, std::string currentMeshName);
 		std::vector<Tex> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, std::string directory);
 		unsigned int LoadTexture(const char* path, std::string dir);
-
+		static unsigned int LoadCubemapTexture(std::vector<std::string>& faces);
 		std::unordered_map<std::string, Mesh*> m_meshes;
 		std::unordered_map<std::string, MeshGroup*> m_models;
 		std::unordered_map<std::string, unsigned int> m_shaders;
@@ -130,6 +130,7 @@ namespace Sleepy
 		std::vector<Tex> m_loadedTextures;
 		
 		unsigned int m_whiteTextureID;
+		unsigned int m_skyboxTextureID;
 		friend class Renderer;
 	};
 }
