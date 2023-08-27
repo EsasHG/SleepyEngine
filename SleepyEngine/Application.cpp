@@ -37,7 +37,7 @@ namespace Sleepy
 		ui = new UiLayer();
 		window->EnableImGui();
 #else
-		s_Playing = true;
+		//s_Playing = true;
 
 #endif // _SHOWUI
 		InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Application::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
@@ -83,16 +83,20 @@ namespace Sleepy
 			//ui->Run(deltaTime, nullptr);
 			for (Scene* scene : m_scenes)
 			{
-				if (ui->Run(deltaTime, scene))
+				//If play or stop button pressed
+				if (ui->Run(deltaTime, scene)) 
 				{
-					if (s_Playing)
+					//if we are playing and should stop
+					if (s_Playing) 
 					{
-						for (Scene* scene : m_scenes)
+						//Delete objects that should only exist while playing
+						for (Scene* scene : m_scenes) 
 						{
 							for(Entity* e : scene->gameEntities)
 								scene->MarkForDeletion(*e);
 						}
-						firstGameFrame = true;
+						//Reset so it's ready for next time play button is pressed.
+						firstGameFrame = true;	
 					}
 					s_Playing = !s_Playing;
 				}
@@ -137,7 +141,9 @@ namespace Sleepy
 			renderer->PrepDraw(deltaTime);
 			for (Scene* scene : m_scenes)
 				scene->Draw();
+			renderer->DrawCubemap();
 			renderer->DrawSceneTextureOnScreen(renderer->EndFrame());
+			s_Playing = true;
 	#endif // _SHOWUI;
 
 			EndFrame();
