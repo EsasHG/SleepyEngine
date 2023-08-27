@@ -42,6 +42,7 @@ namespace Sleepy
 				entity->AddComponent<UpdateComponent>(0);
 
 			entities.insert({ entity->m_entityHandle, entity });
+
 			if (Application::s_Playing)
 			{
 				entity->BeginPlay();

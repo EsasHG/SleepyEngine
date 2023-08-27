@@ -48,12 +48,13 @@ namespace Sleepy
 		//entity->AddComponent<RelationshipComponent>(m_SceneEntity);
 
 		entities.insert({ entity->m_entityHandle, entity });
-		//entities.insert(entity->m_entityHandle,entity);
+
 		if (Application::s_Playing)
 		{
 			entity->BeginPlay();
 			gameEntities.push_back(entity);
 		}
+
 		return *entity;
 	}
 

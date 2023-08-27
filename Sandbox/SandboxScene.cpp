@@ -6,6 +6,7 @@
 #include <TransformSystem.h>
 #include <Mesh.h>
 
+#include "Player.h"
 #include "BoidManager.h"
 SandboxScene::SandboxScene()
 {
@@ -46,10 +47,11 @@ SandboxScene::SandboxScene()
 	{
 		Sleepy::Entity& planetEntity = LoadMeshGroup(planetGroup, *m_SceneEntity, "Planet");
 		planetEntity.SetPosition(glm::vec3(-10.0f, 6.0f, -10.0f));
+		controlledEntity = &planetEntity;
 		Sleepy::Entity& planetEntity2 = LoadMeshGroup(planetGroup, *m_SceneEntity, "Planet2");
 		planetEntity2.SetPosition(glm::vec3(10.0f, 6.0f, -10.0f));
 	}
-
+	
 	CreateGameObject<BoidManager>("Boid Manager");
 
 	std::vector<std::string> faces
@@ -64,6 +66,7 @@ SandboxScene::SandboxScene()
 	std::string face = "Assets\\skybox2.png";
 
 	Sleepy::ModelLibrary::GetInstance().LoadCubemapTexture(faces);
+
 }
 
 
@@ -72,11 +75,23 @@ void SandboxScene::BeginPlay()
 {
 	Sleepy::Scene::BeginPlay();
 
+	CreateGameObject<Player>("Player");
 }
 
 void SandboxScene::Update(double deltaTime)
 {
 	Sleepy::Scene::Update(deltaTime);
 
-	
 }
+
+
+//void SandboxScene::MoveDown()
+//{
+//	position -= up * frameCameraSpeed;
+//
+//}
+//
+//void SandboxScene::MoveUp()
+//{
+//	position += up * frameCameraSpeed;
+//}

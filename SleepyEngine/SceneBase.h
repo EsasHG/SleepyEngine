@@ -45,6 +45,7 @@ namespace Sleepy
 	
 			entt::registry m_registry;
 			//TODO: Hate having both of these. At least while entities has everything in gameEntities already
+			// is this only done so we can easily find and delete all objects created while playing in debug?
 			std::map<entt::entity, Entity*> entities;
 			std::vector<Entity*> gameEntities;
 			friend class Entity;

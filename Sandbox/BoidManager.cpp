@@ -66,7 +66,6 @@ for (int x = 0; x < cellCountPerRow; x++)
 			b.inGroup2 = true;
 	}
 //	showObjectWindow = true;
-
 }
 
 static const int gridMin = -20, gridMax = 20;

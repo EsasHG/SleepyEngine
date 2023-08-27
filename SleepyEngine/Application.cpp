@@ -36,8 +36,6 @@ namespace Sleepy
 #ifdef _SHOWUI
 		ui = new UiLayer();
 		window->EnableImGui();
-#else
-		//s_Playing = true;
 
 #endif // _SHOWUI
 		InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Application::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));

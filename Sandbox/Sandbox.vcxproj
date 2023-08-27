@@ -111,7 +111,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SHOWUI;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>D:\Programming\SleepyEngine\external\include;D:\Programming\SleepyEngine\SleepyEngine;$(SolutionDir)\SleepyEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="Boid.cpp" />
     <ClCompile Include="BoidManager.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Sandbox.cpp" />
     <ClCompile Include="SandboxScene.cpp" />
   </ItemGroup>
@@ -158,6 +159,7 @@
   <ItemGroup>
     <ClInclude Include="Boid.h" />
     <ClInclude Include="BoidManager.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="SandboxScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
