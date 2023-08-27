@@ -119,16 +119,16 @@ namespace Sleepy
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		std::vector<std::string> faces
-		{
-			"Assets\\skybox\\right.jpg",
-			"Assets\\skybox\\left.jpg",
-			"Assets\\skybox\\top.jpg",
-			"Assets\\skybox\\bottom.jpg",
-			"Assets\\skybox\\front.jpg",
-			"Assets\\skybox\\back.jpg"
-		};
-		ModelLibrary::GetInstance().m_skyboxTextureID = ModelLibrary::LoadCubemapTexture(faces);
+		//std::vector<std::string> faces
+		//{
+		//	_SOLUTIONDIR"Sandbox\\Assets\\skybox\\right.jpg",
+		//	_SOLUTIONDIR"Sandbox\\Assets\\skybox\\left.jpg",
+		//	_SOLUTIONDIR"Sandbox\\Assets\\skybox\\top.jpg",
+		//	_SOLUTIONDIR"Sandbox\\Assets\\skybox\\bottom.jpg",
+		//	_SOLUTIONDIR"Sandbox\\Assets\\skybox\\front.jpg",
+		//	_SOLUTIONDIR"Sandbox\\Assets\\skybox\\back.jpg"
+		//};
+		///*ModelLibrary::GetInstance().m_skyboxTextureID = */ModelLibrary::GetInstance().LoadCubemapTexture(faces);
 	}
 
 	Renderer::~Renderer()
@@ -332,6 +332,10 @@ namespace Sleepy
 
 	void Renderer::DrawCubemap()
 	{
+
+		unsigned int skyboxTex = ModelLibrary::GetInstance().m_skyboxTextureID;
+		if (skyboxTex == 0)
+			return;
 		//Skybox
 		glDepthFunc(GL_LEQUAL);
 		glUseProgram(m_SkyboxShaderId);

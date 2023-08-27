@@ -13,8 +13,5 @@ public:
     virtual void BeginPlay() override;
     virtual void Update(double deltaTime) override;
 
-    std::vector<class Boid*> boids;
-    struct BoidInfo info;
-    int maxBoids = 300;
 };
 

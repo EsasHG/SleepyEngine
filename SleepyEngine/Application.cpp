@@ -135,7 +135,8 @@ namespace Sleepy
 			ui->EndFrame();
 	#else
 			renderer->PrepDraw(deltaTime);
-			scene.Draw();
+			for (Scene* scene : m_scenes)
+				scene->Draw();
 			renderer->DrawSceneTextureOnScreen(renderer->EndFrame());
 	#endif // _SHOWUI;
 
@@ -147,7 +148,6 @@ namespace Sleepy
 	void Application::EndFrame()
 	{
 		window->SwapBuffers();
-
 	}
 
 	void Application::FramebufferResizeCallback(int x, int y)

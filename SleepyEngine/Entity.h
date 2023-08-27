@@ -78,6 +78,8 @@ namespace Sleepy
 		std::string m_Name;
 
 		bool enableUpdate = false;
+
+		class Scene* GetScene();
 	private:
 	
 		void RemoveAsChild();

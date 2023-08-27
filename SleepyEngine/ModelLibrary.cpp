@@ -443,7 +443,7 @@ namespace Sleepy
 		for (unsigned int i = 0; i < faces.size(); i++)
 		{
 			stbi_set_flip_vertically_on_load(false);
-
+			
 			unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
 			if (data)
 			{
@@ -473,6 +473,7 @@ namespace Sleepy
 			{
 				std::cout << "Cubemap tex failed to load at path " << faces[i] << std::endl;
 				stbi_image_free(data);
+				return 0;
 
 			}
 		}
@@ -482,9 +483,80 @@ namespace Sleepy
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+		m_skyboxTextureID = textureID;
+		return textureID;
+	}
+
+
+	unsigned int ModelLibrary::LoadCubemapTexture(std::string& faces)
+	{
+		unsigned int textureID;
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+		int width, height, nrChannels;
+
+		stbi_set_flip_vertically_on_load(false);
+		stbi_uc;
+		unsigned char* data = stbi_load(faces.c_str(), &width, &height, &nrChannels, 0);
+
+		int bytesPerPixel = sizeof(data) * width * height;
+
+		if (data)
+		{
+			GLenum format;
+			switch (nrChannels) {
+			case 1:
+				format = GL_RED;
+				break;
+			case 2:
+				format = GL_RG;
+				break;
+			case 3:
+				format = GL_RGB;
+				break;
+			case 4:
+				format = GL_RGBA;
+				break;
+			default:
+				format = GL_RGBA;
+				std::cout << "Model::LoadTexture: Unknown texture format!" << std::endl;
+				break;
+			}
+
+
+			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			//glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			//glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			//glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, width / 4, height / 3, 0, format, GL_UNSIGNED_BYTE, data + (bytesPerPixel * width *		(height / 3)));
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, width / 4, height / 3, 0, format, GL_UNSIGNED_BYTE, data + (bytesPerPixel * width *		(height / 3)));
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format, width / 4, height / 3, 0, format, GL_UNSIGNED_BYTE, data + (bytesPerPixel * width *		(height / 3)));
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format, width / 4, height / 3, 0, format, GL_UNSIGNED_BYTE, data + (bytesPerPixel * (width * 2) * (height / 3)));
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format, width / 4, height / 3, 0, format, GL_UNSIGNED_BYTE, data + (bytesPerPixel * width *		(height / 3)));
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format, width / 4, height / 3, 0, format, GL_UNSIGNED_BYTE, data + (bytesPerPixel * width *		(height / 3)));
+			m_skyboxTextureID = textureID;
+
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap tex failed to load at path " << faces << std::endl;
+			stbi_image_free(data);
+			return 0;
+		}
+		
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 		return textureID;
 
-		return 0;
 	}
 
 }

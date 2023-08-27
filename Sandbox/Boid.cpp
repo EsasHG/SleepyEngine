@@ -10,7 +10,28 @@ void Boid::BeginPlay()
 void Boid::Update(double deltaTime)
 {
 	Sleepy::Entity::Update(deltaTime);
+	
+	glm::vec3 pos = GetPosition();
 
+	if (pos.x < -boidInfo.margin)
+		velocity.x = velocity.x + boidInfo.turnFactor;
+	if (pos.x > boidInfo.margin)
+		velocity.x = velocity.x - boidInfo.turnFactor;
+	if (pos.y > boidInfo.margin)
+		velocity.y = velocity.y - boidInfo.turnFactor;
+	if (pos.y < -boidInfo.margin)
+		velocity.y = velocity.y + boidInfo.turnFactor;
+	if (pos.z > boidInfo.margin)
+		velocity.z = velocity.z - boidInfo.turnFactor;
+	if (pos.z < -boidInfo.margin)
+		velocity.z = velocity.z + boidInfo.turnFactor;
+
+	float speed2 = glm::abs(glm::dot(velocity, velocity));
+	if (speed2 == 0) return;
+	if (speed2 > boidInfo.maxSpeed * boidInfo.maxSpeed)
+		velocity = glm::normalize(velocity) * boidInfo.maxSpeed;
+	if (speed2 < boidInfo.minSpeed * boidInfo.minSpeed)
+		velocity = glm::normalize(velocity) * boidInfo.minSpeed;
 	SetPosition(GetPosition() + (float(deltaTime) * velocity));
 }
 
@@ -56,22 +77,5 @@ void Boid::CheckOthers(std::vector<Boid*>& boids)
 	else if (inGroup2)
 		velocity = (1 - boidInfo.biasVal) * velocity + (boidInfo.biasVal * -1.0f);
 
-	if (pos.x < -boidInfo.margin)
-		velocity.x = velocity.x + boidInfo.turnFactor;
-	if (pos.x > boidInfo.margin)
-		velocity.x = velocity.x - boidInfo.turnFactor;
-	if (pos.y > boidInfo.margin)
-		velocity.y = velocity.y - boidInfo.turnFactor;
-	if (pos.y < -boidInfo.margin)
-		velocity.y = velocity.y + boidInfo.turnFactor;
-	if (pos.z > boidInfo.margin)
-		velocity.z = velocity.z - boidInfo.turnFactor;
-	if (pos.z < -boidInfo.margin)
-		velocity.z = velocity.z + boidInfo.turnFactor;
 
-	float speed2 = glm::abs(glm::dot(velocity, velocity));
-	if (speed2 > boidInfo.maxSpeed * boidInfo.maxSpeed)
-		velocity = glm::normalize(velocity) * boidInfo.maxSpeed;
-	if (speed2 < boidInfo.minSpeed * boidInfo.minSpeed)
-		velocity = glm::normalize(velocity) * boidInfo.minSpeed;
 }

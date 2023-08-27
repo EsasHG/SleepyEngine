@@ -4,15 +4,15 @@
 
 struct BoidInfo
 {
-	float minDistance = 0.8f;
-	float viewRange = 4.0f;
-	float avoidFactor = 0.05f;
-	float matchingFactor = 0.05f;
-	float centeringFactor = 0.0005f;
+	float minDistance = 1.0f;
+	float viewRange = 6.92f;
+	float avoidFactor = 0.348f;
+	float matchingFactor = 0.10f;
+	float centeringFactor = 0.0001f;
 	float margin = 10.0f;
-	float turnFactor = 0.5f;
-	float maxSpeed = 8.0f;
-	float minSpeed = 4.0f;
+	float turnFactor = 0.770f;
+	float maxSpeed = 50.0f;
+	float minSpeed = 8.0f;
 	float biasVal = 0.001;
 };
 

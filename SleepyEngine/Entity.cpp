@@ -2,6 +2,7 @@
 #include "Components/RelationshipComponent.h"
 #include "Components/TransformComponent.h"
 #include "TransformSystem.h"
+#include "Scene.h"
 
 namespace Sleepy
 {
@@ -192,6 +193,12 @@ namespace Sleepy
 			newPrev.m_next = child.m_entityHandle;
 			rCompChild.m_prev = newPrev.m_Entity->m_entityHandle;
 		}
+	}
+
+
+	Scene* Entity::GetScene()
+	{
+		return static_cast<Scene*>(m_scene);
 	}
 
 	/// <summary>
