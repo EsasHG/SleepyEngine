@@ -2,7 +2,7 @@
 #include <glm/gtx/norm.hpp>
 void Player::BeginPlay()
 {
-	m_Input = new Sleepy::Input();
+	m_Input = &AddComponent<Sleepy::InputComponent>();
 	m_Input->AddKeyBinding(GLFW_KEY_UP, Sleepy::SLE_HELD, std::bind(&Player::MoveForward, this));
 	m_Input->AddKeyBinding(GLFW_KEY_DOWN, Sleepy::SLE_HELD, std::bind(&Player::MoveBackward, this));
 	m_Input->AddKeyBinding(GLFW_KEY_LEFT, Sleepy::SLE_HELD, std::bind(&Player::MoveLeft, this));

@@ -1,6 +1,5 @@
 #include "InputManager.h"
 #include <GLFW/glfw3.h>
-#include "Input.h"
 #include "ImGui/imgui.h"
 
 namespace Sleepy
@@ -30,7 +29,7 @@ namespace Sleepy
 	
 		if (bDispatchKeyboardEvents)
 		{
-			for (Input* i : m_Inputs)
+			for (InputComponent* i : m_Inputs)
 			{
 				i->RunKeyEvents();
 			}
@@ -38,14 +37,14 @@ namespace Sleepy
 	
 		if (bDispatchMouseEvents)
 		{
-			for (Input* i : m_Inputs)
+			for (InputComponent* i : m_Inputs)
 			{
 				i->RunKeyEvents();
 			}
 		}
 	}
 	
-	void InputManager::AddInputComponent(Input* i)
+	void InputManager::AddInputComponent(InputComponent* i)
 	{
 		m_Inputs.push_back(i);
 	}
@@ -78,7 +77,7 @@ namespace Sleepy
 	{
 		if (bDispatchKeyboardEvents)
 		{
-			for (Input* i : m_Inputs)
+			for (InputComponent* i : m_Inputs)
 			{
 				i->HandleKeyEvents(key, action);
 			}
@@ -96,7 +95,7 @@ namespace Sleepy
 	{
 		if (bDispatchMouseEvents)
 		{
-			for (Input* i : m_Inputs)
+			for (InputComponent* i : m_Inputs)
 			{
 				i->HandleMousePosEvents(xPos, yPos);
 			}
@@ -113,7 +112,7 @@ namespace Sleepy
 	{
 		if (bDispatchMouseEvents)
 		{
-			for (Input* i : m_Inputs)
+			for (InputComponent* i : m_Inputs)
 			{
 				i->HandleMouseButtonEvents(button, action);
 			}

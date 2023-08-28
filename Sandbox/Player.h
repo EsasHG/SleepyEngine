@@ -1,7 +1,7 @@
 #pragma once
 #include <Entity.h>
 #include <Components/MeshComponent.h>
-#include <Input.h>
+#include <Components/InputComponent.h>
 
 class Player :
     public Sleepy::Entity
@@ -27,6 +27,6 @@ class Player :
 	bool inGroup2 = false;
 	glm::vec3 velocity = glm::vec3(0.0);
 	float maxSpeed = 50.0f;
-	Sleepy::Input* m_Input;
+	Sleepy::InputComponent* m_Input;
 };
 

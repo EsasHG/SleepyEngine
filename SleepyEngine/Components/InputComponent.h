@@ -5,9 +5,10 @@
 #include <map>
 #include <vector>
 
+#include "Component.h"
+
 namespace Sleepy
 {
-
 	enum SLE_INPUT_MODE
 	{
 		SLE_PRESSED,
@@ -16,10 +17,10 @@ namespace Sleepy
 	};
 	
 	
-	class Input
+	class InputComponent : public Component
 	{
 	public:
-		Input();
+		InputComponent(Entity* entity);
 		void AddKeyBinding(int key, SLE_INPUT_MODE mode, std::function<void()> func);
 		void AddMousePosBinding(std::function<void(double, double)> func);
 		void AddMouseButtonBinding(int button, SLE_INPUT_MODE mode, std::function<void()> func);

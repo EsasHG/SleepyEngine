@@ -1,13 +1,13 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include "Input.h"
+#include "Components/InputComponent.h"
 
 
 namespace Sleepy
 {
-	Camera::Camera()
+	Camera::Camera(std::string name, class Sleepy::SceneBase* scene) : Sleepy::Entity(name, scene)
 	{
-		m_Input = new Input();
+		m_Input = &AddComponent<InputComponent>();
 		m_Input->AddKeyBinding(GLFW_KEY_W, SLE_HELD, std::bind(&Camera::MoveForward, this));
 		m_Input->AddKeyBinding(GLFW_KEY_S, SLE_HELD, std::bind(&Camera::MoveBackward, this));
 		m_Input->AddKeyBinding(GLFW_KEY_A, SLE_HELD, std::bind(&Camera::MoveLeft, this));

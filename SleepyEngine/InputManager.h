@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "Input.h"
+#include "Components/InputComponent.h"
 struct GLFWwindow;
 
 static Sleepy::InputManager* s_InputManager;
@@ -35,14 +35,14 @@ namespace Sleepy
 		static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 		void MouseButtonCallbackImpl(GLFWwindow* window, int button, int action, int mods);
 	
-		std::vector<Input*> m_Inputs;
+		std::vector<InputComponent*> m_Inputs;
 		std::vector< std::function<void(int, int)>> m_FramebufferSizeCallbacks;
 		bool bInitialized = false;
 	
 		bool bDispatchKeyboardEvents = true;
 		bool bDispatchMouseEvents = true;
 	
-		void AddInputComponent(Input* i);
-		friend class Input;
+		void AddInputComponent(InputComponent* i);
+		friend class InputComponent;
 	};
 }

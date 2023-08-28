@@ -18,7 +18,6 @@
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 #include "Renderer.h"
-#include "Input.h"
 #include "InputManager.h"
 #include "Camera.h"
 #include "Window.h"
@@ -64,7 +63,7 @@ namespace Sleepy
 
 	int Application::Run() 
 	{
-		Camera* camera = new Camera();
+		Camera* camera = new Camera("Camera", m_scenes[0]);
 		renderer->SetCamera(camera);
 
 		//Scene scene;

@@ -27,7 +27,7 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Input.cpp">
+    <ClCompile Include="Components\InputComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
@@ -101,7 +101,7 @@
     <ClInclude Include="Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Input.h">
+    <ClInclude Include="Components\InputComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InputManager.h">

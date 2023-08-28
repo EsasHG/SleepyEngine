@@ -1,15 +1,17 @@
-#include "Input.h"
+#include "InputComponent.h"
 #include <iostream>
 #include "InputManager.h"
 
 namespace Sleepy
 {
-	Input::Input()
+	InputComponent::InputComponent(Entity* entity)
 	{
 		InputManager::GetInstance().AddInputComponent(this);
+		m_Entity = entity;
+		m_componentType = INPUT;
 	}
 	
-	void Input::AddKeyBinding(int key, SLE_INPUT_MODE inputMode, std::function<void()> func)
+	void InputComponent::AddKeyBinding(int key, SLE_INPUT_MODE inputMode, std::function<void()> func)
 	{
 		switch (inputMode)
 		{
@@ -28,12 +30,12 @@ namespace Sleepy
 		};
 	}
 	
-	void Input::AddMousePosBinding(std::function<void(double, double)> func)
+	void InputComponent::AddMousePosBinding(std::function<void(double, double)> func)
 	{
 		m_MousePosCallbacks.push_back(func);
 	}
 	
-	void Input::AddMouseButtonBinding(int button, SLE_INPUT_MODE inputMode, std::function<void()> func )
+	void InputComponent::AddMouseButtonBinding(int button, SLE_INPUT_MODE inputMode, std::function<void()> func )
 	{
 		switch (inputMode)
 		{
@@ -52,7 +54,7 @@ namespace Sleepy
 		};
 	}
 	
-	void Input::RunKeyEvents()
+	void InputComponent::RunKeyEvents()
 	{
 		for (int key : m_ActiveKeys)
 		{
@@ -64,7 +66,7 @@ namespace Sleepy
 	}
 	
 	
-	void Input::RunMouseEvents()
+	void InputComponent::RunMouseEvents()
 	{
 		for (int button : m_ActiveMouseButtons)
 		{
@@ -76,7 +78,7 @@ namespace Sleepy
 	
 	}
 	
-	void Input::HandleKeyEvents(int key, int action)
+	void InputComponent::HandleKeyEvents(int key, int action)
 	{
 		if (action == GLFW_PRESS)
 		{
@@ -98,7 +100,7 @@ namespace Sleepy
 		}
 	}
 	
-	void Input::HandleMousePosEvents(double xPos, double yPos)
+	void InputComponent::HandleMousePosEvents(double xPos, double yPos)
 	{
 		for (auto it = m_MousePosCallbacks.begin(); it != m_MousePosCallbacks.end(); ++it)
 		{
@@ -106,7 +108,7 @@ namespace Sleepy
 		}
 	}
 	
-	void Input::HandleMouseButtonEvents(int button, int action)
+	void InputComponent::HandleMouseButtonEvents(int button, int action)
 	{
 		if (action == GLFW_PRESS)
 		{

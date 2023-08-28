@@ -1,13 +1,15 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "Entity.h"
+
 namespace Sleepy
 {
-	class Input;
-	class Camera
+	class InputComponent;
+	class Camera : public Entity
 	{
 	public:
-		Camera();
+		Camera(std::string name, class Sleepy::SceneBase* scene);
 		~Camera();
 		glm::mat4 GetViewMatrix();
 		const glm::vec3 GetPosition();
@@ -43,6 +45,6 @@ namespace Sleepy
 		glm::vec3 right;
 		glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 	
-		Input* m_Input;
+		InputComponent* m_Input;
 	};
 }

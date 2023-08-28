@@ -10,6 +10,7 @@ namespace Sleepy
 		MESH, 
 		POINT_LIGHT,
 		DIR_LIGHT,
+		INPUT,
 		DELETION,
 		RELATIONSHIP
 	};
