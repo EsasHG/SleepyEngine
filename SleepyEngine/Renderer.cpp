@@ -13,9 +13,9 @@
 #include "Components/TransformComponent.h"
 #include "Components/MeshComponent.h"
 #include "Components/LightComponent.h"
+#include "Components/CameraComponent.h"
 #include "TransformSystem.h"
-//should this be here? 
-#include "Camera.h"
+
 
 namespace Sleepy
 {
@@ -32,8 +32,6 @@ namespace Sleepy
 		m_TextureShaderId = Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders/TextureShader.vert", _SOLUTIONDIR"SleepyEngine/Shaders/TextureShader.frag");
 
 		m_SkyboxShaderId = Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders/Skybox.vert", _SOLUTIONDIR"SleepyEngine/Shaders/Skybox.frag");
-
-	
 
 		ModelLibrary::GetInstance().AddShader("default", m_TextureShaderId);
 		ModelLibrary::GetInstance().AddShader("quadShader", Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.vert", _SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.frag"));
@@ -161,7 +159,8 @@ namespace Sleepy
 		CheckGLError("End of BeginFrame");
 
 	}
-	void Renderer::SetCamera(class Camera* camera)
+
+	void Renderer::SetCamera(class CameraComponent* camera)
 	{
 		m_camera = camera;
 	}
@@ -176,6 +175,7 @@ namespace Sleepy
 
 		glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 500.0f);
 		Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
+
 		glm::mat4 view = m_camera->GetViewMatrix();
 		Renderer::SetShaderUniformMat4(m_ShaderId, "view", view);
 

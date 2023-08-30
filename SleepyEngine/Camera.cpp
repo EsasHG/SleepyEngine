@@ -1,12 +1,14 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "Components/InputComponent.h"
-
+#include "Components/CameraComponent.h"
 
 namespace Sleepy
 {
 	Camera::Camera(std::string name, class Sleepy::SceneBase* scene) : Sleepy::Entity(name, scene)
 	{
+		m_Camera = &AddComponent<CameraComponent>();
+
 		m_Input = &AddComponent<InputComponent>();
 		m_Input->AddKeyBinding(GLFW_KEY_W, SLE_HELD, std::bind(&Camera::MoveForward, this));
 		m_Input->AddKeyBinding(GLFW_KEY_S, SLE_HELD, std::bind(&Camera::MoveBackward, this));
@@ -17,23 +19,13 @@ namespace Sleepy
 		m_Input->AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_PRESSED, std::bind(&Camera::MouseButtonPressed, this));
 		m_Input->AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_RELEASED, std::bind(&Camera::MouseButtonReleased, this));
 		m_Input->AddMousePosBinding(std::bind(&Camera::CursorMoveCallback, this, std::placeholders::_1, std::placeholders::_2));
-	
-		UpdateVectors();
+		SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+		m_Camera->UpdateVectors();
 	}
 	
 	Camera::~Camera()
 	{
 		delete m_Input;
-	}
-	
-	glm::mat4 Camera::GetViewMatrix()
-	{
-		return glm::lookAt(position, position + front, up);
-	}
-	
-	const glm::vec3 Camera::GetPosition() 
-	{
-		return position; 
 	}
 	
 	void Camera::Run(double deltaTime)
@@ -63,15 +55,15 @@ namespace Sleepy
 			xoffset *= sensitivity;
 			yoffset *= sensitivity;
 			//std::cout << "x offset " << xoffset << "y offset " << yoffset << std::endl;
-			yaw += xoffset;
-			pitch += yoffset;
+			m_Camera->yaw += xoffset;
+			m_Camera->pitch += yoffset;
 	
-			if (pitch > 89.0f)
-				pitch = 89.0f;
-			if (pitch < -89.0f)
-				pitch = -89.0f;
+			if (m_Camera->pitch > 89.0f)
+				m_Camera->pitch = 89.0f;
+			if (m_Camera->pitch < -89.0f)
+				m_Camera->pitch = -89.0f;
 	
-			UpdateVectors();
+			m_Camera->UpdateVectors();
 		}
 	
 		//std::cout << "xPos: " << xPos << "yPos: " << yPos << std::endl;
@@ -79,34 +71,32 @@ namespace Sleepy
 	
 	void Camera::MoveForward()
 	{
-		position += front * frameCameraSpeed;
+		SetPosition(GetPosition() + m_Camera->front * frameCameraSpeed);
 	}
 	
 	void Camera::MoveBackward()
 	{
-		position -= front * frameCameraSpeed;
+		SetPosition(GetPosition() - m_Camera->front * frameCameraSpeed);
 	}
 	
 	void Camera::MoveLeft()
 	{
-		position -= right * frameCameraSpeed;
+		SetPosition(GetPosition() - m_Camera->right * frameCameraSpeed);
 	}
 	
 	void Camera::MoveRight()
 	{
-		position += right * frameCameraSpeed;
+		SetPosition(GetPosition() + m_Camera->right * frameCameraSpeed);
 	}
 	
 	void Camera::MoveDown()
 	{
-		position -= up * frameCameraSpeed;
-	
+		SetPosition(GetPosition() - m_Camera->up * frameCameraSpeed);
 	}
 	
 	void Camera::MoveUp()
 	{
-		position += up * frameCameraSpeed;
-	
+		SetPosition(GetPosition() + m_Camera->up * frameCameraSpeed);
 	}
 	
 	void Camera::MouseButtonPressed()
@@ -117,16 +107,4 @@ namespace Sleepy
 	{
 		mousePressed = false;
 	}
-	
-	void Camera::UpdateVectors()
-	{
-		glm::vec3 direction;
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		front = glm::normalize(direction);
-	
-		right = glm::normalize(glm::cross(front, up));
-	}
-
 }

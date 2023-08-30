@@ -41,7 +41,7 @@ namespace Sleepy
 		static void SetShaderUniformVec2(unsigned int m_ShaderId, const char* name, glm::vec2 vector);
 
 		//TODO: Should not be here
-		void SetCamera(class Camera* camera);
+		void SetCamera(class CameraComponent* camera);
 		void ResizeViewport(int x, int y);
 
 	private:
@@ -61,7 +61,7 @@ namespace Sleepy
 		unsigned int renderedTexture;
 
 		//TODO: Should not be here
-		class Camera* m_camera;
+		class CameraComponent* m_camera;
 
 	};
 }

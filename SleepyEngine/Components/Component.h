@@ -11,6 +11,7 @@ namespace Sleepy
 		POINT_LIGHT,
 		DIR_LIGHT,
 		INPUT,
+		CAMERA,
 		DELETION,
 		RELATIONSHIP
 	};

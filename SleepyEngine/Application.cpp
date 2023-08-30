@@ -64,7 +64,7 @@ namespace Sleepy
 	int Application::Run() 
 	{
 		Camera* camera = new Camera("Camera", m_scenes[0]);
-		renderer->SetCamera(camera);
+		renderer->SetCamera(camera->m_Camera);
 
 		//Scene scene;
 		//SetScene(new Scene());
