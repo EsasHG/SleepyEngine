@@ -6,11 +6,11 @@
 namespace Sleepy
 {
 	class InputComponent;
-	class Camera : public Entity
+	class EditorCamera : public Entity
 	{
 	public:
-		Camera(std::string name, class Sleepy::SceneBase* scene);
-		~Camera();
+		EditorCamera(std::string name, class Sleepy::SceneBase* scene);
+		~EditorCamera();
 		virtual void Update(double deltaTime) override;
 
 		class CameraComponent* m_Camera;
@@ -22,10 +22,14 @@ namespace Sleepy
 		void MoveRight();
 		void MoveDown();
 		void MoveUp();
-	
+		void ShiftPressed();
+		void ShiftReleased();
+
 		void MouseButtonPressed();
 		void MouseButtonReleased();
-	
+		void MouseScrolled(double xOffset, double yOffset);
+
+
 		bool firstMouse = true;
 		bool mousePressed = false;
 		double lastX, lastY;
@@ -33,6 +37,9 @@ namespace Sleepy
 		float yoffset;
 	
 		float cameraSpeed = 5.0;
+		float zoomSpeed = 0.01f;
+		float normalCameraSpeed = 5.0;
+		float superCameraSpeed = 20.0;
 		glm::vec3 moveVector = glm::vec3(0.0f);
 
 		InputComponent* m_Input;

@@ -3,9 +3,9 @@
 #include <Entity.h>
 #include <Components/LightComponent.h>
 #include <Components/MeshComponent.h>
+#include <Components/CameraComponent.h>
 #include <TransformSystem.h>
 #include <Mesh.h>
-#include <Camera.h>
 
 #include "Player.h"
 #include "BoidManager.h"
@@ -80,7 +80,12 @@ void SandboxScene::BeginPlay()
 {
 	Sleepy::Scene::BeginPlay();
 	//Sleepy::Renderer::SetCamera(playerCamera->m_Camera);
-	CreateGameObject<Player>("Player");
+	Player& player = CreateGameObject<Player>("Player");
+
+	Sleepy::Entity& Camera = CreateGameObject<Sleepy::Entity>("Player Camera");
+	Camera.AddComponent<Sleepy::CameraComponent>();
+	Camera.SetParent(player);
+	Camera.SetPosition(glm::vec3(0.0f, 5.0f, 15.0f));
 }
 
 void SandboxScene::Update(double deltaTime)

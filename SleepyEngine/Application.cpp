@@ -19,6 +19,7 @@
 #include "ImGui/imgui_impl_opengl3.h"
 #include "Renderer.h"
 #include "InputManager.h"
+#include "Components/CameraComponent.h"
 #include "Camera.h"
 #include "Window.h"
 #include "UiLayer.h"
@@ -63,11 +64,11 @@ namespace Sleepy
 
 	int Application::Run() 
 	{
-		Camera* camera = &m_scenes[0]->CreateGameObject<Camera>("Camera");
+		EditorCamera* camera = &m_scenes[0]->CreateGameObject<EditorCamera>("Camera");
 		camera->bActive = true;
 		//camera->AddComponent<UpdateComponent>();
-		Camera* playerCamera = &m_scenes[0]->CreateGameObject<Camera>("Player Camera");
-		playerCamera->AddComponent<UpdateComponent>();
+		//Camera* playerCamera = &m_scenes[0]->CreateGameObject<Camera>("Player Camera");
+		//playerCamera->AddComponent<UpdateComponent>();
 
 		renderer->SetCamera(camera->m_Camera);
 
@@ -121,9 +122,17 @@ namespace Sleepy
 			if (s_Playing && firstGameFrame)
 			{
 				for (Scene* scene : m_scenes)
+				{
 					scene->BeginPlay();
+					auto camView = scene->m_registry.view<CameraComponent>();
+					for (auto [entity, camera] : camView.each())
+					{
+						if (camera.bPossessOnStart)
+							renderer->SetCamera(&camera);
+					}
+				}
 				firstGameFrame = false;
-				renderer->SetCamera(playerCamera->m_Camera);
+				//renderer->SetCamera(playerCamera->m_Camera);
 				camera->bActive = false;
 			}
 

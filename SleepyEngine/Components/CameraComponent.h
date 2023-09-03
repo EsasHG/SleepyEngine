@@ -20,11 +20,14 @@ namespace Sleepy
         void UpdateVectors();
         float yaw = -90;
         float pitch = 0;
+
+        float fov = 0.5f;
         float renderDistance = 500.0f;
 
         glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 right;
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        bool bPossessOnStart = true;
 
     };
 

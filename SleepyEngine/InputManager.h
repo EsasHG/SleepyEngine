@@ -37,6 +37,9 @@ namespace Sleepy
 	
 		static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 		void MouseButtonCallbackImpl(GLFWwindow* window, int button, int action, int mods);
+
+		static void MouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset);
+		void MouseScrollCallbackImpl(GLFWwindow* window, double xOffset, double yOffset);
 	
 		std::vector<InputComponent*> m_Inputs;
 		std::vector<std::function<void(int, int)>> m_FramebufferSizeCallbacks;

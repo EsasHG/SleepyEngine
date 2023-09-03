@@ -92,6 +92,11 @@ namespace Sleepy
 		return transformComp.m_modelMatrix;
 	}
 
+	glm::mat4 TransformSystem::GetModelMatrix(const Entity& entity)
+	{
+		return entity.transformComp->m_modelMatrix;
+	}
+
 	glm::mat4 TransformSystem::GetLocalModelMatrix(const TransformComponent& transformComp)
 	{
 		glm::mat4 model = glm::mat4(1.0f);

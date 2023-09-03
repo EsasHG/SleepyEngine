@@ -40,6 +40,11 @@ namespace Sleepy
 	{
 		m_MousePosCallbacks.push_back(func);
 	}
+
+	void InputComponent::AddMouseScrollBinding(std::function<void(double, double)> func)
+	{
+		m_MouseScrollCallbacks.push_back(func);
+	}
 	
 	void InputComponent::AddMouseButtonBinding(int button, SLE_INPUT_MODE inputMode, std::function<void()> func )
 	{
@@ -123,6 +128,17 @@ namespace Sleepy
 		{
 			if (*it != nullptr)
 				(*it)(xPos, yPos);
+		}
+	}
+
+	void InputComponent::HandleMouseScrollEvents(double xOffset, double yOffset)
+	{
+		if (!m_Entity->bActive) return;
+
+		for (auto it = m_MousePosCallbacks.begin(); it != m_MousePosCallbacks.end(); ++it)
+		{
+			if (*it != nullptr)
+				(*it)(xOffset, yOffset);
 		}
 	}
 	

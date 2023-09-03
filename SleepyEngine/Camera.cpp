@@ -1,35 +1,45 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
+#include <string>
 #include "Components/InputComponent.h"
 #include "Components/CameraComponent.h"
 
 namespace Sleepy
 {
-	Camera::Camera(std::string name, class Sleepy::SceneBase* scene) : Sleepy::Entity(name, scene)
+	EditorCamera::EditorCamera(std::string name, class Sleepy::SceneBase* scene) : Sleepy::Entity(name, scene)
 	{
-		m_Camera = &AddComponent<CameraComponent>();
+
 		m_Input = &AddComponent<InputComponent>();
-		m_Input->AddKeyBinding(GLFW_KEY_W, SLE_HELD, std::bind(&Camera::MoveForward, this));
-		m_Input->AddKeyBinding(GLFW_KEY_S, SLE_HELD, std::bind(&Camera::MoveBackward, this));
-		m_Input->AddKeyBinding(GLFW_KEY_A, SLE_HELD, std::bind(&Camera::MoveLeft, this));
-		m_Input->AddKeyBinding(GLFW_KEY_D, SLE_HELD, std::bind(&Camera::MoveRight, this));
-		m_Input->AddKeyBinding(GLFW_KEY_Q, SLE_HELD, std::bind(&Camera::MoveDown, this));
-		m_Input->AddKeyBinding(GLFW_KEY_E, SLE_HELD, std::bind(&Camera::MoveUp, this));
-		m_Input->AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_PRESSED, std::bind(&Camera::MouseButtonPressed, this));
-		m_Input->AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_RELEASED, std::bind(&Camera::MouseButtonReleased, this));
-		m_Input->AddMousePosBinding(std::bind(&Camera::CursorMoveCallback, this, std::placeholders::_1, std::placeholders::_2));
+		m_Input->AddKeyBinding(GLFW_KEY_W, SLE_HELD, std::bind(&EditorCamera::MoveForward, this));
+		m_Input->AddKeyBinding(GLFW_KEY_S, SLE_HELD, std::bind(&EditorCamera::MoveBackward, this));
+		m_Input->AddKeyBinding(GLFW_KEY_A, SLE_HELD, std::bind(&EditorCamera::MoveLeft, this));
+		m_Input->AddKeyBinding(GLFW_KEY_D, SLE_HELD, std::bind(&EditorCamera::MoveRight, this));
+		m_Input->AddKeyBinding(GLFW_KEY_Q, SLE_HELD, std::bind(&EditorCamera::MoveDown, this));
+		m_Input->AddKeyBinding(GLFW_KEY_E, SLE_HELD, std::bind(&EditorCamera::MoveUp, this));
+
+		m_Input->AddKeyBinding(GLFW_KEY_LEFT_SHIFT, SLE_PRESSED, std::bind(&EditorCamera::ShiftPressed, this));
+		m_Input->AddKeyBinding(GLFW_KEY_LEFT_SHIFT, SLE_RELEASED, std::bind(&EditorCamera::ShiftReleased, this));
+		m_Input->AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_PRESSED, std::bind(&EditorCamera::MouseButtonPressed, this));
+		m_Input->AddMouseButtonBinding(GLFW_MOUSE_BUTTON_2, SLE_RELEASED, std::bind(&EditorCamera::MouseButtonReleased, this));
+		m_Input->AddMouseScrollBinding(std::bind(&EditorCamera::MouseScrolled, this, std::placeholders::_1, std::placeholders::_2));
+
+		m_Input->AddMousePosBinding(std::bind(&EditorCamera::CursorMoveCallback, this, std::placeholders::_1, std::placeholders::_2));
 		SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+
+		m_Camera = &AddComponent<CameraComponent>();
+		m_Camera->bPossessOnStart = false;
 		m_Camera->UpdateVectors();
 
 		enableUpdate = false;
 	}
 	
-	Camera::~Camera()
+	EditorCamera::~EditorCamera()
 	{
 		delete m_Input;
 	}
 	
-	void Camera::Update(double deltaTime)
+	void EditorCamera::Update(double deltaTime)
 	{
 		Entity::Update(deltaTime);
 
@@ -41,7 +51,7 @@ namespace Sleepy
 	}
 	
 	
-	void Camera::CursorMoveCallback(double xPos, double yPos)
+	void EditorCamera::CursorMoveCallback(double xPos, double yPos)
 	{
 		if (firstMouse)
 		{
@@ -76,42 +86,57 @@ namespace Sleepy
 		//std::cout << "xPos: " << xPos << "yPos: " << yPos << std::endl;
 	}
 	
-	void Camera::MoveForward()
+	void EditorCamera::MoveForward()
 	{
 		moveVector +=  m_Camera->front;
 	}
 	
-	void Camera::MoveBackward()
+	void EditorCamera::MoveBackward()
 	{
 		moveVector -= m_Camera->front;
 	}
 	
-	void Camera::MoveLeft()
+	void EditorCamera::MoveLeft()
 	{
 		moveVector -= m_Camera->right;
 	}
 	
-	void Camera::MoveRight()
+	void EditorCamera::MoveRight()
 	{
 		moveVector += m_Camera->right;
 	}
 	
-	void Camera::MoveDown()
+	void EditorCamera::MoveDown()
 	{
 		moveVector -= m_Camera->up;
 	}
 	
-	void Camera::MoveUp()
+	void EditorCamera::MoveUp()
 	{
 		moveVector += m_Camera->up;
 	}
+
+	void EditorCamera::ShiftPressed()
+	{
+		cameraSpeed = superCameraSpeed;
+	}
+
+	void EditorCamera::ShiftReleased()
+	{
+		cameraSpeed = normalCameraSpeed;
+	}
 	
-	void Camera::MouseButtonPressed()
+	void EditorCamera::MouseButtonPressed()
 	{
 		mousePressed = true;
 	}
-	void Camera::MouseButtonReleased()
+	void EditorCamera::MouseButtonReleased()
 	{
 		mousePressed = false;
+	}
+	void EditorCamera::MouseScrolled(double xOffset, double yOffset)
+	{
+		//m_Camera->fov += yOffset * zoomSpeed;
+		std::cout << "Mouse Scrolled! FOV: " << std::to_string(m_Camera->fov) << std::endl;
 	}
 }

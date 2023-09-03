@@ -3,13 +3,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Entity.h"
+#include "TransformSystem.h"
 
 namespace Sleepy
 {
 
     glm::mat4 CameraComponent::GetViewMatrix()
     {
-		glm::vec3 pos = m_Entity->GetPosition();
+		glm::mat4 mat = TransformSystem::GetModelMatrix(*m_Entity);
+
+
+		glm::vec3 pos = glm::vec3(mat[3][0], mat[3][1], mat[3][2]);
         return glm::lookAt(pos, pos + front, up);
     }
 

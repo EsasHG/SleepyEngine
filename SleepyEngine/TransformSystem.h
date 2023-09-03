@@ -5,6 +5,7 @@
 namespace Sleepy
 {
 	class TransformComponent;
+	class Entity;
 	class TransformSystem
 	{
 
@@ -23,6 +24,7 @@ namespace Sleepy
 		static void SetRotation(TransformComponent& transformComp, float yaw, float pitch, float roll);
 		static void SetRotation(TransformComponent& transformComp, glm::vec3 eulerRotDeg);
 
+		static glm::mat4 GetModelMatrix(const Entity& entity);
 		static glm::mat4 GetModelMatrix(const TransformComponent& transformComp);
 		static glm::mat4 GetLocalModelMatrix(const TransformComponent& transformComp);
 		static void RecalculateModelMatrices(TransformComponent& transformComp);

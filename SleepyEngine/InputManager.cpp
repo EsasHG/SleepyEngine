@@ -11,6 +11,7 @@ namespace Sleepy
 			glfwSetKeyCallback(window, KeyCallback);
 			glfwSetCursorPosCallback(window, CursorPosCallback);
 			glfwSetMouseButtonCallback(window, MouseButtonCallback);
+			glfwSetScrollCallback(window, MouseScrollCallback);
 			glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 			bInitialized = true;
 		}
@@ -143,6 +144,21 @@ namespace Sleepy
 			for (InputComponent* i : m_Inputs)
 			{
 				i->HandleMouseButtonEvents(button, action);
+			}
+		}
+	}
+	void InputManager::MouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+	{
+		GetInstance().MouseScrollCallbackImpl(window, xOffset, yOffset);
+
+	}
+	void InputManager::MouseScrollCallbackImpl(GLFWwindow* window, double xOffset, double yOffset)
+	{
+		if (bDispatchMouseEvents)
+		{
+			for (InputComponent* i : m_Inputs)
+			{
+				i->HandleMouseScrollEvents(xOffset, yOffset);
 			}
 		}
 	}

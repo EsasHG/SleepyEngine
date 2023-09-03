@@ -24,13 +24,15 @@ namespace Sleepy
 		~InputComponent();
 		void AddKeyBinding(int key, SLE_INPUT_MODE mode, std::function<void()> func);
 		void AddMousePosBinding(std::function<void(double, double)> func);
+		void AddMouseScrollBinding(std::function<void(double, double)> func);
 		void AddMouseButtonBinding(int button, SLE_INPUT_MODE mode, std::function<void()> func);
 	private:
 		void RunKeyEvents();
 		void RunMouseEvents();
 	
 		void HandleKeyEvents(int key, int action);
-		void HandleMousePosEvents(double xPos, double yPos);
+		void HandleMousePosEvents(double xOffset, double yOffset);
+		void HandleMouseScrollEvents(double xPos, double yPos);
 		void HandleMouseButtonEvents(int button, int action);
 	
 		std::vector<int> m_ActiveKeys;
@@ -45,6 +47,7 @@ namespace Sleepy
 		std::map<int, std::vector<std::function<void()>>> m_ReleasedMouseButtonCallbacks;
 	
 		std::vector<std::function<void(double, double)>> m_MousePosCallbacks;
+		std::vector<std::function<void(double, double)>> m_MouseScrollCallbacks;
 		friend class InputManager;
 	};
 }

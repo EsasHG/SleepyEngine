@@ -173,7 +173,7 @@ namespace Sleepy
 		glEnable(GL_CULL_FACE);
 		//glDisable(GL_CULL_FACE);
 
-		glm::mat4 projection = glm::perspective(0.5f, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, 500.0f);
+		glm::mat4 projection = glm::perspective(m_camera->fov, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, m_camera->renderDistance);
 		Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
 
 		glm::mat4 view = m_camera->GetViewMatrix();
