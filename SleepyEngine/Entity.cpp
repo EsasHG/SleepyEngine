@@ -15,10 +15,7 @@ namespace Sleepy
 			SetParent(*m_scene->m_SceneEntity);
 	}
 
-	Entity:: ~Entity()
-	{
-		RemoveAsChild();
-	}
+
 	Entity& Entity::GetParent()
 	{
 		return *m_scene->m_registry.get<RelationshipComponent>(relationshipComp->m_parent).m_Entity;

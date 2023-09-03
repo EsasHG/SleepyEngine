@@ -16,10 +16,13 @@ namespace Sleepy
 		}
 	
 		void RunEvents();
+
+		void RunEvents(InputComponent& input);
 	
 		void Init(GLFWwindow* window);
 		void AddWindowResizeCallback(std::function<void(int, int)> func);
 	
+		void RemoveInputComponent(InputComponent* input);
 	private:
 		InputManager() {};
 		static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -36,7 +39,7 @@ namespace Sleepy
 		void MouseButtonCallbackImpl(GLFWwindow* window, int button, int action, int mods);
 	
 		std::vector<InputComponent*> m_Inputs;
-		std::vector< std::function<void(int, int)>> m_FramebufferSizeCallbacks;
+		std::vector<std::function<void(int, int)>> m_FramebufferSizeCallbacks;
 		bool bInitialized = false;
 	
 		bool bDispatchKeyboardEvents = true;

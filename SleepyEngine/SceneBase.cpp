@@ -5,6 +5,7 @@
 #include "Components/LightComponent.h"
 #include "Components/RelationshipComponent.h"
 #include "Components/TransformComponent.h"
+#include "Components/InputComponent.h"
 #include "Application.h"
 namespace Sleepy
 {
@@ -159,13 +160,16 @@ namespace Sleepy
 	{
 		entity.RemoveAsChild();
 
+		/*if (entity.Has<InputComponent>())
+			RemoveComponent<InputComponent>(&entity);*/
+
 		m_registry.destroy(entity.m_entityHandle);
 
 		auto it = entities.find(entity.m_entityHandle);
-		Entity* ent = nullptr;
+		//Entity* ent = nullptr;
 		if (it != entities.end())
 		{
-			Entity* ent = it->second;
+			//ent = it->second;
 			entities.erase(it);		
 		}
 
@@ -174,12 +178,13 @@ namespace Sleepy
 		{
 			gameEntities.erase(it2);
 		}
-		delete ent;
+
+		delete &entity;
 	}
 
 	void SceneBase::DeleteAllComponents(Entity& entity)
 	{
-
+		
 	}
 
 	template<typename T>

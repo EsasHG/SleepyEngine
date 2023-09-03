@@ -21,6 +21,7 @@ namespace Sleepy
 	{
 	public:
 		InputComponent(Entity* entity);
+		~InputComponent();
 		void AddKeyBinding(int key, SLE_INPUT_MODE mode, std::function<void()> func);
 		void AddMousePosBinding(std::function<void(double, double)> func);
 		void AddMouseButtonBinding(int button, SLE_INPUT_MODE mode, std::function<void()> func);

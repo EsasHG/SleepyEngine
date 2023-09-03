@@ -1,5 +1,7 @@
 #include "Player.h"
 #include <glm/gtx/norm.hpp>
+
+
 void Player::BeginPlay()
 {
 	m_Input = &AddComponent<Sleepy::InputComponent>();
@@ -9,10 +11,10 @@ void Player::BeginPlay()
 	m_Input->AddKeyBinding(GLFW_KEY_RIGHT, Sleepy::SLE_HELD, std::bind(&Player::MoveRight, this));
 }
 
-Player::~Player()
-{
-	delete m_Input;
-}
+//Player::~Player()
+//{
+//	Sleepy::Entity::~Entity();
+//}
 
 void Player::Update(double deltaTime)
 {

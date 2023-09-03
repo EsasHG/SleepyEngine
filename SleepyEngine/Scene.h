@@ -22,6 +22,7 @@ namespace Sleepy
 		Scene() : SceneBase() {}
 
 		virtual void BeginPlay() override;
+		virtual void EndPlay() override;
 		virtual void Update(double deltaTime) override;
 
 		template<typename T, typename ... Args>

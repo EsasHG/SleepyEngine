@@ -5,6 +5,7 @@
 #include <Components/MeshComponent.h>
 #include <TransformSystem.h>
 #include <Mesh.h>
+#include <Camera.h>
 
 #include "Player.h"
 #include "BoidManager.h"
@@ -67,6 +68,10 @@ SandboxScene::SandboxScene()
 
 	Sleepy::ModelLibrary::GetInstance().LoadCubemapTexture(faces);
 
+
+	//Set cameras
+	//camera = &CreateGameObject<Sleepy::Camera>("Editor Camera", this);
+	//playerCamera = &CreateGameObject<Sleepy::Camera>("Player Camera", this);
 }
 
 
@@ -74,7 +79,7 @@ SandboxScene::SandboxScene()
 void SandboxScene::BeginPlay()
 {
 	Sleepy::Scene::BeginPlay();
-
+	//Sleepy::Renderer::SetCamera(playerCamera->m_Camera);
 	CreateGameObject<Player>("Player");
 }
 

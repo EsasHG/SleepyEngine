@@ -11,8 +11,9 @@ class Player :
 		: Sleepy::Entity(name, scene), mesh(AddComponent<Sleepy::MeshComponent>("planet_0", "color"))
 	{
 		enableUpdate = true;
+		bActive = true;
 	}
-	~Player();
+	//~Player();
 	virtual void BeginPlay() override;
 	virtual void Update(double deltaTime) override;
 

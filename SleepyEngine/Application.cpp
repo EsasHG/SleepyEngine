@@ -63,7 +63,12 @@ namespace Sleepy
 
 	int Application::Run() 
 	{
-		Camera* camera = new Camera("Camera", m_scenes[0]);
+		Camera* camera = &m_scenes[0]->CreateGameObject<Camera>("Camera");
+		camera->bActive = true;
+		//camera->AddComponent<UpdateComponent>();
+		Camera* playerCamera = &m_scenes[0]->CreateGameObject<Camera>("Player Camera");
+		playerCamera->AddComponent<UpdateComponent>();
+
 		renderer->SetCamera(camera->m_Camera);
 
 		//Scene scene;
@@ -78,26 +83,31 @@ namespace Sleepy
 
 			ui->BeginFrame();
 			//ui->Run(deltaTime, nullptr);
-			for (Scene* scene : m_scenes)
+			// 
+			//If play or stop button pressed
+			if (ui->Run(deltaTime, m_scenes[0]))
 			{
-				//If play or stop button pressed
-				if (ui->Run(deltaTime, scene)) 
+				//if we are playing and should stop
+				if (s_Playing)
 				{
-					//if we are playing and should stop
-					if (s_Playing) 
+					//Delete objects that should only exist while playing
+					for (Scene* scene : m_scenes)
 					{
-						//Delete objects that should only exist while playing
-						for (Scene* scene : m_scenes) 
-						{
-							for(Entity* e : scene->gameEntities)
-								scene->MarkForDeletion(*e);
-						}
-						//Reset so it's ready for next time play button is pressed.
-						firstGameFrame = true;	
+						scene->EndPlay();
+
 					}
-					s_Playing = !s_Playing;
+					//Change back to editor camera
+					renderer->SetCamera(camera->m_Camera);
+
+					//Reset so it's ready for next time play button is pressed.
+					firstGameFrame = true;
+
+
+					camera->bActive = true;
 				}
+				s_Playing = !s_Playing;
 			}
+			
 			renderer->BeginFrame(ui->contentRegionSize);
 	#else
 			renderer->BeginFrame(glm::vec2(window->GetWidth(),window->GetHeight()));
@@ -107,19 +117,24 @@ namespace Sleepy
 			glfwPollEvents();
 
 			InputManager::GetInstance().RunEvents();
-			camera->Run(deltaTime);
 			
-			if (s_Playing)
+			if (s_Playing && firstGameFrame)
 			{
-				if (firstGameFrame)
-				{
-					for (Scene* scene : m_scenes)
-						scene->BeginPlay();
-					firstGameFrame = false;
-				}
+				for (Scene* scene : m_scenes)
+					scene->BeginPlay();
+				firstGameFrame = false;
+				renderer->SetCamera(playerCamera->m_Camera);
+				camera->bActive = false;
+			}
 
+			if(s_Playing)
+			{
 				for (Scene* scene : m_scenes)
 					scene->Update(deltaTime);
+			}
+			else
+			{
+				camera->Update(deltaTime);
 			}
 
 	#ifdef _SHOWUI

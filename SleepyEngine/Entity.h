@@ -11,8 +11,6 @@ namespace Sleepy
 	public:
 		Entity(std::string entityName, SceneBase* scene);
 	
-		~Entity();
-	
 		template<typename T, typename ... Args>
 		T& AddComponent(Args&&... args)
 		{
@@ -78,6 +76,7 @@ namespace Sleepy
 		std::string m_Name;
 
 		bool enableUpdate = false;
+		bool bActive = false;
 
 		class Scene* GetScene();
 	private:

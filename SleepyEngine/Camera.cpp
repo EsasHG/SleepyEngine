@@ -8,7 +8,6 @@ namespace Sleepy
 	Camera::Camera(std::string name, class Sleepy::SceneBase* scene) : Sleepy::Entity(name, scene)
 	{
 		m_Camera = &AddComponent<CameraComponent>();
-
 		m_Input = &AddComponent<InputComponent>();
 		m_Input->AddKeyBinding(GLFW_KEY_W, SLE_HELD, std::bind(&Camera::MoveForward, this));
 		m_Input->AddKeyBinding(GLFW_KEY_S, SLE_HELD, std::bind(&Camera::MoveBackward, this));
@@ -21,6 +20,8 @@ namespace Sleepy
 		m_Input->AddMousePosBinding(std::bind(&Camera::CursorMoveCallback, this, std::placeholders::_1, std::placeholders::_2));
 		SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 		m_Camera->UpdateVectors();
+
+		enableUpdate = false;
 	}
 	
 	Camera::~Camera()
@@ -28,9 +29,15 @@ namespace Sleepy
 		delete m_Input;
 	}
 	
-	void Camera::Run(double deltaTime)
+	void Camera::Update(double deltaTime)
 	{
-		frameCameraSpeed = cameraSpeed * deltaTime;
+		Entity::Update(deltaTime);
+
+		float frameCameraSpeed = cameraSpeed * deltaTime;
+		glm::normalize(moveVector);
+		SetPosition(GetPosition() + moveVector * frameCameraSpeed);
+		moveVector = glm::vec3(0.0f);
+
 	}
 	
 	
@@ -71,32 +78,32 @@ namespace Sleepy
 	
 	void Camera::MoveForward()
 	{
-		SetPosition(GetPosition() + m_Camera->front * frameCameraSpeed);
+		moveVector +=  m_Camera->front;
 	}
 	
 	void Camera::MoveBackward()
 	{
-		SetPosition(GetPosition() - m_Camera->front * frameCameraSpeed);
+		moveVector -= m_Camera->front;
 	}
 	
 	void Camera::MoveLeft()
 	{
-		SetPosition(GetPosition() - m_Camera->right * frameCameraSpeed);
+		moveVector -= m_Camera->right;
 	}
 	
 	void Camera::MoveRight()
 	{
-		SetPosition(GetPosition() + m_Camera->right * frameCameraSpeed);
+		moveVector += m_Camera->right;
 	}
 	
 	void Camera::MoveDown()
 	{
-		SetPosition(GetPosition() - m_Camera->up * frameCameraSpeed);
+		moveVector -= m_Camera->up;
 	}
 	
 	void Camera::MoveUp()
 	{
-		SetPosition(GetPosition() + m_Camera->up * frameCameraSpeed);
+		moveVector += m_Camera->up;
 	}
 	
 	void Camera::MouseButtonPressed()

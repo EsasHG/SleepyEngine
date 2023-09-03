@@ -20,5 +20,8 @@ public:
     //void MoveUp();
     Sleepy::Entity* controlledEntity;
 
+    //class Sleepy::Camera* camera;
+    //class Sleepy::Camera* playerCamera;
+
 };
 

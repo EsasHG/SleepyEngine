@@ -160,7 +160,7 @@ namespace Sleepy
 
 	}
 
-	void Renderer::SetCamera(class CameraComponent* camera)
+	void Renderer::SetCamera(CameraComponent* camera)
 	{
 		m_camera = camera;
 	}

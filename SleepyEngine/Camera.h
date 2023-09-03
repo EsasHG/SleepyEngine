@@ -11,7 +11,7 @@ namespace Sleepy
 	public:
 		Camera(std::string name, class Sleepy::SceneBase* scene);
 		~Camera();
-		void Run(double deltaTime);
+		virtual void Update(double deltaTime) override;
 
 		class CameraComponent* m_Camera;
 	private:
@@ -32,10 +32,8 @@ namespace Sleepy
 		float xoffset;
 		float yoffset;
 	
-		float frameCameraSpeed;
-	
 		float cameraSpeed = 5.0;
-
+		glm::vec3 moveVector = glm::vec3(0.0f);
 
 		InputComponent* m_Input;
 	};

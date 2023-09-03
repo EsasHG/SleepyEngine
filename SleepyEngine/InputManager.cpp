@@ -15,8 +15,35 @@ namespace Sleepy
 			bInitialized = true;
 		}
 	}
-	
 	void InputManager::RunEvents()
+	{
+#ifdef _SHOWUI
+		bDispatchKeyboardEvents = !ImGui::GetIO().WantCaptureKeyboard;
+		bDispatchMouseEvents = !ImGui::GetIO().WantCaptureMouse;
+#else
+		bDispatchKeyboardEvents = true;
+		bDispatchMouseEvents = true;
+
+#endif // _SHOWUI
+
+		if (bDispatchKeyboardEvents)
+		{
+			for (InputComponent* i : m_Inputs)
+			{
+				i->RunKeyEvents();
+			}
+		}
+
+		if (bDispatchMouseEvents)
+		{
+			for (InputComponent* i : m_Inputs)
+			{
+				i->RunKeyEvents();
+			}
+		}
+	}
+
+	void InputManager::RunEvents(InputComponent& input)
 	{
 	#ifdef _SHOWUI
 		bDispatchKeyboardEvents = !ImGui::GetIO().WantCaptureKeyboard;
@@ -29,18 +56,12 @@ namespace Sleepy
 	
 		if (bDispatchKeyboardEvents)
 		{
-			for (InputComponent* i : m_Inputs)
-			{
-				i->RunKeyEvents();
-			}
+			input.RunKeyEvents();
 		}
 	
 		if (bDispatchMouseEvents)
 		{
-			for (InputComponent* i : m_Inputs)
-			{
-				i->RunKeyEvents();
-			}
+			input.RunKeyEvents();
 		}
 	}
 	
@@ -52,6 +73,13 @@ namespace Sleepy
 	void InputManager::AddWindowResizeCallback(std::function<void(int, int)> func)
 	{
 		m_FramebufferSizeCallbacks.push_back(func);
+	}
+
+	void InputManager::RemoveInputComponent(InputComponent* input)
+	{
+		auto it = std::find(m_Inputs.begin(), m_Inputs.end(), input);
+		if (it != m_Inputs.end())
+			m_Inputs.erase(it);
 	}
 	
 	

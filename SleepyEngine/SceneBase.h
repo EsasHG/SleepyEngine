@@ -21,6 +21,7 @@ namespace Sleepy
 			SceneBase();
 			~SceneBase();
 			virtual void BeginPlay() = 0;
+			virtual void EndPlay() = 0;
 			virtual void Update(double deltaTime) = 0;
 			void DeleteEntity(Entity& entity);
 			void DeleteAllComponents(Entity& entity);
