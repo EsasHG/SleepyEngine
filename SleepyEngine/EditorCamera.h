@@ -32,9 +32,9 @@ namespace Sleepy
 
 		bool firstMouse = true;
 		bool mousePressed = false;
-		double lastX, lastY;
-		float xoffset;
-		float yoffset;
+		double lastX = 0, lastY = 0;
+		float xoffset = 0;
+		float yoffset = 0;
 	
 		float cameraSpeed = 5.0;
 		float zoomSpeed = 0.025f;

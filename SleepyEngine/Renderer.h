@@ -22,8 +22,9 @@ namespace Sleepy
 
 		static void SetPointLightValues(unsigned int shaderID, TransformComponent& transform, class PointLightComponent& pointLight);
 		static void SetDirLightValues(unsigned int shaderID, TransformComponent& transform, class DirLightComponent& pointLight);
-
+#ifdef _DEBUG
 		static void CheckGLError(std::string placeMessage);
+#endif // DEBUG
 		static unsigned int CreateShader(const char* vertShaderPath, const char* fragShaderPath);
 		static unsigned int CreateShader(const char* vertShaderPath, const char* geometryShaderPath, const char* fragShaderPath);
 

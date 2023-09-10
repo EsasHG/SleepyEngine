@@ -1,5 +1,7 @@
 #include "InputComponent.h"
+
 #include <iostream>
+
 #include "InputManager.h"
 #include "Entity.h"
 

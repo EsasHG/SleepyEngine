@@ -18,8 +18,6 @@ namespace Sleepy
         const glm::vec3 GetPosition();
 
         void UpdateVectors();
-        float yaw = -90;
-        float pitch = 0;
 
         float fov = 0.5f;
         float renderDistance = 500.0f;

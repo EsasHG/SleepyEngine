@@ -20,7 +20,7 @@
 #include "Renderer.h"
 #include "InputManager.h"
 #include "Components/CameraComponent.h"
-#include "Camera.h"
+#include "EditorCamera.h"
 #include "Window.h"
 #include "UiLayer.h"
 #include "Model.h"

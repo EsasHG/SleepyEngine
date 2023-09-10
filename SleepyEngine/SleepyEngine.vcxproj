@@ -145,7 +145,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="EditorCamera.cpp" />
     <ClCompile Include="Components\CameraComponent.cpp" />
     <ClCompile Include="Components\RelationshipComponent.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -174,7 +174,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
-    <ClInclude Include="Camera.h" />
+    <ClInclude Include="EditorCamera.h" />
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\Component.h" />
     <ClInclude Include="Components\RelationshipComponent.h" />

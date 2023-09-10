@@ -1,7 +1,6 @@
-#include "Camera.h"
+#include "EditorCamera.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
-#include <string>
+
 #include "Components/InputComponent.h"
 #include "Components/CameraComponent.h"
 
@@ -71,19 +70,21 @@ namespace Sleepy
 			const float sensitivity = 0.1f;
 			xoffset *= sensitivity;
 			yoffset *= sensitivity;
-			//std::cout << "x offset " << xoffset << "y offset " << yoffset << std::endl;
-			m_Camera->yaw += xoffset;
-			m_Camera->pitch += yoffset;
-	
-			if (m_Camera->pitch > 89.0f)
-				m_Camera->pitch = 89.0f;
-			if (m_Camera->pitch < -89.0f)
-				m_Camera->pitch = -89.0f;
+			
+			glm::vec3 rot = GetRotation();
+
+			rot.x += xoffset;
+			rot.y += yoffset;
+
+			if (rot.y > 89.0f)
+				rot.y = 89.0f;
+			if (rot.y < -89.0f)
+				rot.y = -89.0f;
+
+			SetRotation(rot);
 	
 			m_Camera->UpdateVectors();
 		}
-	
-		//std::cout << "xPos: " << xPos << "yPos: " << yPos << std::endl;
 	}
 	
 	void EditorCamera::MoveForward()

@@ -25,9 +25,11 @@ namespace Sleepy
 	void CameraComponent::UpdateVectors()
 	{
 		glm::vec3 direction;
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+		glm::vec3 rot = m_Entity->GetRotation();
+		direction.x = cos(glm::radians(rot.x)) * cos(glm::radians(rot.y));
+		direction.y = sin(glm::radians(rot.y));
+		direction.z = sin(glm::radians(rot.x)) * cos(glm::radians(rot.y));
 		front = glm::normalize(direction);
 
 		right = glm::normalize(glm::cross(front, up));

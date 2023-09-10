@@ -135,7 +135,9 @@ namespace Sleepy
 
 	void Renderer::BeginFrame(glm::vec2 windowSize)
 	{
+#ifdef _DEBUG
 		CheckGLError("Start of BeginFrame");
+#endif // _DEBUG
 
 		glUseProgram(m_ShaderId);
 
@@ -155,8 +157,9 @@ namespace Sleepy
 		glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
+#ifdef _DEBUG
 		CheckGLError("End of BeginFrame");
+#endif // _DEBUG
 
 	}
 
@@ -202,7 +205,9 @@ namespace Sleepy
 
 	void Renderer::DrawMesh(MeshComponent mesh, TransformComponent transform)
 	{
+#ifdef _DEBUG
 		CheckGLError("Start of DrawMesh");
+#endif // _DEBUG
 
 		unsigned int shaderID = ModelLibrary::GetInstance().GetShader(mesh.m_shaderID);
 		glUseProgram(shaderID);
@@ -292,8 +297,9 @@ namespace Sleepy
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		glActiveTexture(GL_TEXTURE0);
-
+#ifdef _DEBUG
 		CheckGLError("End of DrawMesh");
+#endif // _DEBUG
 		glUseProgram(0);
 
 	}
@@ -391,9 +397,8 @@ namespace Sleepy
 		RecreateFramebuffer();
 	}
 
-
+#ifdef _DEBUG
 	void Renderer::CheckGLError(std::string placeMessage)
-
 	{
 		while (true)
 		{
@@ -438,6 +443,7 @@ namespace Sleepy
 			std::cout << "GL Error: " << errorstring << " Placement: " << placeMessage << std::endl;
 		}
 	}
+#endif // _DEBUG
 
 
 	unsigned int Renderer::CreateShader(const char* vertShaderPath, const char* fragShaderPath)
