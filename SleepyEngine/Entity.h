@@ -66,6 +66,7 @@ namespace Sleepy
 		bool HasChildren();
 
 		glm::vec3 GetPosition();
+		glm::vec3 GetWorldPosition();
 		glm::vec3 GetRotation();
 		glm::vec3 GetScale();
 

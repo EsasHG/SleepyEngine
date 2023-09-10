@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <glm/gtx/norm.hpp>
 
+#include <Components/CameraComponent.h>
 
 void Player::BeginPlay()
 {
@@ -9,6 +10,8 @@ void Player::BeginPlay()
 	m_Input->AddKeyBinding(GLFW_KEY_DOWN, Sleepy::SLE_HELD, std::bind(&Player::MoveBackward, this));
 	m_Input->AddKeyBinding(GLFW_KEY_LEFT, Sleepy::SLE_HELD, std::bind(&Player::MoveLeft, this));
 	m_Input->AddKeyBinding(GLFW_KEY_RIGHT, Sleepy::SLE_HELD, std::bind(&Player::MoveRight, this));
+
+	m_Input->AddMousePosBinding(std::bind(&Player::CursorMoveCallback, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 //Player::~Player()
@@ -63,20 +66,77 @@ void Player::Update(double deltaTime)
 
 void Player::MoveForward()
 {
-	velocity += glm::vec3(0.0f, 0.0f, -1.0f);
+	if (!m_Camera) return;
+	velocity += glm::normalize(m_Camera->front);
 }
 
 void Player::MoveBackward()
 {
-	velocity += glm::vec3(0.0f, 0.0f, 1.0f);
+	if (!m_Camera) return;
+	velocity -= glm::normalize(m_Camera->front);
 }
 
 void Player::MoveLeft()
 {
-	velocity += glm::vec3(-1.0f, 0.0f, 0.0f);
+	if (!m_Camera) return;
+	velocity -= glm::normalize(m_Camera->right);
 }
 
 void Player::MoveRight()
 {
-	velocity += glm::vec3(1.0f, 0.0f, 0.0f);
+	if (!m_Camera) return;
+	velocity += glm::normalize(m_Camera->right);
+}
+
+void Player::CursorMoveCallback(double xPos, double yPos)
+{
+	if (firstMouse)
+	{
+		lastX = xPos;
+		lastY = yPos;
+		firstMouse = false;
+	}
+
+	xoffset = xPos - lastX;
+	yoffset = lastY - yPos;
+	lastX = xPos;
+	lastY = yPos;
+
+
+	const float sensitivity = 0.1f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	glm::vec3 rot = GetRotation();
+
+	rot.x += yoffset;
+	rot.y += xoffset;
+
+	if (rot.y > 89.0f)
+		rot.y = 89.0f;
+	if (rot.y < -89.0f)
+		rot.y = -89.0f;
+
+	SetRotation(rot);
+	if (!m_Camera)
+	{
+		auto children = GetChildren();
+		if(children.size()>0)
+		{
+			for (auto child : children)
+			{
+				if (child->Has<Sleepy::CameraComponent>())
+				{
+					m_Camera = &child->GetComponent<Sleepy::CameraComponent>();
+					m_Camera->UpdateVectors();
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		m_Camera->UpdateVectors();
+	}
+
 }

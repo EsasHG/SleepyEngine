@@ -27,6 +27,13 @@ namespace Sleepy
 		//return TransformSystem::GetPosition(GetComponent<TransformComponent>());
 	}
 
+	glm::vec3 Entity::GetWorldPosition()
+	{
+		glm::mat4 mat = TransformSystem::GetModelMatrix(*transformComp);
+		return glm::vec3(mat[3][0], mat[3][1], mat[3][2]);
+
+	}
+
 	glm::vec3 Entity::GetRotation()
 	{
 		return TransformSystem::GetRotation(*transformComp);

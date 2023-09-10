@@ -21,6 +21,7 @@ class Player :
 	void MoveBackward();
 	void MoveLeft();
 	void MoveRight();
+	void CursorMoveCallback(double xPos, double yPos);
 
 	Sleepy::MeshComponent& mesh;
 
@@ -29,5 +30,10 @@ class Player :
 	glm::vec3 velocity = glm::vec3(0.0);
 	float maxSpeed = 50.0f;
 	Sleepy::InputComponent* m_Input;
+	class Sleepy::CameraComponent* m_Camera;
+private:
+	bool firstMouse;
+	double lastX = 0, lastY = 0;
+	double xoffset = 0, yoffset = 0;
 };
 

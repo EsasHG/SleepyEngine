@@ -83,15 +83,15 @@ void SandboxScene::BeginPlay()
 	Player& player = CreateGameObject<Player>("Player");
 
 	Sleepy::Entity& Camera = CreateGameObject<Sleepy::Entity>("Player Camera");
-	Camera.AddComponent<Sleepy::CameraComponent>();
+	Sleepy::CameraComponent& camComp = Camera.AddComponent<Sleepy::CameraComponent>();
 	Camera.SetParent(player);
-	Camera.SetPosition(glm::vec3(0.0f, 5.0f, 15.0f));
+	camComp.lookatTarget = &player;
+	Camera.SetPosition(glm::vec3(0.0f, 20.0f, 35.0f));
 }
 
 void SandboxScene::Update(double deltaTime)
 {
 	Sleepy::Scene::Update(deltaTime);
-
 }
 
 
