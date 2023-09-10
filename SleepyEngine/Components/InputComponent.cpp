@@ -135,7 +135,7 @@ namespace Sleepy
 	{
 		if (!m_Entity->bActive) return;
 
-		for (auto it = m_MousePosCallbacks.begin(); it != m_MousePosCallbacks.end(); ++it)
+		for (auto it = m_MouseScrollCallbacks.begin(); it != m_MouseScrollCallbacks.end(); ++it)
 		{
 			if (*it != nullptr)
 				(*it)(xOffset, yOffset);

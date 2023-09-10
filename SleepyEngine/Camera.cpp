@@ -136,7 +136,7 @@ namespace Sleepy
 	}
 	void EditorCamera::MouseScrolled(double xOffset, double yOffset)
 	{
-		//m_Camera->fov += yOffset * zoomSpeed;
-		std::cout << "Mouse Scrolled! FOV: " << std::to_string(m_Camera->fov) << std::endl;
+		m_Camera->fov += yOffset * zoomSpeed;
+		m_Camera->fov = glm::clamp(m_Camera->fov, 0.025f, 1.0f);
 	}
 }

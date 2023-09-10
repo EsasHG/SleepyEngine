@@ -37,7 +37,7 @@ namespace Sleepy
 		float yoffset;
 	
 		float cameraSpeed = 5.0;
-		float zoomSpeed = 0.01f;
+		float zoomSpeed = 0.025f;
 		float normalCameraSpeed = 5.0;
 		float superCameraSpeed = 20.0;
 		glm::vec3 moveVector = glm::vec3(0.0f);
