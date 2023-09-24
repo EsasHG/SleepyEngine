@@ -7,6 +7,12 @@
 
 namespace Sleepy
 {
+	//info that is returned from the application from UiLayer::Run();
+	struct UiInfo
+	{
+		bool bTogglePlay = false;
+		bool bNewWindow = false;
+	};
 
 	class Window;
 	class TransformComponent;
@@ -18,16 +24,17 @@ namespace Sleepy
 	public:
 		UiLayer();
 		void BeginFrame();
-		bool Run(double deltaTime, Scene* scene);
+		UiInfo Run(double deltaTime, Scene* scene);
 
 		void EndFrame();
-
+		void OpenNewRenderWindow(int windowID);
 		bool RenderWindowOpen() { return renderWindowOpen; };
 		glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
 		glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
 
-		unsigned int sceneTexture;
-		glm::vec2 contentRegionSize;
+
+		std::vector<unsigned int> sceneTextures;
+		std::vector<glm::vec2> contentRegionSize;
 
 		int id;
 
@@ -73,6 +80,10 @@ namespace Sleepy
 		//static float frames[140];
 		int newIndex = -1;
 		int oldIndex = -1;
+
+		int windowID = 0;
+
+		std::vector<int> openRenderWindows;
 	};
 	static char inputText[128];
 }

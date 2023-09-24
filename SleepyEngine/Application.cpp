@@ -20,6 +20,7 @@
 #include "Renderer.h"
 #include "InputManager.h"
 #include "Components/CameraComponent.h"
+#include "Components/MeshComponent.h"
 #include "EditorCamera.h"
 #include "Window.h"
 #include "UiLayer.h"
@@ -66,12 +67,19 @@ namespace Sleepy
 	{
 		EditorCamera* camera = &m_scenes[0]->CreateGameObject<EditorCamera>("Camera");
 		camera->bActive = true;
+
+		//add a new scene
+		//Scene* scene2 = new Scene();
+		//scene2->CreateGameObject<EditorCamera>("Camera2");
+		//Entity& ent = scene2->CreateGameObject<Entity>("EntityTest");
+		//m_scenes.push_back(scene2);
+		//SetScene(scene);
+
 		//camera->AddComponent<UpdateComponent>();
 		//Camera* playerCamera = &m_scenes[0]->CreateGameObject<Camera>("Player Camera");
 		//playerCamera->AddComponent<UpdateComponent>();
 
-		renderer->SetCamera(camera->m_Camera);
-
+		//renderer->SetCamera(camera->m_Camera);
 		//Scene scene;
 		//SetScene(new Scene());
 		while (!window->ShouldClose())
@@ -86,7 +94,8 @@ namespace Sleepy
 			//ui->Run(deltaTime, nullptr);
 			// 
 			//If play or stop button pressed
-			if (ui->Run(deltaTime, m_scenes[0]))
+			UiInfo info = ui->Run(deltaTime, m_scenes[0]);
+			if (info.bTogglePlay)
 			{
 				//if we are playing and should stop
 				if (s_Playing)
@@ -98,22 +107,31 @@ namespace Sleepy
 
 					}
 					//Change back to editor camera
-					renderer->SetCamera(camera->m_Camera);
+					//renderer->SetCamera(camera->m_Camera);
 
 					//Reset so it's ready for next time play button is pressed.
 					firstGameFrame = true;
-
 
 					camera->bActive = true;
 				}
 				s_Playing = !s_Playing;
 			}
-			
-			renderer->BeginFrame(ui->contentRegionSize);
-	#else
-			renderer->BeginFrame(glm::vec2(window->GetWidth(),window->GetHeight()));
+			if (info.bNewWindow)
+			{
+				Scene* s = new Scene();
+				m_scenes.push_back(s);
+				Entity& ent = s->CreateGameObject<Entity>("Camera");
+				ent.AddComponent<CameraComponent>();
+				srand(glfwGetTime());
+				ent.SetRotation(glm::vec3(rand() % 180, rand() % 180, rand() % 180));
+				Entity& planet = s->CreateGameObject<Entity>("planet");
+				planet.AddComponent<MeshComponent>("planet_0", "Mars", "default");
+				planet.SetPosition(glm::vec3(0, 0, -10.0f));
+				planet.SetRotation(glm::vec3(rand() % 180, rand() % 180, rand() % 180));
+				renderer->AddFramebuffer();
 
-	#endif // _SHOWUI;
+			}
+#endif // _SHOWUI;
 
 			glfwPollEvents();
 
@@ -124,12 +142,12 @@ namespace Sleepy
 				for (Scene* scene : m_scenes)
 				{
 					scene->BeginPlay();
-					auto camView = scene->m_registry.view<CameraComponent>();
-					for (auto [entity, camera] : camView.each())
-					{
-						if (camera.bPossessOnStart)
-							renderer->SetCamera(&camera);
-					}
+					//auto camView = scene->m_registry.view<CameraComponent>();
+					//for (auto [entity, camera] : camView.each())
+					//{
+					//	if (camera.bPossessOnStart)
+					//		renderer->SetCamera(&camera);
+					//}
 				}
 				firstGameFrame = false;
 				//renderer->SetCamera(playerCamera->m_Camera);
@@ -147,18 +165,53 @@ namespace Sleepy
 			}
 
 	#ifdef _SHOWUI
+
 			if (ui->RenderWindowOpen())
 			{
-				renderer->PrepDraw(deltaTime);
-				for (Scene* scene : m_scenes)
-					scene->Draw();
-				
-				renderer->DrawCubemap();
-				ui->sceneTexture = renderer->EndFrame();
+				int sceneID = 0;
+				for (Scene* s : m_scenes)
+				{
+					auto camView = s->m_registry.view<CameraComponent>();
 
+					//if there is no active camera, we want to use an inactive one instead. 
+					// If there is no camera, we create one and use that
+
+					bool camSet = false;
+					CameraComponent* emergencyCam = nullptr;
+					for (auto [entity, camera] : camView.each())
+					{
+						emergencyCam = &camera;
+						if (camera.m_Entity->bActive)
+						{
+							renderer->SetCamera(&camera);
+							camSet = true;
+						}
+					}
+					if (!camSet)
+					{
+						if (emergencyCam)
+							renderer->SetCamera(emergencyCam);
+						else
+						{
+							Entity& ent = s->CreateGameObject<Entity>("auto camera");
+							renderer->SetCamera(&ent.AddComponent<CameraComponent>());
+						}
+					}
+
+					renderer->SetFramebuffer(sceneID);
+
+					renderer->BeginFrame(ui->contentRegionSize[sceneID]);
+					renderer->PrepDraw(deltaTime);
+					s->Draw();
+					renderer->DrawCubemap();
+
+					ui->sceneTextures[sceneID] = renderer->EndFrame();
+					sceneID++;
+				}
 			}
 			ui->EndFrame();
 	#else
+			renderer->BeginFrame(glm::vec2(window->GetWidth(), window->GetHeight()));
 			renderer->PrepDraw(deltaTime);
 			for (Scene* scene : m_scenes)
 				scene->Draw();

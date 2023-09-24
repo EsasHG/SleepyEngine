@@ -45,6 +45,8 @@ namespace Sleepy
 		static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 
 		io.Fonts->AddFontFromFileTTF(font.c_str(), 13.0f, &config, icon_ranges);
+		sceneTextures.push_back(0);
+		contentRegionSize.push_back(glm::vec2(1920, 1080));
 	}
 
 	void UiLayer::BeginFrame()
@@ -57,11 +59,12 @@ namespace Sleepy
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 	}
 
-	bool UiLayer::Run(double deltaTime, Scene* scene)
+	UiInfo UiLayer::Run(double deltaTime, Scene* scene)
 	{
+		UiInfo info;
 		Entity* sceneEntity = scene->m_SceneEntity;
 		bool windowFocused = false;
-		bool bTogglePlay = false;
+
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("Windows"))
@@ -84,7 +87,7 @@ namespace Sleepy
 			{
 				if (ImGui::Button("PLAY",ImVec2(50,20)))
 				{
-					bTogglePlay = true;
+					info.bTogglePlay = true;
 					playing = true;
 				}
 			}
@@ -92,11 +95,18 @@ namespace Sleepy
 			{
 				if (ImGui::Button("STOP", ImVec2(50, 20)))
 				{
-					bTogglePlay = true;
+					info.bTogglePlay = true;
 					playing = false;
 				}
 			}
 
+			if (ImGui::Button("Open Window", ImVec2(100, 20)))
+			{
+				openRenderWindows.push_back(++windowID);
+				info.bNewWindow = true;
+				sceneTextures.push_back(windowID);
+				contentRegionSize.push_back(glm::vec2(1920, 1080));
+			}
 			ImGui::EndMainMenuBar();
 		}
 
@@ -125,6 +135,13 @@ namespace Sleepy
 			ImGui::ShowUserGuide();
 			ImGui::End();
 		}
+
+
+		for (auto window : openRenderWindows)
+		{
+			OpenNewRenderWindow(window);
+		}
+
 		if (showRenderWindow)
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -132,14 +149,14 @@ namespace Sleepy
 
 			ImGui::BeginChild("GameRender", ImVec2(0, 0), false, ImGuiWindowFlags_NoNavInputs);
 			ImVec2 crSize = ImGui::GetContentRegionAvail();
-			ImGui::Image((ImTextureID)sceneTexture, crSize, ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((ImTextureID)sceneTextures[0], crSize, ImVec2(0, 1), ImVec2(1, 0));
 			if (ImGui::IsWindowFocused())
 			{
 				windowFocused = true;
 				ImGui::SetNextFrameWantCaptureMouse(false);
 				ImGui::SetNextFrameWantCaptureKeyboard(false);
 			}
-			contentRegionSize = glm::vec2(crSize.x, crSize.y);
+			contentRegionSize[0] = glm::vec2(crSize.x, crSize.y);
 			ImGui::EndChild();
 			ImGui::End();
 			ImGui::PopStyleVar();
@@ -207,7 +224,7 @@ namespace Sleepy
 			ReorderObjectTree(*newParentEntity, newIndex, *entityToMove);
 
 
-		return bTogglePlay;
+		return info;
 	}
 
 	void UiLayer::SetupObjectTree(Entity& sceneEntity)
@@ -737,5 +754,31 @@ namespace Sleepy
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backupCurrentContext);
 		}
+	}
+	void UiLayer::OpenNewRenderWindow(int windowID)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(1.0f, 1.0f));
+		bool stayOpen;
+		std::string windowName = "Game Window" + std::to_string(windowID);
+		bool open = ImGui::Begin(windowName.c_str(), &stayOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);// | ImGuiWindowFlags_MenuBar);
+		if (!stayOpen)
+		{
+			std::vector<int>::iterator position = std::find(openRenderWindows.begin(), openRenderWindows.end(), windowID);
+			if (position != openRenderWindows.end()) // == myVector.end() means the element was not found
+				openRenderWindows.erase(position);
+		}
+
+		ImGui::BeginChild(windowName.c_str(), ImVec2(0, 0), false, ImGuiWindowFlags_NoNavInputs);
+		ImVec2 crSize = ImGui::GetContentRegionAvail();
+		ImGui::Image((ImTextureID)sceneTextures[windowID], crSize, ImVec2(0, 1), ImVec2(1, 0));
+		if (ImGui::IsWindowFocused())
+		{
+			ImGui::SetNextFrameWantCaptureMouse(false);
+			ImGui::SetNextFrameWantCaptureKeyboard(false);
+		}
+		contentRegionSize[windowID] = glm::vec2(crSize.x, crSize.y);
+		ImGui::EndChild();
+		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 }

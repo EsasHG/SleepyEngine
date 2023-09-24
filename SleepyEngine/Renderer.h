@@ -5,7 +5,14 @@
 #include <map>
 namespace Sleepy
 {
-
+	struct BufferData
+	{
+		unsigned int framebuffer;
+		unsigned int renderbuffer;
+		unsigned int renderedTexture;
+		unsigned int bufferHeigth = 1920;
+		unsigned int bufferWidth = 1080;
+	};
 
 	class TransformComponent;
 	class Renderer
@@ -35,7 +42,9 @@ namespace Sleepy
 		static void SetShaderUniformMat4(unsigned int m_ShaderId, const char* name, glm::mat4 matrix);
 		void SetShaderUniformMat4(const char* name, glm::mat4 matrix);
 
-		void RecreateFramebuffer();
+		BufferData& AddFramebuffer();
+		void SetFramebuffer(int id);
+		void RecreateFramebuffer(BufferData& data);
 
 		static void SetShaderUniformVec3(unsigned int m_ShaderId, const char* name, glm::vec3 vector);
 
@@ -43,12 +52,10 @@ namespace Sleepy
 
 		//TODO: Should not be here
 		void SetCamera(class CameraComponent* camera);
-		void ResizeViewport(int x, int y);
 
 	private:
 
 		class Mesh* screenQuadMesh = nullptr;
-		glm::vec2 m_WindowSize;
 
 		unsigned int m_ShaderId;
 		unsigned int m_TextureShaderId;
@@ -56,10 +63,9 @@ namespace Sleepy
 		unsigned int VAO, VBO;
 		unsigned int skyboxVAO, skyboxVBO;	//TODO: Remove, should be somewhere else
 
-		unsigned int FBO;
-		unsigned int RBO;
+		unsigned int boundBuffer = 0;
 
-		unsigned int renderedTexture;
+		std::vector<BufferData> frameBuffers;
 
 		//TODO: Should not be here
 		class CameraComponent* m_camera;

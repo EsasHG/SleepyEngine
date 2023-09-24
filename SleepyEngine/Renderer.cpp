@@ -20,7 +20,7 @@
 namespace Sleepy
 {
 
-	Renderer::Renderer(glm::vec2 windowSize) : m_WindowSize(windowSize)
+	Renderer::Renderer(glm::vec2 windowSize)
 	{
 		if (!gladLoadGL())
 		{
@@ -36,13 +36,8 @@ namespace Sleepy
 		ModelLibrary::GetInstance().AddShader("default", m_TextureShaderId);
 		ModelLibrary::GetInstance().AddShader("quadShader", Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.vert", _SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.frag"));
 
-		glGenFramebuffers(1, &FBO);
-		glGenTextures(1, &renderedTexture);
-		glGenRenderbuffers(1, &RBO);
 
-		RecreateFramebuffer();
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		AddFramebuffer();
 
 		unsigned int whiteTexture;
 		const char texData[] = { 255, 255, 255, 255 };
@@ -141,20 +136,21 @@ namespace Sleepy
 
 		glUseProgram(m_ShaderId);
 
-		if (m_WindowSize != windowSize)
+		if (frameBuffers[boundBuffer].bufferHeigth != windowSize.x || frameBuffers[boundBuffer].bufferWidth != windowSize.y)
 		{
-			m_WindowSize = windowSize;
-			RecreateFramebuffer();
+			frameBuffers[boundBuffer].bufferHeigth = windowSize.x;
+			frameBuffers[boundBuffer].bufferWidth = windowSize.y;
+			RecreateFramebuffer(frameBuffers[boundBuffer]);
 		}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffers[boundBuffer].framebuffer);
 
 		glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 		glEnable(GL_DEPTH_TEST);
 
-		glViewport(0, 0, m_WindowSize.x, m_WindowSize.y);
+		glViewport(0, 0, windowSize.x, windowSize.y);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 #ifdef _DEBUG
@@ -176,7 +172,8 @@ namespace Sleepy
 		glEnable(GL_CULL_FACE);
 		//glDisable(GL_CULL_FACE);
 
-		glm::mat4 projection = glm::perspective(m_camera->fov, (float)m_WindowSize.x / m_WindowSize.y, 0.1f, m_camera->renderDistance);
+
+		glm::mat4 projection = glm::perspective(m_camera->fov, (float)frameBuffers[boundBuffer].bufferHeigth / frameBuffers[boundBuffer].bufferWidth, 0.1f, m_camera->renderDistance);
 		Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
 
 		glm::mat4 view = m_camera->GetViewMatrix();
@@ -358,7 +355,7 @@ namespace Sleepy
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST);
 
-		return renderedTexture;
+		return frameBuffers[boundBuffer].renderedTexture;
 		//Got some weird results without this :/
 	}
 
@@ -383,18 +380,6 @@ namespace Sleepy
 		Renderer::SetShaderUniformVec3(shaderID, "dirLight.diffuse", dirLight.m_diffuse);
 		Renderer::SetShaderUniformVec3(shaderID, "dirLight.specular", dirLight.m_specular);
 		glUseProgram(0);
-	}
-
-	void Renderer::ResizeViewport(int x, int y)
-	{
-
-		//We don't set window height/width here? We set it each frame so we might not have to... 
-
-		m_WindowSize.x = x;
-		m_WindowSize.y = y;
-
-		glViewport(0, 0, x, y);
-		RecreateFramebuffer();
 	}
 
 #ifdef _DEBUG
@@ -694,23 +679,46 @@ namespace Sleepy
 		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
-	void Renderer::RecreateFramebuffer()
+	BufferData& Renderer::AddFramebuffer()
+	{
+		CheckGLError(" AddFrameBuffer");
+		BufferData data;
+		glGenFramebuffers(1, &data.framebuffer);
+		glGenTextures(1, &data.renderedTexture);
+		glGenRenderbuffers(1, &data.renderbuffer);
+
+		frameBuffers.push_back(data);
+		RecreateFramebuffer(data);
+
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		return data;
+	}
+
+	void Renderer::SetFramebuffer(int id)
+	{
+		boundBuffer = id;
+
+	}
+
+	void Renderer::RecreateFramebuffer(BufferData& data)
 	{
 
-		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, data.framebuffer);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, renderedTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_WindowSize.x, m_WindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+		glBindTexture(GL_TEXTURE_2D, data.renderedTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, frameBuffers[boundBuffer].bufferHeigth, frameBuffers[boundBuffer].bufferWidth, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
-
-		glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_WindowSize.x, m_WindowSize.y);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data.renderedTexture, 0);
+		
+		glBindRenderbuffer(GL_RENDERBUFFER, data.renderbuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, frameBuffers[boundBuffer].bufferHeigth, frameBuffers[boundBuffer].bufferWidth);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, data.renderbuffer);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+
 
 		GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 

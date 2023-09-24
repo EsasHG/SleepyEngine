@@ -27,6 +27,7 @@ namespace Sleepy
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
         bool bPossessOnStart = true;
         Entity* lookatTarget = nullptr;
+
     };
 
 }
