@@ -698,7 +698,6 @@ namespace Sleepy
 	void Renderer::SetFramebuffer(int id)
 	{
 		boundBuffer = id;
-
 	}
 
 	void Renderer::RecreateFramebuffer(BufferData& data)

@@ -7,12 +7,32 @@
 
 namespace Sleepy
 {
+
+
+	struct RenderWindow
+	{
+		unsigned int sceneTexture = 0;
+		glm::vec2 contentRegionSize = glm::vec2(1920, 1080);
+		int id = 0;
+		std::string name = "New Render window";
+		bool bOpen = true;
+		bool bVisible = true;
+
+		bool operator==(const RenderWindow& w) const
+		{
+			return id == w.id ? true : false;
+		}
+	};
+
 	//info that is returned from the application from UiLayer::Run();
 	struct UiInfo
 	{
+		std::vector<RenderWindow>& renderWindows;
 		bool bTogglePlay = false;
 		bool bNewWindow = false;
 	};
+
+	
 
 	class Window;
 	class TransformComponent;
@@ -27,14 +47,14 @@ namespace Sleepy
 		UiInfo Run(double deltaTime, Scene* scene);
 
 		void EndFrame();
-		void OpenNewRenderWindow(int windowID);
-		bool RenderWindowOpen() { return renderWindowOpen; };
+		void ShowRenderWindow(RenderWindow& window);
+	
 		glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
 		glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
 
 
-		std::vector<unsigned int> sceneTextures;
-		std::vector<glm::vec2> contentRegionSize;
+		unsigned int sceneTexture;
+		glm::vec2 contentRegionSize = glm::vec2(1920, 1080);
 
 		int id;
 
@@ -56,7 +76,6 @@ namespace Sleepy
 		//window bools
 		bool showObjectWindow = true;
 		bool showObjectTreeWindow = true;
-		bool showRenderWindow = true;
 		bool showPerformanceWindow = true;
 		bool showAssetsWindow = true;
 
@@ -66,7 +85,6 @@ namespace Sleepy
 		bool metricsWindowOpen = false;
 		bool debugLogWindowOpen = false;
 		bool stackToolWindowOpen = false;
-		bool renderWindowOpen;
 		bool playing;
 		bool sceneSelected = false;
 
@@ -83,7 +101,8 @@ namespace Sleepy
 
 		int windowID = 0;
 
-		std::vector<int> openRenderWindows;
+		std::vector<RenderWindow> openRenderWindows;
+		RenderWindow* windowToClose = nullptr;
 	};
 	static char inputText[128];
 }

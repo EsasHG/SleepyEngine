@@ -28,6 +28,9 @@ namespace Sleepy
 
 	SceneBase::~SceneBase()
 	{
+		auto entityView = m_registry.view<TransformComponent>();
+		for (auto [entity, transform] : entityView.each())
+			DeleteEntity(*transform.m_Entity);
 	}
 
 	void SceneBase::CreateSceneEntity()

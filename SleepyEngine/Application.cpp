@@ -165,13 +165,15 @@ namespace Sleepy
 			}
 
 	#ifdef _SHOWUI
-
-			if (ui->RenderWindowOpen())
+			unsigned int sceneID = 0;
+			for (int i = 0; i < info.renderWindows.size(); i++)
 			{
-				int sceneID = 0;
-				for (Scene* s : m_scenes)
+				RenderWindow& window = info.renderWindows[i];
+				if (window.bOpen)
 				{
-					auto camView = s->m_registry.view<CameraComponent>();
+					/*for (Scene* s : m_scenes)
+					{*/
+					auto camView = m_scenes[sceneID]->m_registry.view<CameraComponent>();
 
 					//if there is no active camera, we want to use an inactive one instead. 
 					// If there is no camera, we create one and use that
@@ -193,20 +195,31 @@ namespace Sleepy
 							renderer->SetCamera(emergencyCam);
 						else
 						{
-							Entity& ent = s->CreateGameObject<Entity>("auto camera");
+							Entity& ent = m_scenes[sceneID]->CreateGameObject<Entity>("auto camera");
 							renderer->SetCamera(&ent.AddComponent<CameraComponent>());
 						}
 					}
 
 					renderer->SetFramebuffer(sceneID);
 
-					renderer->BeginFrame(ui->contentRegionSize[sceneID]);
+					renderer->BeginFrame(window.contentRegionSize);
 					renderer->PrepDraw(deltaTime);
-					s->Draw();
+					m_scenes[sceneID]->Draw();
 					renderer->DrawCubemap();
 
-					ui->sceneTextures[sceneID] = renderer->EndFrame();
+					window.sceneTexture = renderer->EndFrame();
+
 					sceneID++;
+					//}
+				}
+				else
+				{
+					Scene* removedScene = m_scenes[sceneID];
+					m_scenes.erase(m_scenes.begin() + sceneID);
+				
+					delete removedScene;
+
+					//TODO: remove framebuffer as well?
 				}
 			}
 			ui->EndFrame();

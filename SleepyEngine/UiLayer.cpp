@@ -45,8 +45,11 @@ namespace Sleepy
 		static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 
 		io.Fonts->AddFontFromFileTTF(font.c_str(), 13.0f, &config, icon_ranges);
-		sceneTextures.push_back(0);
-		contentRegionSize.push_back(glm::vec2(1920, 1080));
+
+		RenderWindow w;
+		w.id = windowID++;
+		w.name = "Game Window";
+		openRenderWindows.push_back(w);
 	}
 
 	void UiLayer::BeginFrame()
@@ -61,7 +64,7 @@ namespace Sleepy
 
 	UiInfo UiLayer::Run(double deltaTime, Scene* scene)
 	{
-		UiInfo info;
+		UiInfo info = UiInfo(openRenderWindows);
 		Entity* sceneEntity = scene->m_SceneEntity;
 		bool windowFocused = false;
 
@@ -70,7 +73,16 @@ namespace Sleepy
 			if (ImGui::BeginMenu("Windows"))
 			{
 				//ImGui::Button("Play", ImVec2(25, 25));
-				if (ImGui::MenuItem("Main", "", &showRenderWindow)) {}
+				if (ImGui::MenuItem("Render Window"))
+				{
+					RenderWindow w;
+					w.id = windowID++;
+					w.name = w.name + std::to_string(w.id);
+					openRenderWindows.push_back(w);
+
+					info.bNewWindow = true;
+				}
+				//if (ImGui::MenuItem("Main", "", &showRenderWindow)) {}
 				if (ImGui::MenuItem("Object Tree", "", &showObjectTreeWindow)) {}
 				if (ImGui::MenuItem("Object Details", "", &showObjectWindow)) {}
 				if (ImGui::MenuItem("Performance", "", &showPerformanceWindow)) {}
@@ -100,13 +112,7 @@ namespace Sleepy
 				}
 			}
 
-			if (ImGui::Button("Open Window", ImVec2(100, 20)))
-			{
-				openRenderWindows.push_back(++windowID);
-				info.bNewWindow = true;
-				sceneTextures.push_back(windowID);
-				contentRegionSize.push_back(glm::vec2(1920, 1080));
-			}
+			
 			ImGui::EndMainMenuBar();
 		}
 
@@ -136,31 +142,20 @@ namespace Sleepy
 			ImGui::End();
 		}
 
-
-		for (auto window : openRenderWindows)
+		//Deletes windows the frame after they are set to close, so Application has time to notice and remove the scene. 
+		if (windowToClose)
 		{
-			OpenNewRenderWindow(window);
+			std::vector<RenderWindow>::iterator position = std::find(openRenderWindows.begin(), openRenderWindows.end(), *windowToClose);
+			if (position != openRenderWindows.end()) // == myVector.end() means the element was not found
+				openRenderWindows.erase(position);
+			windowToClose = nullptr;
 		}
 
-		if (showRenderWindow)
+		for (auto& window : openRenderWindows)
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-			renderWindowOpen = ImGui::Begin("Game Window", &showRenderWindow, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);// | ImGuiWindowFlags_MenuBar);
-
-			ImGui::BeginChild("GameRender", ImVec2(0, 0), false, ImGuiWindowFlags_NoNavInputs);
-			ImVec2 crSize = ImGui::GetContentRegionAvail();
-			ImGui::Image((ImTextureID)sceneTextures[0], crSize, ImVec2(0, 1), ImVec2(1, 0));
-			if (ImGui::IsWindowFocused())
-			{
-				windowFocused = true;
-				ImGui::SetNextFrameWantCaptureMouse(false);
-				ImGui::SetNextFrameWantCaptureKeyboard(false);
-			}
-			contentRegionSize[0] = glm::vec2(crSize.x, crSize.y);
-			ImGui::EndChild();
-			ImGui::End();
-			ImGui::PopStyleVar();
+			ShowRenderWindow(window);
 		}
+
 
 		if (showPerformanceWindow)
 		{
@@ -195,7 +190,8 @@ namespace Sleepy
 		if (showObjectTreeWindow && sceneEntity)
 			SetupObjectTree(*sceneEntity);
 
-		if (showObjectWindow) //Needs to be after Object tree window for parent button to work
+		//Needs to be after Object tree window for parent button to work
+		if (showObjectWindow) 
 			SetupObjectWindow(scene);
 
 		if (showAssetsWindow)
@@ -755,28 +751,26 @@ namespace Sleepy
 			glfwMakeContextCurrent(backupCurrentContext);
 		}
 	}
-	void UiLayer::OpenNewRenderWindow(int windowID)
-	{
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(1.0f, 1.0f));
-		bool stayOpen;
-		std::string windowName = "Game Window" + std::to_string(windowID);
-		bool open = ImGui::Begin(windowName.c_str(), &stayOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);// | ImGuiWindowFlags_MenuBar);
-		if (!stayOpen)
-		{
-			std::vector<int>::iterator position = std::find(openRenderWindows.begin(), openRenderWindows.end(), windowID);
-			if (position != openRenderWindows.end()) // == myVector.end() means the element was not found
-				openRenderWindows.erase(position);
-		}
 
-		ImGui::BeginChild(windowName.c_str(), ImVec2(0, 0), false, ImGuiWindowFlags_NoNavInputs);
+	void UiLayer::ShowRenderWindow(RenderWindow& window)
+	{		
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(1.0f, 1.0f));
+
+		window.bVisible = ImGui::Begin(window.name.c_str(), &window.bOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs);// | ImGuiWindowFlags_MenuBar);
+		
+		//Wait until next frame to close windows, so Application has time to notice and remove the scene. 
+		if (!window.bOpen)
+			windowToClose = &window;
+
+		ImGui::BeginChild(window.name.c_str(), ImVec2(0, 0), false, ImGuiWindowFlags_NoNavInputs);
 		ImVec2 crSize = ImGui::GetContentRegionAvail();
-		ImGui::Image((ImTextureID)sceneTextures[windowID], crSize, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image((ImTextureID)window.sceneTexture, crSize, ImVec2(0, 1), ImVec2(1, 0));
 		if (ImGui::IsWindowFocused())
 		{
 			ImGui::SetNextFrameWantCaptureMouse(false);
 			ImGui::SetNextFrameWantCaptureKeyboard(false);
 		}
-		contentRegionSize[windowID] = glm::vec2(crSize.x, crSize.y);
+		window.contentRegionSize = glm::vec2(crSize.x, crSize.y);
 		ImGui::EndChild();
 		ImGui::End();
 		ImGui::PopStyleVar();
