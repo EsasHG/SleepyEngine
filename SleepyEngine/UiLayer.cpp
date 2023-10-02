@@ -11,6 +11,7 @@
 #include "ImGui/imgui_impl_opengl3.h"
 #include "Components/LightComponent.h"
 #include "Components/MeshComponent.h"
+#include "Components/CameraComponent.h"
 #include "TransformSystem.h"
 #include "ModelLibrary.h"
 #include "Fonts/IconsFontAwesome6.h"
@@ -435,7 +436,7 @@ namespace Sleepy
 		if (selectedEntities.size() == 0)
 		{
 			ImGui::Spacing();
-			ImGui::Text("No objects selected!");
+			ImGui::Text("No objects selected");
 		}
 		else if (selectedEntities.size() == 1)
 		{
@@ -510,6 +511,9 @@ namespace Sleepy
 
 			if (entity->Has<MeshComponent>())
 				ShowMeshComp(*entity);
+
+			if (entity->Has<CameraComponent>())
+				ShowCameraComp(*entity);
 		}
 		else
 		{
@@ -707,6 +711,23 @@ namespace Sleepy
 		ImGui::Spacing();
 		ImGui::Separator();
 
+	}
+
+	void UiLayer::ShowCameraComp(Entity& entity)
+	{
+		CameraComponent& camera = entity.GetComponent<CameraComponent>();
+		ImGui::DragFloat("FOV", &camera.fov, 0.01f, 0.025f, 1.0f);
+		ImGui::DragFloat("Render Distance", &camera.renderDistance, 1.0f, 0.05f, 1000.0f);
+		ImGui::Checkbox("Possess On Start", &camera.bPossessOnStart);
+
+		ImGui::BeginChild("Camera Render", ImVec2(0, 0), false, ImGuiWindowFlags_NoNavInputs);
+		ImVec2 crSize = ImGui::GetContentRegionAvail();
+		camera.m_BufferData.bufferHeigth = crSize.x;
+		camera.m_BufferData.bufferWidth = crSize.y;
+		ImGui::Image((ImTextureID)camera.m_BufferData.renderedTexture, crSize, ImVec2(0, 1), ImVec2(1, 0));
+
+		//window.contentRegionSize = glm::vec2(crSize.x, crSize.y);
+		ImGui::EndChild();
 	}
 
 	void UiLayer::SetupAssetsWindow()

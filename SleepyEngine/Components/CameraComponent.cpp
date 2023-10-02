@@ -3,15 +3,27 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
-#include<glm/gtc/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include "Entity.h"
 #include "TransformSystem.h"
+#include "RenderTarget.h"
 
 namespace Sleepy
 {
 
-    glm::mat4 CameraComponent::GetViewMatrix()
+	CameraComponent::CameraComponent(Entity* entity)
+	{
+		m_Entity = entity;
+		m_componentType = CAMERA;
+		//m_BufferData = BufferData();
+	}
+
+	CameraComponent::~CameraComponent()
+	{
+	}
+
+	glm::mat4 CameraComponent::GetViewMatrix()
     {
 		glm::vec3 pos = m_Entity->GetWorldPosition();
 		if(lookatTarget)

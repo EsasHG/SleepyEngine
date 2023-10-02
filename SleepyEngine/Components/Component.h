@@ -20,7 +20,7 @@ namespace Sleepy
 	{
 	public:
 		Component() {};
-	
+		virtual ~Component() {};
 		bool operator == (Component const& comp) 
 	    {
 			return (m_Entity == comp.m_Entity && m_componentType == comp.m_componentType);

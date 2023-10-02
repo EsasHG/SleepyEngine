@@ -68,20 +68,6 @@ namespace Sleepy
 		EditorCamera* camera = &m_scenes[0]->CreateGameObject<EditorCamera>("Camera");
 		camera->bActive = true;
 
-		//add a new scene
-		//Scene* scene2 = new Scene();
-		//scene2->CreateGameObject<EditorCamera>("Camera2");
-		//Entity& ent = scene2->CreateGameObject<Entity>("EntityTest");
-		//m_scenes.push_back(scene2);
-		//SetScene(scene);
-
-		//camera->AddComponent<UpdateComponent>();
-		//Camera* playerCamera = &m_scenes[0]->CreateGameObject<Camera>("Player Camera");
-		//playerCamera->AddComponent<UpdateComponent>();
-
-		//renderer->SetCamera(camera->m_Camera);
-		//Scene scene;
-		//SetScene(new Scene());
 		while (!window->ShouldClose())
 		{
 			for (Scene* scene : m_scenes)
@@ -128,7 +114,7 @@ namespace Sleepy
 				planet.AddComponent<MeshComponent>("planet_0", "Mars", "default");
 				planet.SetPosition(glm::vec3(0, 0, -10.0f));
 				planet.SetRotation(glm::vec3(rand() % 180, rand() % 180, rand() % 180));
-				renderer->AddFramebuffer();
+				//renderer->AddFramebuffer();
 
 			}
 #endif // _SHOWUI;
@@ -164,13 +150,18 @@ namespace Sleepy
 				camera->Update(deltaTime);
 			}
 
+			renderer->BeginFrame();
+
 	#ifdef _SHOWUI
+
+
 			unsigned int sceneID = 0;
 			for (int i = 0; i < info.renderWindows.size(); i++)
 			{
 				RenderWindow& window = info.renderWindows[i];
 				if (window.bOpen)
 				{
+
 					/*for (Scene* s : m_scenes)
 					{*/
 					auto camView = m_scenes[sceneID]->m_registry.view<CameraComponent>();
@@ -185,32 +176,39 @@ namespace Sleepy
 						emergencyCam = &camera;
 						if (camera.m_Entity->bActive)
 						{
-							renderer->SetCamera(&camera);
+							camera.m_BufferData.bufferHeigth = window.contentRegionSize.x;
+							camera.m_BufferData.bufferWidth = window.contentRegionSize.y;
+							renderer->PrepDraw(camera);
+							//renderer->SetCamera(&camera);
 							camSet = true;
+							break;
 						}
 					}
 					if (!camSet)
 					{
 						if (emergencyCam)
-							renderer->SetCamera(emergencyCam);
+						{
+							emergencyCam->m_BufferData.bufferHeigth = window.contentRegionSize.x;
+							emergencyCam->m_BufferData.bufferWidth = window.contentRegionSize.y;
+							renderer->PrepDraw(*emergencyCam);
+							//renderer->SetCamera(emergencyCam);
+						}
 						else
 						{
 							Entity& ent = m_scenes[sceneID]->CreateGameObject<Entity>("auto camera");
-							renderer->SetCamera(&ent.AddComponent<CameraComponent>());
+							CameraComponent& newCam = ent.AddComponent<CameraComponent>();
+							newCam.m_BufferData.bufferHeigth = window.contentRegionSize.x;
+							newCam.m_BufferData.bufferWidth = window.contentRegionSize.y;
+							renderer->PrepDraw(newCam);
 						}
 					}
 
-					renderer->SetFramebuffer(sceneID);
-
-					renderer->BeginFrame(window.contentRegionSize);
-					renderer->PrepDraw(deltaTime);
 					m_scenes[sceneID]->Draw();
 					renderer->DrawCubemap();
 
-					window.sceneTexture = renderer->EndFrame();
+					window.sceneTexture = renderer->EndBufferRender();
 
 					sceneID++;
-					//}
 				}
 				else
 				{

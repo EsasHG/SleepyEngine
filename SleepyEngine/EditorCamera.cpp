@@ -46,9 +46,7 @@ namespace Sleepy
 		glm::normalize(moveVector);
 		SetPosition(GetPosition() + moveVector * frameCameraSpeed);
 		moveVector = glm::vec3(0.0f);
-
 	}
-	
 	
 	void EditorCamera::CursorMoveCallback(double xPos, double yPos)
 	{
@@ -86,7 +84,23 @@ namespace Sleepy
 			m_Camera->UpdateVectors();
 		}
 	}
-	
+
+	void EditorCamera::MouseScrolled(double xOffset, double yOffset)
+	{
+		m_Camera->fov += yOffset * zoomSpeed;
+		m_Camera->fov = glm::clamp(m_Camera->fov, 0.025f, 1.0f);
+	}
+
+	void EditorCamera::MouseButtonPressed()
+	{
+		mousePressed = true;
+	}
+
+	void EditorCamera::MouseButtonReleased()
+	{
+		mousePressed = false;
+	}
+
 	void EditorCamera::MoveForward()
 	{
 		moveVector +=  m_Camera->front;
@@ -127,17 +141,5 @@ namespace Sleepy
 		cameraSpeed = normalCameraSpeed;
 	}
 	
-	void EditorCamera::MouseButtonPressed()
-	{
-		mousePressed = true;
-	}
-	void EditorCamera::MouseButtonReleased()
-	{
-		mousePressed = false;
-	}
-	void EditorCamera::MouseScrolled(double xOffset, double yOffset)
-	{
-		m_Camera->fov += yOffset * zoomSpeed;
-		m_Camera->fov = glm::clamp(m_Camera->fov, 0.025f, 1.0f);
-	}
+
 }

@@ -165,6 +165,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelLibrary.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneBase.cpp" />
     <ClCompile Include="TransformSystem.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="Components\MeshComponent.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLibrary.h" />
+    <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="Shaders\QuadShader.vert" />

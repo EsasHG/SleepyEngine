@@ -70,6 +70,7 @@ namespace Sleepy
 		void ShowMeshComp(Entity& entity);
 		void ShowDirLightComp(Entity& entity);
 		void ShowPointLightComp(Entity& entity);
+		void ShowCameraComp(Entity& entity);
 		//assets window
 		void SetupAssetsWindow();
 

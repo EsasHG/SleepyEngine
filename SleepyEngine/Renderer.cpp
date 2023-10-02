@@ -15,7 +15,7 @@
 #include "Components/LightComponent.h"
 #include "Components/CameraComponent.h"
 #include "TransformSystem.h"
-
+#include "RenderTarget.h"
 
 namespace Sleepy
 {
@@ -36,8 +36,6 @@ namespace Sleepy
 		ModelLibrary::GetInstance().AddShader("default", m_TextureShaderId);
 		ModelLibrary::GetInstance().AddShader("quadShader", Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.vert", _SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.frag"));
 
-
-		AddFramebuffer();
 
 		unsigned int whiteTexture;
 		const char texData[] = { 255, 255, 255, 255 };
@@ -128,55 +126,73 @@ namespace Sleepy
 	{
 	}
 
-	void Renderer::BeginFrame(glm::vec2 windowSize)
+	void Renderer::BeginFrame()
 	{
 #ifdef _DEBUG
 		CheckGLError("Start of BeginFrame");
 #endif // _DEBUG
 
-		glUseProgram(m_ShaderId);
-
-		if (frameBuffers[boundBuffer].bufferHeigth != windowSize.x || frameBuffers[boundBuffer].bufferWidth != windowSize.y)
+		if (usedBuffers < frameBuffers.size())
 		{
-			frameBuffers[boundBuffer].bufferHeigth = windowSize.x;
-			frameBuffers[boundBuffer].bufferWidth = windowSize.y;
-			RecreateFramebuffer(frameBuffers[boundBuffer]);
+			frameBuffers.erase(frameBuffers.begin() + usedBuffers, frameBuffers.end());
 		}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffers[boundBuffer].framebuffer);
+		usedBuffers = 0;
 
-		glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
-		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
-		glEnable(GL_DEPTH_TEST);
 
-		glViewport(0, 0, windowSize.x, windowSize.y);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 #ifdef _DEBUG
 		CheckGLError("End of BeginFrame");
 #endif // _DEBUG
 
 	}
 
-	void Renderer::SetCamera(CameraComponent* camera)
+	void Renderer::PrepDraw(CameraComponent& camera)
 	{
-		m_camera = camera;
-	}
 
-	//TODO: Sets all values that only needs to be set once per shader per frame. Should be done in another way?
-	void Renderer::PrepDraw(double deltaTime)
-	{
+		glUseProgram(m_ShaderId);
+
+
+		if (frameBuffers.size() <= usedBuffers)
+		{
+			BufferData newBuffer;
+			glGenFramebuffers(1, &newBuffer.framebuffer);
+			glGenTextures(1, &newBuffer.renderedTexture);
+			glGenRenderbuffers(1, &newBuffer.renderbuffer);
+			frameBuffers.push_back(newBuffer);
+		}
+		
+		BufferData& data = camera.m_BufferData;
+
+		if (frameBuffers[usedBuffers].bufferHeigth  != data.bufferHeigth || frameBuffers[usedBuffers].bufferWidth != data.bufferWidth)
+		{
+			frameBuffers[usedBuffers].bufferHeigth = data.bufferHeigth;
+			frameBuffers[usedBuffers].bufferWidth = data.bufferWidth;
+			Renderer::RecreateFramebuffer(frameBuffers[usedBuffers]);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffers[usedBuffers].framebuffer);
+		camera.m_BufferData = frameBuffers[usedBuffers];
+
+
+		glm::vec3 clearColor = glm::vec3(0.7f, 0.3f, 0.6f);
+		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+		glEnable(GL_DEPTH_TEST);
+
+		glViewport(0, 0, data.bufferHeigth, data.bufferWidth);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+
 		glUseProgram(m_ShaderId);
 		//game window draw stuff
 		glEnable(GL_CULL_FACE);
 		//glDisable(GL_CULL_FACE);
 
 
-		glm::mat4 projection = glm::perspective(m_camera->fov, (float)frameBuffers[boundBuffer].bufferHeigth / frameBuffers[boundBuffer].bufferWidth, 0.1f, m_camera->renderDistance);
+		glm::mat4 projection = glm::perspective(camera.fov, (float)camera.m_BufferData.bufferHeigth / camera.m_BufferData.bufferWidth, 0.1f, camera.renderDistance);
 		Renderer::SetShaderUniformMat4(m_ShaderId, "projection", projection);
 
-		glm::mat4 view = m_camera->GetViewMatrix();
+		glm::mat4 view = camera.GetViewMatrix();
 		Renderer::SetShaderUniformMat4(m_ShaderId, "view", view);
 
 		glm::vec3 quadColor = glm::vec3(0.4f, 0.4f, 0.4f);
@@ -187,7 +203,7 @@ namespace Sleepy
 
 		glUseProgram(m_TextureShaderId);
 
-		Renderer::SetShaderUniformVec3(m_TextureShaderId, "viewPos", m_camera->GetPosition());
+		Renderer::SetShaderUniformVec3(m_TextureShaderId, "viewPos", camera.GetPosition());
 
 		Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
 		Renderer::SetShaderUniformMat4(m_TextureShaderId, "view", view);
@@ -350,36 +366,96 @@ namespace Sleepy
 		//glStencilMask(0xFF);
 	}
 
-	unsigned int Renderer::EndFrame()
+	unsigned int Renderer::EndBufferRender()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST);
-
-		return frameBuffers[boundBuffer].renderedTexture;
+		
+		usedBuffers++;
+		return frameBuffers[usedBuffers-1].renderedTexture;
 		//Got some weird results without this :/
 	}
 
-	void Renderer::SetPointLightValues(unsigned int shaderID, TransformComponent& transform, PointLightComponent& pointLight)
+	/*
+	BufferData& Renderer::AddFramebuffer()
 	{
-		glUseProgram(shaderID);
-		Renderer::SetShaderUniformVec3(shaderID, "pointLight.position", TransformSystem::GetPosition(transform));
-		Renderer::SetShaderUniformVec3(shaderID, "pointLight.ambient", pointLight.m_ambient);
-		Renderer::SetShaderUniformVec3(shaderID, "pointLight.diffuse", pointLight.m_diffuse);
-		Renderer::SetShaderUniformVec3(shaderID, "pointLight.specular", pointLight.m_specular);
-		Renderer::SetShaderUniformFloat(shaderID, "pointLight.constant", pointLight.m_constant);
-		Renderer::SetShaderUniformFloat(shaderID, "pointLight.linear", pointLight.m_linear);
-		Renderer::SetShaderUniformFloat(shaderID, "pointLight.quadratic", pointLight.m_quadratic);
-		glUseProgram(0);
+		CheckGLError(" AddFrameBuffer");
+		BufferData data;
+		glGenFramebuffers(1, &data.framebuffer);
+		glGenTextures(1, &data.renderedTexture);
+		glGenRenderbuffers(1, &data.renderbuffer);
+
+		frameBuffers.push_back(data);
+		RecreateFramebuffer(data);
+
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		return data;
 	}
 
-	void Renderer::SetDirLightValues(unsigned int shaderID, TransformComponent& transform, DirLightComponent& dirLight)
+	void Renderer::SetFramebuffer(int id)
 	{
-		glUseProgram(shaderID);
-		Renderer::SetShaderUniformVec3(shaderID, "dirLight.direction", dirLight.m_direction);
-		Renderer::SetShaderUniformVec3(shaderID, "dirLight.ambient", dirLight.m_ambient);
-		Renderer::SetShaderUniformVec3(shaderID, "dirLight.diffuse", dirLight.m_diffuse);
-		Renderer::SetShaderUniformVec3(shaderID, "dirLight.specular", dirLight.m_specular);
-		glUseProgram(0);
+		boundBuffer = id;
+	}
+	*/
+
+	void Renderer::RecreateFramebuffer(BufferData& data)
+	{
+
+		glBindFramebuffer(GL_FRAMEBUFFER, data.framebuffer);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, data.renderedTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, data.bufferHeigth, data.bufferWidth, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data.renderedTexture, 0);
+		
+		glBindRenderbuffer(GL_RENDERBUFFER, data.renderbuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, data.bufferHeigth, data.bufferWidth);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, data.renderbuffer);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+
+		GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+		std::string errorstring;
+		switch (framebufferStatus)
+		{
+		case GL_FRAMEBUFFER_COMPLETE:
+			return;
+		case GL_FRAMEBUFFER_UNDEFINED:
+			errorstring = "Undefined framebuffer!";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+			errorstring = "Incomplete Attachment!";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+			errorstring = "Imcomplete Missing Attachment!";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+			errorstring = "Incomplete Draw Buffer!";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+			errorstring = "Incomplete Read Buffer!";
+			break;
+		case GL_FRAMEBUFFER_UNSUPPORTED:
+			errorstring = "Unsupported Framebuffer!";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+			errorstring = "Incomplete Multisample!";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+			errorstring = "Incomplete Layer Targets!";
+			break;
+		default:
+			errorstring = "Unknown Error";
+			break;
+		}
+
+		std::cout << "ERROR::FRAMEBUFFER: " << errorstring << std::endl;
+
 	}
 
 #ifdef _DEBUG
@@ -429,7 +505,6 @@ namespace Sleepy
 		}
 	}
 #endif // _DEBUG
-
 
 	unsigned int Renderer::CreateShader(const char* vertShaderPath, const char* fragShaderPath)
 	{
@@ -515,8 +590,6 @@ namespace Sleepy
 
 		return Id;
 	}
-
-
 
 	/// <summary>
 	/// Untested
@@ -637,6 +710,29 @@ namespace Sleepy
 		return Id;
 	}
 
+	void Renderer::SetPointLightValues(unsigned int shaderID, TransformComponent& transform, PointLightComponent& pointLight)
+	{
+		glUseProgram(shaderID);
+		Renderer::SetShaderUniformVec3(shaderID, "pointLight.position", TransformSystem::GetPosition(transform));
+		Renderer::SetShaderUniformVec3(shaderID, "pointLight.ambient", pointLight.m_ambient);
+		Renderer::SetShaderUniformVec3(shaderID, "pointLight.diffuse", pointLight.m_diffuse);
+		Renderer::SetShaderUniformVec3(shaderID, "pointLight.specular", pointLight.m_specular);
+		Renderer::SetShaderUniformFloat(shaderID, "pointLight.constant", pointLight.m_constant);
+		Renderer::SetShaderUniformFloat(shaderID, "pointLight.linear", pointLight.m_linear);
+		Renderer::SetShaderUniformFloat(shaderID, "pointLight.quadratic", pointLight.m_quadratic);
+		glUseProgram(0);
+	}
+
+	void Renderer::SetDirLightValues(unsigned int shaderID, TransformComponent& transform, DirLightComponent& dirLight)
+	{
+		glUseProgram(shaderID);
+		Renderer::SetShaderUniformVec3(shaderID, "dirLight.direction", dirLight.m_direction);
+		Renderer::SetShaderUniformVec3(shaderID, "dirLight.ambient", dirLight.m_ambient);
+		Renderer::SetShaderUniformVec3(shaderID, "dirLight.diffuse", dirLight.m_diffuse);
+		Renderer::SetShaderUniformVec3(shaderID, "dirLight.specular", dirLight.m_specular);
+		glUseProgram(0);
+	}
+
 	void Renderer::SetShaderUniformFloat(unsigned int m_ShaderId, const char* name, float f)
 	{
 		unsigned int loc = glGetUniformLocation(m_ShaderId, name);
@@ -673,89 +769,9 @@ namespace Sleepy
 		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
-	void Renderer::SetShaderUniformMat4(const char* name, glm::mat4 matrix)
+	/*void Renderer::SetShaderUniformMat4(const char* name, glm::mat4 matrix)
 	{
 		unsigned int loc = glGetUniformLocation(m_ShaderId, name);
 		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
-	}
-
-	BufferData& Renderer::AddFramebuffer()
-	{
-		CheckGLError(" AddFrameBuffer");
-		BufferData data;
-		glGenFramebuffers(1, &data.framebuffer);
-		glGenTextures(1, &data.renderedTexture);
-		glGenRenderbuffers(1, &data.renderbuffer);
-
-		frameBuffers.push_back(data);
-		RecreateFramebuffer(data);
-
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		return data;
-	}
-
-	void Renderer::SetFramebuffer(int id)
-	{
-		boundBuffer = id;
-	}
-
-	void Renderer::RecreateFramebuffer(BufferData& data)
-	{
-
-		glBindFramebuffer(GL_FRAMEBUFFER, data.framebuffer);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, data.renderedTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, frameBuffers[boundBuffer].bufferHeigth, frameBuffers[boundBuffer].bufferWidth, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data.renderedTexture, 0);
-		
-		glBindRenderbuffer(GL_RENDERBUFFER, data.renderbuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, frameBuffers[boundBuffer].bufferHeigth, frameBuffers[boundBuffer].bufferWidth);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, data.renderbuffer);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-
-		GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-		std::string errorstring;
-		switch (framebufferStatus)
-		{
-		case GL_FRAMEBUFFER_COMPLETE:
-			return;
-		case GL_FRAMEBUFFER_UNDEFINED:
-			errorstring = "Undefined framebuffer!";
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-			errorstring = "Incomplete Attachment!";
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-			errorstring = "Imcomplete Missing Attachment!";
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-			errorstring = "Incomplete Draw Buffer!";
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-			errorstring = "Incomplete Read Buffer!";
-			break;
-		case GL_FRAMEBUFFER_UNSUPPORTED:
-			errorstring = "Unsupported Framebuffer!";
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-			errorstring = "Incomplete Multisample!";
-			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-			errorstring = "Incomplete Layer Targets!";
-			break;
-		default:
-			errorstring = "Unknown Error";
-			break;
-		}
-
-		std::cout << "ERROR::FRAMEBUFFER: " << errorstring << std::endl;
-
-	}
+	}*/
 }
