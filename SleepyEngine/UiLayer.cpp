@@ -3,10 +3,14 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 #include <filesystem>
+#include <windows.h>
+#include <shellapi.h>
+#include <atlstr.h>
 #include "Window.h"
 #include "Entity.h"
 #include "Scene.h"
 #include "ImGui/imgui.h"
+#include "ImGui/imgui_internal.h"
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 #include "Components/LightComponent.h"
@@ -14,6 +18,7 @@
 #include "Components/CameraComponent.h"
 #include "TransformSystem.h"
 #include "ModelLibrary.h"
+#include "AssetManager.h"
 #include "Fonts/IconsFontAwesome6.h"
 
 #define PROJECTDIR
@@ -71,9 +76,48 @@ namespace Sleepy
 
 		if (ImGui::BeginMainMenuBar())
 		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Save"))
+				{
+					AssetManager::SaveScene(*scene);
+				}
+				if (ImGui::MenuItem("Load"))
+				{
+					OPENFILENAME ofn;
+					char szFile[260];       // buffer for file name
+					HWND hwnd;              // owner window
+					HANDLE hf;              // file handle
+
+					ZeroMemory(&ofn, sizeof(ofn));
+					ofn.lStructSize = sizeof(ofn);
+//					ofn.hwndOwner = hwnd;
+					ofn.lpstrFile = LPWSTR(szFile);
+					// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
+					// use the contents of szFile to initialize itself.
+					ofn.lpstrFile[0] = '\0';
+					ofn.nMaxFile = sizeof(szFile);
+					ofn.lpstrFilter = L"All\0*.*\0Text\0*.TXT\0";
+					ofn.nFilterIndex = 1;
+					ofn.lpstrFileTitle = NULL;
+					ofn.nMaxFileTitle = 0;
+					ofn.lpstrInitialDir = NULL;
+					ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+					bool ret = GetOpenFileName(&ofn);
+					if (ret)
+					{
+						//ShellExecute(NULL, L"find", "D:\\Programming\\SleepyEngine\\Sandbox\\Assets\\", NULL, NULL, SW_SHOWDEFAULT);
+						std::wstring wStr(ofn.lpstrFile);
+						std::string conv(wStr.begin(), wStr.end());
+						info.loadedScene = AssetManager::LoadScene(conv);
+					}
+				}
+
+				ImGui::EndMenu();
+			}
 			if (ImGui::BeginMenu("Windows"))
 			{
-				//ImGui::Button("Play", ImVec2(25, 25));
 				if (ImGui::MenuItem("Render Window"))
 				{
 					RenderWindow w;
@@ -96,6 +140,23 @@ namespace Sleepy
 
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("Create"))
+			{
+				ImGui::BeginDisabled(playing);
+				if (ImGui::MenuItem("Scene"))
+				{
+					info.bCreateScene = true;
+				}
+				ImGui::EndDisabled();
+				
+				if (ImGui::MenuItem("Game Object"))
+				{
+					info.bCreateObject = true;
+				}
+				ImGui::EndMenu();
+
+			}
+
 			if (!playing)
 			{
 				if (ImGui::Button("PLAY",ImVec2(50,20)))

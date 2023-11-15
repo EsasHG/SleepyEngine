@@ -30,6 +30,9 @@ namespace Sleepy
 		std::vector<RenderWindow>& renderWindows;
 		bool bTogglePlay = false;
 		bool bNewWindow = false;
+		bool bCreateScene = false;
+		bool bCreateObject = false;
+		class Scene* loadedScene = nullptr;
 	};
 
 	

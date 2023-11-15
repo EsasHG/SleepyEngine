@@ -57,6 +57,7 @@ namespace Sleepy
 		Entity& GetParent();
 			
 		std::vector<Entity*> GetChildren();
+		const std::vector<const Entity*> GetChildren() const;
 	
 		void MoveChild(Entity& child, int newIndex);
 	
@@ -65,10 +66,10 @@ namespace Sleepy
 		bool HasParent();
 		bool HasChildren();
 
-		glm::vec3 GetPosition();
-		glm::vec3 GetWorldPosition();
-		glm::vec3 GetRotation();
-		glm::vec3 GetScale();
+		 glm::vec3 GetPosition() const;
+		 glm::vec3 GetWorldPosition() const;
+		 glm::vec3 GetRotation() const;
+		 glm::vec3 GetScale() const;
 
 		void SetPosition(glm::vec3 pos);
 		void SetRotation(glm::vec3 rot);

@@ -19,7 +19,9 @@ namespace Sleepy
 	class Scene : public SceneBase
 	{
 	public:
-		Scene() : SceneBase() {}
+		Scene() : SceneBase() {
+			CreateSceneEntity();
+		}
 
 		virtual void BeginPlay() override;
 		virtual void EndPlay() override;

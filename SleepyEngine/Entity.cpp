@@ -21,26 +21,26 @@ namespace Sleepy
 		return *m_scene->m_registry.get<RelationshipComponent>(relationshipComp->m_parent).m_Entity;
 	}
 
-	glm::vec3 Entity::GetPosition()
+	glm::vec3 Entity::GetPosition() const
 	{
 		return transformComp->m_position;
 		//return TransformSystem::GetPosition(GetComponent<TransformComponent>());
 	}
 
-	glm::vec3 Entity::GetWorldPosition()
+	glm::vec3 Entity::GetWorldPosition()const 
 	{
 		glm::mat4 mat = TransformSystem::GetModelMatrix(*transformComp);
 		return glm::vec3(mat[3][0], mat[3][1], mat[3][2]);
 
 	}
 
-	glm::vec3 Entity::GetRotation()
+	glm::vec3 Entity::GetRotation() const
 	{
 		return TransformSystem::GetRotation(*transformComp);
 		//return TransformSystem::GetRotation(GetComponent<TransformComponent>());
 	}
 
-	glm::vec3 Entity::GetScale()
+	glm::vec3 Entity::GetScale() const
 	{
 		return transformComp->m_scale;
 		//return TransformSystem::GetScale(GetComponent<TransformComponent>());
@@ -63,6 +63,21 @@ namespace Sleepy
 	std::vector<Entity*> Entity::GetChildren()
 	{
 		std::vector<Entity*> children;
+		entt::entity current = relationshipComp->m_firstChild;
+
+		while (current != entt::null)
+		{
+			RelationshipComponent& rComp = m_scene->m_registry.get<RelationshipComponent>(current);
+			children.push_back(rComp.m_Entity);
+			current = rComp.m_next;
+		}
+
+		return children;
+	}
+
+	const std::vector<const Entity*> Entity::GetChildren() const
+	{
+		std::vector<const Entity*> children;
 		entt::entity current = relationshipComp->m_firstChild;
 
 		while (current != entt::null)

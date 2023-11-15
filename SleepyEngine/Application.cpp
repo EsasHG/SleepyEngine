@@ -13,6 +13,7 @@
 #include <assimp/Importer.hpp>
 #include <entt/entt.hpp>
 #include <functional>
+#include <algorithm>
 
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
@@ -39,8 +40,8 @@ namespace Sleepy
 		window->EnableImGui();
 
 #endif // _SHOWUI
+		srand(glfwGetTime());
 		InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Application::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
-
 		renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
 		prevFrameTime = glfwGetTime();
 	}
@@ -67,6 +68,7 @@ namespace Sleepy
 	{
 		EditorCamera* camera = &m_scenes[0]->CreateGameObject<EditorCamera>("Camera");
 		camera->bActive = true;
+
 
 		while (!window->ShouldClose())
 		{
@@ -108,7 +110,6 @@ namespace Sleepy
 				m_scenes.push_back(s);
 				Entity& ent = s->CreateGameObject<Entity>("Camera");
 				ent.AddComponent<CameraComponent>();
-				srand(glfwGetTime());
 				ent.SetRotation(glm::vec3(rand() % 180, rand() % 180, rand() % 180));
 				Entity& planet = s->CreateGameObject<Entity>("planet");
 				planet.AddComponent<MeshComponent>("planet_0", "Mars", "default");
@@ -116,6 +117,36 @@ namespace Sleepy
 				planet.SetRotation(glm::vec3(rand() % 180, rand() % 180, rand() % 180));
 				//renderer->AddFramebuffer();
 
+			}
+			if (info.bCreateScene)
+			{
+				Scene* s = new Scene();
+				m_scenes.push_back(s);
+				EditorCamera& ent = s->CreateGameObject<EditorCamera>("Camera");
+				camera = &ent;
+				camera->bActive = true;
+				ent.SetRotation(glm::vec3(rand() % 180, rand() % 180, rand() % 180));
+				//ent.SetRotation(glm::vec3(rand() % 180, rand() % 180, rand() % 180));
+				Entity& planet = s->CreateGameObject<Entity>("planet");
+				planet.AddComponent<MeshComponent>("planet_0", "Mars", "default");
+				planet.SetPosition(glm::vec3(20.0f, 0, 10.0f));
+				planet.SetRotation(glm::vec3(rand() % 180, rand() % 180, rand() % 180));
+				std::iter_swap(m_scenes.begin(), m_scenes.end() - 1);
+			}
+			if (info.bCreateObject)
+			{
+				m_scenes[0]->CreateGameObject<Entity>("GameObject");
+			}
+			if (info.loadedScene)
+			{
+				m_scenes.push_back(info.loadedScene);
+				Scene* sceneToDelete = m_scenes[0];
+				std::iter_swap(m_scenes.begin(), m_scenes.end() - 1);
+				m_scenes.pop_back();
+				delete sceneToDelete;
+				camera = &m_scenes[0]->CreateGameObject<EditorCamera>("Editor Camera");
+				camera->bActive = true;
+				
 			}
 #endif // _SHOWUI;
 
