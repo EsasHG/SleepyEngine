@@ -18,6 +18,7 @@
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
+#include "btBulletDynamicsCommon.h"
 #include "Renderer.h"
 #include "InputManager.h"
 #include "Components/CameraComponent.h"
@@ -69,6 +70,8 @@ namespace Sleepy
 		EditorCamera* camera = &m_scenes[0]->CreateGameObject<EditorCamera>("Camera");
 		camera->bActive = true;
 
+		/// collision configuration contains default setup for memory , collision setup . Advanced users can create their own configuration .
+		btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
 
 		while (!window->ShouldClose())
 		{
