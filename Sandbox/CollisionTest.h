@@ -27,7 +27,7 @@ public:
     void StopMoveLeft();
     void StopMoveRight();
     float groundScale = 1.0f;
-    float speed = 25.0f;
+    float speed = 250.0f;
     glm::vec3 dir;
     Sleepy::Entity* controlledEntity;
     Sleepy::Entity* groundEntity;

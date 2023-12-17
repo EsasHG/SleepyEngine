@@ -199,7 +199,7 @@ CollisionTest::CollisionTest()
 	btTransform startTransform;
 	startTransform.setIdentity();
 
-	mass = 1.f;
+	mass = 100.f;
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
 	isDynamic = (mass != 0.f);
 
@@ -217,7 +217,7 @@ CollisionTest::CollisionTest()
 	//rigidBody->applyCentralForce(btVector3(0.0f, 0.0f, 0.5f));
 	Sleepy::CollisionSystem::GetInstance().dynamicsWorld->addRigidBody(rigidBody);
 
-	rigidBody->setGravity(btVector3(0.0f, -9.0f, 0.0f));
+	rigidBody->setGravity(btVector3(0.0f, -9.8f, 0.0f));
 
 	Sleepy::Entity& gameCamera = CreateGameObject<Sleepy::Entity>("Game Camera");
 	Sleepy::CameraComponent& cam = gameCamera.AddComponent<Sleepy::CameraComponent>();
@@ -277,28 +277,25 @@ void CollisionTest::Update(double deltaTime)
 	quat.setEuler(0.0f, 0.0f, glm::radians(180.0f) * (1 - groundScale));
 	float eulerZ, eulerY, eulerX;
 	quat.getEulerZYX(eulerZ, eulerY, eulerX);
-	std::cout << "Pre Rotation: " << quat.getW() << ", " << quat.getX() << ", " << quat.getY() << ", " << quat.getZ() << std::endl;
-	std::cout << "In euler: " << eulerZ << ", " << eulerY << ", " << eulerX <<  std::endl;
 
 	transform.setOrigin(btVector3(0.0f, -51.0f, 0.0f));
 	transform.setRotation(quat);
 	quat = transform.getRotation();
 	quat.getEulerZYX(eulerZ, eulerY, eulerX);
 
-	std::cout << "Post Rotation: " << quat.getW() << ", " << quat.getX() << ", " << quat.getY() << ", " << quat.getZ() << std::endl;
-	std::cout << "In euler: " << eulerZ << ", " << eulerY << ", " << eulerX << std::endl;
 
 	groundRigidBody->setWorldTransform(transform);
+	groundRigidBody->getMotionState()->setWorldTransform(transform);
 	
 	btTransform newTrans;
 	groundRigidBody->getMotionState()->getWorldTransform(newTrans);
 
 	btQuaternion newQuat = newTrans.getRotation();
-	groundEntity->SetRotation(glm::quat(newQuat.getW(), newQuat.getX(), newQuat.getY(), newQuat.getZ()));
-	std::cout <<"Ground Rotation: " << newQuat.getW() << ", " << newQuat.getX() << ", " << newQuat.getY() << ", " << newQuat.getZ() << std::endl;
-	newQuat.getEulerZYX(eulerZ, eulerY, eulerX);
 
-	std::cout << "In euler: " << eulerZ << ", " << eulerY << ", " << eulerX << std::endl;
+	newQuat.getEulerZYX(eulerZ, eulerY, eulerX);
+	groundEntity->SetRotation(glm::vec3(glm::degrees(eulerX), glm::degrees(eulerY), glm::degrees(eulerZ)));
+
+
 
 	glm::vec3 newRot = groundEntity->GetRotation();
 }
