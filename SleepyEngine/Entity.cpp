@@ -55,6 +55,10 @@ namespace Sleepy
 	{
 		TransformSystem::SetRotation(*transformComp, rot);
 	}
+	void Entity::SetRotation(glm::quat rot)
+	{
+		TransformSystem::SetRotation(*transformComp, rot);
+	}
 	void Entity::SetScale(glm::vec3 scale)
 	{
 		TransformSystem::SetScale(*transformComp, scale);

@@ -1,8 +1,8 @@
 #include "Player.h"
 #include <glm/gtx/norm.hpp>
 
+#include <CollisionSystem.h>
 #include <Components/CameraComponent.h>
-
 void Player::BeginPlay()
 {
 	m_Input = &AddComponent<Sleepy::InputComponent>();
@@ -12,12 +12,41 @@ void Player::BeginPlay()
 	m_Input->AddKeyBinding(GLFW_KEY_RIGHT, Sleepy::SLE_HELD, std::bind(&Player::MoveRight, this));
 
 	m_Input->AddMousePosBinding(std::bind(&Player::CursorMoveCallback, this, std::placeholders::_1, std::placeholders::_2));
+
+	//btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
+	btCollisionShape* colShape = Sleepy::CollisionSystem::GetInstance().GetSphereCollisionShape();
+	/// Create Dynamic Objects
+	btTransform startTransform;
+	startTransform.setIdentity();
+
+	btScalar mass(1.f);
+
+	//rigidbody is dynamic if and only if mass is non zero, otherwise static
+	bool isDynamic = (mass != 0.f);
+
+	btVector3 localInertia(0, 0, 0);
+	if (isDynamic)
+		colShape->calculateLocalInertia(mass, localInertia);
+
+	startTransform.setOrigin(btVector3(2, 5, 0));
+
+	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+	rigidBody = new btRigidBody(rbInfo);
+	//rigidBody->applyCentralForce(btVector3(0.0f, 0.0f, 0.5f));
+	Sleepy::CollisionSystem::GetInstance().dynamicsWorld->addRigidBody(rigidBody);
+
+	rigidBody->setGravity(btVector3(0.0f, -0.0f, 0.0f));
+
 }
 
-//Player::~Player()
-//{
-//	Sleepy::Entity::~Entity();
-//}
+Player::~Player()
+{
+	Sleepy::CollisionSystem::GetInstance().dynamicsWorld->removeRigidBody(rigidBody);
+	Sleepy::CollisionSystem::GetInstance().m_collisionShapes.clear();
+	delete rigidBody;
+}
 
 void Player::Update(double deltaTime)
 {
@@ -58,10 +87,21 @@ void Player::Update(double deltaTime)
 	{
 		velocity = glm::normalize(velocity) * maxSpeed;
 	}
-		
+	if (glm::length2(velocity) > 0)
+	{
+		velocity = glm::normalize(velocity) * 5.0f;
+		//velocity = glm::normalize(velocity) * 50.0f;
+		rigidBody->applyCentralForce(btVector3(velocity.x, velocity.y, velocity.z));
+	}
+	btTransform trans;
 
-	SetPosition(pos + (float(deltaTime) * velocity));
+	rigidBody->getMotionState()->getWorldTransform(trans);
 
+	btVector3 btPos = trans.getOrigin();
+	SetPosition(glm::vec3(btPos.x(), btPos.y(), btPos.z()));
+
+	//SetPosition(pos + (float(deltaTime) * velocity));
+	velocity = glm::vec3(0.0f);
 }
 
 void Player::MoveForward()

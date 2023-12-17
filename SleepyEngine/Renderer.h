@@ -65,6 +65,7 @@ namespace Sleepy
 		unsigned int m_ShaderId;
 		unsigned int m_TextureShaderId;
 		unsigned int m_SkyboxShaderId;
+		unsigned int m_VertexColorShaderId;
 		unsigned int VAO, VBO;
 		unsigned int skyboxVAO, skyboxVBO;	//TODO: Remove, should be somewhere else
 		unsigned int usedBuffers;

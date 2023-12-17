@@ -36,6 +36,8 @@ namespace Sleepy
 		ModelLibrary::GetInstance().AddShader("default", m_TextureShaderId);
 		ModelLibrary::GetInstance().AddShader("quadShader", Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.vert", _SOLUTIONDIR"SleepyEngine/Shaders\\QuadShader.frag"));
 
+		m_VertexColorShaderId = Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders/VertexColor.vert", _SOLUTIONDIR"SleepyEngine/Shaders/VertexColor.frag");
+		ModelLibrary::GetInstance().AddShader("vertexColor", m_VertexColorShaderId);
 
 		unsigned int whiteTexture;
 		const char texData[] = { 255, 255, 255, 255 };
@@ -207,6 +209,14 @@ namespace Sleepy
 
 		Renderer::SetShaderUniformMat4(m_TextureShaderId, "projection", projection);
 		Renderer::SetShaderUniformMat4(m_TextureShaderId, "view", view);
+
+
+		glUseProgram(m_VertexColorShaderId);
+
+		Renderer::SetShaderUniformVec3(m_VertexColorShaderId, "viewPos", camera.GetPosition());
+
+		Renderer::SetShaderUniformMat4(m_VertexColorShaderId, "projection", projection);
+		Renderer::SetShaderUniformMat4(m_VertexColorShaderId, "view", view);
 
 		glUseProgram(m_SkyboxShaderId);
 

@@ -33,6 +33,7 @@ public:
 	bool inGroup2 = false;
 	BoidInfo& boidInfo;
 	glm::vec3 velocity = glm::vec3(0.0);
+	class btRigidBody* rigidBody;
 
 };
 

@@ -18,9 +18,9 @@
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
-#include "btBulletDynamicsCommon.h"
 #include "Renderer.h"
 #include "InputManager.h"
+#include "CollisionSystem.h"
 #include "Components/CameraComponent.h"
 #include "Components/MeshComponent.h"
 #include "EditorCamera.h"
@@ -42,7 +42,9 @@ namespace Sleepy
 
 #endif // _SHOWUI
 		srand(glfwGetTime());
+
 		InputManager::GetInstance().AddWindowResizeCallback(std::bind(&Application::FramebufferResizeCallback, this, std::placeholders::_1, std::placeholders::_2));
+		CollisionSystem::GetInstance().InitPhysicsImpl();
 		renderer = new Renderer(glm::vec2(window->GetWidth(), window->GetHeight()));
 		prevFrameTime = glfwGetTime();
 	}
@@ -54,6 +56,7 @@ namespace Sleepy
 		delete ui;
 	#endif // _SHOWUI
 		delete renderer;
+		CollisionSystem::GetInstance().DeleteAllImpl();
 	}
 
 	double Application::BeginFrame()
@@ -69,16 +72,14 @@ namespace Sleepy
 	{
 		EditorCamera* camera = &m_scenes[0]->CreateGameObject<EditorCamera>("Camera");
 		camera->bActive = true;
-
-		/// collision configuration contains default setup for memory , collision setup . Advanced users can create their own configuration .
-		btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
-
+		
 		while (!window->ShouldClose())
 		{
 			for (Scene* scene : m_scenes)
 				scene->CleanupRegistry();
 
 			double deltaTime = BeginFrame();
+
 	#ifdef _SHOWUI
 
 			ui->BeginFrame();
@@ -91,6 +92,8 @@ namespace Sleepy
 				//if we are playing and should stop
 				if (s_Playing)
 				{
+
+					CollisionSystem::EndSimulation();
 					//Delete objects that should only exist while playing
 					for (Scene* scene : m_scenes)
 					{
@@ -162,12 +165,15 @@ namespace Sleepy
 				for (Scene* scene : m_scenes)
 				{
 					scene->BeginPlay();
-					//auto camView = scene->m_registry.view<CameraComponent>();
-					//for (auto [entity, camera] : camView.each())
-					//{
-					//	if (camera.bPossessOnStart)
-					//		renderer->SetCamera(&camera);
-					//}
+					auto camView = scene->m_registry.view<CameraComponent>();
+					for (auto [entity, camera] : camView.each())
+					{
+						if (camera.bPossessOnStart)
+						{
+							camera.m_Entity->bActive = true;
+							renderer->PrepDraw(camera);
+						}
+					}
 				}
 				firstGameFrame = false;
 				//renderer->SetCamera(playerCamera->m_Camera);
@@ -176,6 +182,7 @@ namespace Sleepy
 
 			if(s_Playing)
 			{
+				CollisionSystem::GetInstance().UpdateImpl(deltaTime);
 				for (Scene* scene : m_scenes)
 					scene->Update(deltaTime);
 			}

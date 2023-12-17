@@ -83,6 +83,8 @@ void SandboxScene::BeginPlay()
 	Player& player = CreateGameObject<Player>("Player");
 
 	Sleepy::Entity& Camera = CreateGameObject<Sleepy::Entity>("Player Camera");
+	Camera.bActive = true;
+	Camera.enableUpdate = true;
 	Sleepy::CameraComponent& camComp = Camera.AddComponent<Sleepy::CameraComponent>();
 	Camera.SetParent(player);
 	camComp.lookatTarget = &player;

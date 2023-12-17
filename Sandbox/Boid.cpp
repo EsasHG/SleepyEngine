@@ -1,10 +1,44 @@
 #include "Boid.h"
 #include <TransformSystem.h>
-#include <Components/LightComponent.h>
+#include <CollisionSystem.h>
+#include <glm/gtx/norm.hpp>
+
 
 void Boid::BeginPlay()
 {
 	Sleepy::Entity::BeginPlay();
+
+
+	//btCollisionShape* colShape = new btSphereShape(btScalar(1.));
+	//Sleepy::CollisionSystem::GetInstance().m_collisionShapes.push_back(colShape);
+
+	btCollisionShape* colShape = Sleepy::CollisionSystem::GetInstance().GetSphereCollisionShape();
+
+
+	/// Create Dynamic Objects
+	btTransform startTransform;
+	startTransform.setIdentity();
+
+	btScalar mass(1.f);
+
+	//rigidbody is dynamic if and only if mass is non zero, otherwise static
+	bool isDynamic = (mass != 0.f);
+
+	btVector3 localInertia(0, 0, 0);
+	if (isDynamic)
+		colShape->calculateLocalInertia(mass, localInertia);
+
+	startTransform.setOrigin(btVector3(2, 5, 0));
+
+	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+	rigidBody = new btRigidBody(rbInfo);
+	//rigidBody->applyCentralForce(btVector3(0.0f, 0.0f, 0.5f));
+	Sleepy::CollisionSystem::GetInstance().dynamicsWorld->addRigidBody(rigidBody);
+
+	rigidBody->setGravity(btVector3(0.0f, -0.0f, 0.0f));
+
 }
 
 void Boid::Update(double deltaTime)
@@ -32,7 +66,27 @@ void Boid::Update(double deltaTime)
 		velocity = glm::normalize(velocity) * boidInfo.maxSpeed;
 	if (speed2 < boidInfo.minSpeed * boidInfo.minSpeed)
 		velocity = glm::normalize(velocity) * boidInfo.minSpeed;
-	SetPosition(GetPosition() + (float(deltaTime) * velocity));
+	//SetPosition(GetPosition() + (float(deltaTime) * velocity));
+
+
+	if (glm::length2(velocity) > 0)
+	{
+		velocity = glm::normalize(velocity) * 5.0f;
+		//velocity = glm::normalize(velocity) * 50.0f;
+		rigidBody->applyCentralForce(btVector3(velocity.x, velocity.y, velocity.z));
+	}
+	btTransform trans;
+
+	rigidBody->getMotionState()->getWorldTransform(trans);
+
+	btVector3 btPos = trans.getOrigin();
+	SetPosition(glm::vec3(btPos.x(), btPos.y(), btPos.z()));
+
+	//SetPosition(pos + (float(deltaTime) * velocity));
+	velocity = glm::vec3(0.0f);
+
+
+
 }
 
 void Boid::CheckOthers(std::vector<Boid*>& boids)

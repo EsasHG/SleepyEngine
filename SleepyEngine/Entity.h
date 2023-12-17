@@ -73,6 +73,7 @@ namespace Sleepy
 
 		void SetPosition(glm::vec3 pos);
 		void SetRotation(glm::vec3 rot);
+		void SetRotation(glm::quat rot);
 		void SetScale(glm::vec3 scale);
 		entt::entity GetHandle() { return m_entityHandle; }
 		std::string m_Name;

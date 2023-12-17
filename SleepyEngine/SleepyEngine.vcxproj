@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="CollisionSystem.cpp" />
     <ClCompile Include="EditorCamera.cpp" />
     <ClCompile Include="Components\CameraComponent.cpp" />
     <ClCompile Include="Components\RelationshipComponent.cpp" />
@@ -187,6 +188,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="CollisionSystem.h" />
     <ClInclude Include="EditorCamera.h" />
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\Component.h" />
@@ -231,6 +233,8 @@
     <None Include="Shaders\skybox.vert" />
     <None Include="Shaders\textureShader.frag" />
     <None Include="Shaders\textureShader.vert" />
+    <None Include="Shaders\VertexColor.frag" />
+    <None Include="Shaders\VertexColor.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

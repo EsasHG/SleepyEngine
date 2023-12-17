@@ -23,6 +23,7 @@ namespace Sleepy
 
 		static void SetRotation(TransformComponent& transformComp, float yaw, float pitch, float roll);
 		static void SetRotation(TransformComponent& transformComp, glm::vec3 eulerRotDeg);
+		static void SetRotation(TransformComponent& transformComp, glm::quat rot);
 
 		static glm::mat4 GetModelMatrix(const Entity& entity);
 		static glm::mat4 GetModelMatrix(const TransformComponent& transformComp);

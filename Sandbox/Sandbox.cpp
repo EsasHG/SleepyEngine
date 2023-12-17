@@ -5,44 +5,14 @@
 #include <Application.h>
 
 #include "SandboxScene.h"
+#include "CollisionTest.h"
 
 int main()
 {
 
-
-    //btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
-    //btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
-    //btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
-
-    //btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,
-    //    overlappingPairCache, solver, collisionConfiguration);
-
-    //dynamicsWorld->setGravity(btVector3(0, -10, 0));
-
-    //for (int i = 0; i < 100; i++)
-    //{
-    //    dynamicsWorld->stepSimulation(1.f / 60.f, 10);
-    //
-    //    // print positions of all objects
-    //    for (int j = dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
-    //    {
-    //        btCollisionObject * obj = dynamicsWorld->getCollisionObjectArray()[j];
-    //        btRigidBody * body = btRigidBody::upcast(obj);
-    //        btTransform trans;
-    //        if (body && body->getMotionState())
-    //        {
-    //            body->getMotionState()->getWorldTransform(trans);
-    //        }
-    //        else
-    //        {
-    //            trans = obj->getWorldTransform();
-    //        }
-    //        printf(" world pos object %d = %f ,%f ,%f\n", j, float(trans.getOrigin().getX()), float(
-    //        trans.getOrigin().getY()), float(trans.getOrigin().getZ()));
-    //    }
-    //}
     Sleepy::Application app;
-    SandboxScene* scene = new SandboxScene();
+    //SandboxScene* scene = new SandboxScene();
+    CollisionTest* scene = new CollisionTest();
     app.SetScene(scene);
     app.Run();
 }

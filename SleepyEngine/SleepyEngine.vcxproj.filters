@@ -102,6 +102,9 @@
     <ClCompile Include="AssetManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CollisionSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -212,6 +215,9 @@
     <ClInclude Include="AssetManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CollisionSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\SingleColor.vert">
@@ -224,5 +230,7 @@
     <None Include="packages.config" />
     <None Include="Shaders\Skybox.frag" />
     <None Include="Shaders\skybox.vert" />
+    <None Include="Shaders\VertexColor.vert" />
+    <None Include="Shaders\VertexColor.frag" />
   </ItemGroup>
 </Project>

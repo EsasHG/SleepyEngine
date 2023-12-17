@@ -13,7 +13,7 @@ class Player :
 		enableUpdate = true;
 		bActive = true;
 	}
-	//~Player();
+	~Player();
 	virtual void BeginPlay() override;
 	virtual void Update(double deltaTime) override;
 
@@ -31,6 +31,7 @@ class Player :
 	float maxSpeed = 50.0f;
 	Sleepy::InputComponent* m_Input;
 	class Sleepy::CameraComponent* m_Camera;
+	class btRigidBody* rigidBody;
 private:
 	bool firstMouse;
 	double lastX = 0, lastY = 0;

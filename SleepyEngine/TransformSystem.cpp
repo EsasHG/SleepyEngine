@@ -83,6 +83,14 @@ namespace Sleepy
 		RecalculateModelMatrices(transformComp);
 	}
 
+	void TransformSystem::SetRotation(TransformComponent& transformComp, glm::quat rot)
+	{
+		transformComp.m_rotation = rot;
+
+		RecalculateModelMatrices(transformComp);
+
+	}
+
 
 	// ********** Matrix **********
 

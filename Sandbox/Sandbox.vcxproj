@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="Boid.cpp" />
     <ClCompile Include="BoidManager.cpp" />
+    <ClCompile Include="CollisionTest.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Sandbox.cpp" />
     <ClCompile Include="SandboxScene.cpp" />
@@ -161,6 +162,7 @@
   <ItemGroup>
     <ClInclude Include="Boid.h" />
     <ClInclude Include="BoidManager.h" />
+    <ClInclude Include="CollisionTest.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="SandboxScene.h" />
   </ItemGroup>
