@@ -39,6 +39,7 @@ namespace Sleepy
 			return m_meshes.contains(path);
 		}
 
+
 		MeshGroup* AddMesh(std::string filepath);
 
 		bool AddMesh(std::string name, std::vector<Vertex> vertices);
@@ -116,7 +117,7 @@ namespace Sleepy
 
 	private:
 		ModelLibrary();
-
+		void SetupDefaultMeshes();
 		MeshGroup* LoadModel(std::string path);
 
 		std::vector<std::string> ProcessModelNode(aiNode* node, const aiScene* scene, std::string meshName, std::string directory);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "btBulletDynamicsCommon.h"
+
 namespace Sleepy
 {
 	class CollisionSystem;

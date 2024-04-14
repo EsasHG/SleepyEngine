@@ -1,5 +1,7 @@
 #include "CollisionSystem.h"
-
+#include <iostream>
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
+#include "Entity.h"
 namespace Sleepy
 {
 
@@ -32,14 +34,24 @@ namespace Sleepy
 		{
 			btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[j];
 			btRigidBody* body = btRigidBody::upcast(obj);
+			btGhostObject* ghost = btGhostObject::upcast(obj);
+
 			btTransform trans;
 			if (body && body->getMotionState())
 			{
 				body->getMotionState()->getWorldTransform(trans);
 				dynamicsWorld->updateAabbs();
 			}
-			else
+			else if(ghost)
 			{
+				btCollisionObjectArray arr = ghost->getOverlappingPairs();
+				
+				for(int i=0; i< arr.size(); i++)
+				{
+					Entity* ent = (Entity*)(arr[0]->getUserPointer());
+					if(ent)
+						ent->OnOverlap();
+				}
 				trans = obj->getWorldTransform();
 			}
 			//printf(" world pos object %d = %f ,%f ,%f\n", j, float(trans.getOrigin().getX()), float(trans.getOrigin().getY()), float(trans.getOrigin().getZ()));
@@ -64,9 +76,7 @@ namespace Sleepy
 
 
 
-		////btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
-		//btCollisionShape* colShape = new btSphereShape(btScalar(1.));
-		//m_collisionShapes.push_back(colShape);
+		
 		///// Create Dynamic Objects
 		//btTransform startTransform;
 		//startTransform.setIdentity();
@@ -89,9 +99,7 @@ namespace Sleepy
 		//body->applyCentralForce(btVector3(0.0f, 0.0f, 0.5f));
 		//dynamicsWorld->addRigidBody(body);
 
-		//btCollisionShape* colShape2 = new btBoxShape(btVector3(10, 0.2, 10));
-		btCollisionShape* colShape = new btSphereShape(btScalar(3.5f));
-		m_collisionShapes.push_back(colShape);
+
 		///// Create Dynamic Objects
 		//btTransform startTransform2;
 

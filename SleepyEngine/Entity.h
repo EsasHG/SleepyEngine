@@ -70,6 +70,7 @@ namespace Sleepy
 		 glm::vec3 GetWorldPosition() const;
 		 glm::vec3 GetRotation() const;
 		 glm::vec3 GetScale() const;
+		 virtual void OnOverlap();
 
 		void SetPosition(glm::vec3 pos);
 		void SetRotation(glm::vec3 rot);

@@ -3,6 +3,7 @@
 #include "Components/TransformComponent.h"
 #include "TransformSystem.h"
 #include "Scene.h"
+#include <iostream>
 
 namespace Sleepy
 {
@@ -45,6 +46,11 @@ namespace Sleepy
 		return transformComp->m_scale;
 		//return TransformSystem::GetScale(GetComponent<TransformComponent>());
 	}
+
+	void Entity::OnOverlap()
+	{
+		//std::cout << "Overlap for object: " << m_Name << std::endl;
+ 	}
 
 	void Entity::SetPosition(glm::vec3 pos)
 	{

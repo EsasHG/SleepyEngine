@@ -10,9 +10,19 @@ class CollisionTest :
 public:
     CollisionTest();
 
+
     virtual void BeginPlay() override;
     virtual void Update(double deltaTime) override;
+    virtual void EndPlay() override;
 
+    void PhysicsUpdate();
+    void UpdateGround(double deltaTime);
+
+    void UpdateControlledEntityVisuals();
+    void SpawnCube();
+    void DeleteCube();
+    void SpawnBall();
+    void DeleteBall();
     //void MoveDown();
     //void MoveUp();
 
@@ -26,14 +36,24 @@ public:
     void StopMoveBackward();
     void StopMoveLeft();
     void StopMoveRight();
+
     float groundScale = 1.0f;
-    float speed = 250.0f;
+    float speed = 200.0f;
+    float ballMass = 10.0f;
+    bool bAlreadyOverlapped = false;
     glm::vec3 dir;
-    Sleepy::Entity* controlledEntity;
-    Sleepy::Entity* groundEntity;
-    Sleepy::InputComponent* m_Input;
-    class btRigidBody* rigidBody;
-    class btRigidBody* groundRigidBody;
+
+    Sleepy::Entity* controlledEntity = nullptr;
+    Sleepy::Entity* groundEntity = nullptr;
+
+    Sleepy::InputComponent* m_Input = nullptr;
+    Sleepy::MeshGroup* planetGroup = nullptr;
+
+    class btRigidBody* ballRigidBody = nullptr;
+    class btRigidBody* groundRigidBody = nullptr;
+
+    class btGhostObject* ghostObj = nullptr;
+    
     //class Sleepy::Camera* camera;
     //class Sleepy::Camera* playerCamera;
 

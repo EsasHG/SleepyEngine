@@ -39,6 +39,7 @@ namespace Sleepy
 		m_VertexColorShaderId = Renderer::CreateShader(_SOLUTIONDIR"SleepyEngine/Shaders/VertexColor.vert", _SOLUTIONDIR"SleepyEngine/Shaders/VertexColor.frag");
 		ModelLibrary::GetInstance().AddShader("vertexColor", m_VertexColorShaderId);
 
+		ModelLibrary::GetInstance().SetupDefaultMeshes();
 		unsigned int whiteTexture;
 		const char texData[] = { 255, 255, 255, 255 };
 		//create 1 pixel white texture
