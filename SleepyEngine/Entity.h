@@ -10,7 +10,7 @@ namespace Sleepy
 	{
 	public:
 		Entity(std::string entityName, SceneBase* scene);
-	
+		virtual ~Entity() {};
 		template<typename T, typename ... Args>
 		T& AddComponent(Args&&... args)
 		{

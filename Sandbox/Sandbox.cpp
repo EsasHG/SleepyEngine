@@ -11,8 +11,8 @@ int main()
 {
 
     Sleepy::Application app;
-    //SandboxScene* scene = new SandboxScene();
-    CollisionTest* scene = new CollisionTest();
+    SandboxScene* scene = new SandboxScene();
+    //CollisionTest* scene = new CollisionTest();
     app.SetScene(scene);
     app.Run();
 }

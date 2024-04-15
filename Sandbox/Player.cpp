@@ -44,7 +44,7 @@ void Player::BeginPlay()
 Player::~Player()
 {
 	Sleepy::CollisionSystem::GetInstance().dynamicsWorld->removeRigidBody(rigidBody);
-	Sleepy::CollisionSystem::GetInstance().m_collisionShapes.clear();
+	//Sleepy::CollisionSystem::GetInstance().m_collisionShapes.clear();
 	delete rigidBody;
 }
 

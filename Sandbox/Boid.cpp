@@ -3,6 +3,12 @@
 #include <CollisionSystem.h>
 #include <glm/gtx/norm.hpp>
 
+Boid::~Boid()
+{
+	Sleepy::CollisionSystem::GetInstance().dynamicsWorld->removeCollisionObject(rigidBody);
+	delete rigidBody;
+	delete myMotionState;
+}
 
 void Boid::BeginPlay()
 {
@@ -31,7 +37,7 @@ void Boid::BeginPlay()
 	startTransform.setOrigin(btVector3(2, 5, 0));
 
 	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	myMotionState = new btDefaultMotionState(startTransform);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
 	rigidBody = new btRigidBody(rbInfo);
 	//rigidBody->applyCentralForce(btVector3(0.0f, 0.0f, 0.5f));

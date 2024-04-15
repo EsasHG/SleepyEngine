@@ -54,7 +54,8 @@ namespace Sleepy
 				}
 				trans = obj->getWorldTransform();
 			}
-			//printf(" world pos object %d = %f ,%f ,%f\n", j, float(trans.getOrigin().getX()), float(trans.getOrigin().getY()), float(trans.getOrigin().getZ()));
+			//printf(" world pos object %d = %f ,%f ,%f\n", j, float(trans.getOrigin().getX()), float(trans.getOrigin().getY()), float(trans.getOrigin().getZ
+			printf("Collision objects: %d \n", dynamicsWorld->getNumCollisionObjects());
 		}
 	}
 
@@ -74,7 +75,8 @@ namespace Sleepy
 
 		dynamicsWorld->setGravity(btVector3(0, -10, 0));
 
-
+		//specifically for boids, was removed so should probably remove again?
+		m_collisionShapes.push_back(new btSphereShape(btScalar(0.35f)));
 
 		
 		///// Create Dynamic Objects

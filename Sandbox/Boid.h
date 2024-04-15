@@ -24,6 +24,8 @@ public:
 	{
 		enableUpdate = true;
 	}
+
+	virtual ~Boid();
 	virtual void BeginPlay() override;
 	virtual void Update(double deltaTime) override;
 	void CheckOthers(std::vector<Boid*>& boids);
@@ -34,6 +36,6 @@ public:
 	BoidInfo& boidInfo;
 	glm::vec3 velocity = glm::vec3(0.0);
 	class btRigidBody* rigidBody;
-
+	class btDefaultMotionState* myMotionState;
 };
 
