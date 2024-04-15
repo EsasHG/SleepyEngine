@@ -44,13 +44,15 @@ namespace Sleepy
 			if (entity->enableUpdate)
 				entity->AddComponent<UpdateComponent>(0);
 
-			entities.insert({ entity->m_entityHandle, entity });
+
 
 			if (Application::s_Playing)
 			{
 				entity->BeginPlay();
 				gameEntities.push_back(entity);
 			}
+			else
+				entities.insert({ entity->m_entityHandle, entity });
 
 			return *entity;
 

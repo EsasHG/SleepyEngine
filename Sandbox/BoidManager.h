@@ -18,6 +18,6 @@ private:
 
     std::vector<class Boid*> boids;
     struct BoidInfo info;
-    int maxBoids = 10;
+    int maxBoids = 300;
 };
 

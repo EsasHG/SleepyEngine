@@ -2,12 +2,15 @@
 #include <TransformSystem.h>
 #include <CollisionSystem.h>
 #include <glm/gtx/norm.hpp>
+#include <iostream>
 
 Boid::~Boid()
 {
-	Sleepy::CollisionSystem::GetInstance().dynamicsWorld->removeCollisionObject(rigidBody);
+
+	Sleepy::CollisionSystem::GetInstance().dynamicsWorld->removeRigidBody(rigidBody);
 	delete rigidBody;
 	delete myMotionState;
+	
 }
 
 void Boid::BeginPlay()
@@ -19,7 +22,6 @@ void Boid::BeginPlay()
 	//Sleepy::CollisionSystem::GetInstance().m_collisionShapes.push_back(colShape);
 
 	btCollisionShape* colShape = Sleepy::CollisionSystem::GetInstance().GetSphereCollisionShape();
-
 
 	/// Create Dynamic Objects
 	btTransform startTransform;
